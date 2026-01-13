@@ -63,8 +63,15 @@ This document outlines the security considerations and self-audit results for th
 - Regular updates recommended
 
 ### Java Dependencies
-- Maven Central security scanning
-- Spring Boot 3.2.0 (latest stable)
+✅ **org.apache.tomcat.embed:tomcat-embed-core** - Overridden to v10.1.35
+- Previous: v10.1.16 (via Spring Boot 3.2.0, vulnerable to GHSA-83qj-6fr2-vhqg)
+- Fixed: Overridden to v10.1.35 (patched version)
+- CVE: Path Equivalence vulnerability enabling RCE, information disclosure, and file corruption
+- Severity: Critical
+
+✅ **Spring Boot** - v3.2.0 with Tomcat override
+- Using latest stable Spring Boot 3.2.0
+- Tomcat version explicitly overridden for security
 
 ## Known Considerations
 
@@ -131,8 +138,12 @@ Current test coverage:
 
 ### 2026-01-13
 - ✅ Updated Go JWT library from v5.2.0 to v5.2.2
-- ✅ Fixed excessive memory allocation vulnerability during header parsing
+- ✅ Fixed excessive memory allocation vulnerability during header parsing (JWT)
 - ✅ All Go dependencies reviewed and updated
+- ✅ **CRITICAL**: Fixed Apache Tomcat CVE (GHSA-83qj-6fr2-vhqg)
+- ✅ Overridden tomcat-embed-core from 10.1.16 to 10.1.35
+- ✅ Fixed Path Equivalence vulnerability (RCE, information disclosure, file corruption)
+- ✅ All Java dependencies reviewed and patched
 
 ## Deployment Checklist
 
