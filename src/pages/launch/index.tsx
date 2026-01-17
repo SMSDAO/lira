@@ -6,7 +6,7 @@ import DashboardLayout from '@/components/common/DashboardLayout';
 import toast from 'react-hot-toast';
 
 export default function LaunchToken() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',

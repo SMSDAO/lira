@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
-import { useAccount } from 'wagmi';
 import DashboardLayout from '@/components/common/DashboardLayout';
-import { FiCpu, FiPlay, FiPause, FiSettings } from 'react-icons/fi';
+import { FiCpu, FiPlay, FiSettings } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 export default function AgentsPage() {
-  const { address, isConnected } = useAccount();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const agents = [

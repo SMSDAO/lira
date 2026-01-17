@@ -22,7 +22,8 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <!-- Security: Override Tomcat version to fix GHSA-83qj-6fr2-vhqg (CVE: Path Equivalence → Potential RCE)
+        <!-- Security: Override Tomcat version to fix GHSA-83qj-6fr2-vhqg (Path Equivalence → Potential RCE)
+             Note: GHSA-83qj-6fr2-vhqg is a GitHub Security Advisory identifier (not a CVE number)
              Affected: tomcat-embed-core 10.1.0-M1 to 10.1.34
              Patched: 10.1.35
              Severity: Critical (RCE, information disclosure, file corruption)

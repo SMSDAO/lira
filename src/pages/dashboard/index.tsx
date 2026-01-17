@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import Head from 'next/head';
-import { motion } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import DashboardLayout from '@/components/common/DashboardLayout';
-import { FiTrendingUp, FiDollarSign, FiActivity, FiCpu } from 'react-icons/fi';
 
 export default function UserDashboard() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
 
   if (!isConnected) {
     return (
@@ -18,13 +15,6 @@ export default function UserDashboard() {
       </DashboardLayout>
     );
   }
-
-  const stats = [
-    { label: 'Tokens Launched', value: '5', icon: '🚀' },
-    { label: 'Active Agents', value: '12', icon: '🤖' },
-    { label: 'Total Executions', value: '1,247', icon: '⚡' },
-    { label: 'Revenue Earned', value: '$8,432', icon: '💰' },
-  ];
 
   return (
     <>

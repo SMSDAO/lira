@@ -3,10 +3,10 @@ import Head from 'next/head';
 import { motion } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import DashboardLayout from '@/components/common/DashboardLayout';
-import { FiUsers, FiDollarSign, FiSettings, FiActivity, FiBarChart2, FiShield } from 'react-icons/fi';
+import { FiUsers, FiDollarSign, FiActivity, FiBarChart2 } from 'react-icons/fi';
 
 export default function AdminDashboard() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const [activeTab, setActiveTab] = useState('overview');
 
   if (!isConnected) {
