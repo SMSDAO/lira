@@ -30,7 +30,7 @@ export default function LaunchToken() {
       await new Promise(resolve => setTimeout(resolve, 2000));
       toast.success('Token launched successfully!');
       setFormData({ name: '', symbol: '', supply: '', description: '' });
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to launch token');
     } finally {
       setIsLaunching(false);

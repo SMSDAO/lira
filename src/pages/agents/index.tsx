@@ -35,7 +35,7 @@ export default function AgentsPage() {
     },
   ];
 
-  const handleExecuteAgent = (agentId: number) => {
+  const handleExecuteAgent = (_agentId: number) => {
     toast.success('Agent execution started!');
   };
 

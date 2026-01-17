@@ -170,7 +170,7 @@ contract LaunchedToken is ERC20, Ownable {
         uint256 initialSupply,
         address _creator,
         address _factory
-    ) ERC20(name, symbol) {
+    ) ERC20(name, symbol) Ownable(_creator) {
         creator = _creator;
         factory = _factory;
         launchTime = block.timestamp;

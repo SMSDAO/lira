@@ -122,17 +122,4 @@ contract LiraToken is ERC20, Ownable, ReentrancyGuard, Pausable {
         _unpause();
     }
     
-    /**
-     * @dev Override transfer to include fee logic when enabled
-     */
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        require(from != address(0), "Transfer from zero address");
-        require(to != address(0), "Transfer to zero address");
-        
-        super._transfer(from, to, amount);
-    }
 }
