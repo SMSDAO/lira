@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title LiraToken
@@ -36,7 +36,7 @@ contract LiraToken is ERC20, Ownable, ReentrancyGuard, Pausable {
     constructor(
         address _treasury,
         address _feeCollector
-    ) ERC20("Lira", "LIRA") {
+    ) ERC20("Lira", "LIRA") Ownable(_treasury) {
         require(_treasury != address(0), "Invalid treasury");
         require(_feeCollector != address(0), "Invalid fee collector");
         

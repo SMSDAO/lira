@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title AgentExecutor
@@ -64,7 +64,7 @@ contract AgentExecutor is Ownable, ReentrancyGuard, Pausable {
     event AgentUpdated(uint256 indexed agentId, bool isActive);
     event QuantumOracleUpdated(address indexed newOracle);
     
-    constructor(address _feeCollector) {
+    constructor(address _feeCollector) Ownable(msg.sender) {
         require(_feeCollector != address(0), "Invalid fee collector");
         feeCollector = _feeCollector;
     }
