@@ -1,0 +1,32 @@
+# PHP Backend Dockerfile
+FROM php:8.2-fpm-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache \
+    postgresql-dev \
+    curl \
+    zip \
+    unzip \
+    git
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application files
+COPY backend/php/composer.json backend/php/composer.lock* ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+COPY backend/php ./
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+EXPOSE 8000
+
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
