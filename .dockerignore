@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+.github
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+.next
+out
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+test-results
+
+# Build artifacts
+dist
+build
+*.log
+
+# Secrets
+*.key
+*.pem
+secrets/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Documentation (not needed in container)
+docs/
+*.md
+!README.md

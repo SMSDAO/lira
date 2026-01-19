@@ -1,14 +1,17 @@
-# Deployment Guide - Lira Protocol
+# Lira Protocol - Deployment Guide
+
+This document provides comprehensive instructions for deploying the Lira Protocol to staging and production environments.
 
 ## Table of Contents
-1. [Prerequisites](#prerequisites)
-2. [Environment Setup](#environment-setup)
-3. [Database Setup](#database-setup)
-4. [Smart Contract Deployment](#smart-contract-deployment)
-5. [Backend Services](#backend-services)
-6. [Frontend Deployment](#frontend-deployment)
-7. [Production Checklist](#production-checklist)
-8. [Monitoring](#monitoring)
+
+- [Prerequisites](#prerequisites)
+- [Environment Configuration](#environment-configuration)
+- [Staging Deployment](#staging-deployment)
+- [Production Deployment](#production-deployment)
+- [Health Checks](#health-checks)
+- [Rollback Procedures](#rollback-procedures)
+- [Monitoring](#monitoring)
+- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
