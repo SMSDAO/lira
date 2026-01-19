@@ -180,7 +180,7 @@ describe("Lira Protocol Smart Contracts", function () {
           ethers.keccak256(ethers.toUtf8Bytes("hash")),
           { value: agentFee }
         )
-      ).to.be.revertedWith("Pausable: paused");
+      ).to.be.revertedWithCustomError(agentExecutor, "EnforcedPause");
     });
   });
 });
