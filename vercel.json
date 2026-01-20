@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_CHAIN_ID": "8453",
+    "NEXT_PUBLIC_CHAIN_NAME": "base"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_WALLET_CONNECT_ID": "@wallet_connect_id",
+      "NEXT_PUBLIC_API_URL": "@api_url",
+      "NEXT_PUBLIC_GO_API_URL": "@go_api_url",
+      "NEXT_PUBLIC_JAVA_API_URL": "@java_api_url"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
