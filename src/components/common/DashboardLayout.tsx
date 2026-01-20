@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { FiHome, FiUser, FiRocket, FiCpu, FiSettings, FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiUser, FiZap, FiCpu, FiSettings, FiBarChart2 } from 'react-icons/fi';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigation = [
     { name: 'Home', href: '/', icon: FiHome },
     { name: 'Dashboard', href: '/dashboard', icon: FiBarChart2 },
-    { name: 'Launch Token', href: '/launch', icon: FiRocket },
+    { name: 'Launch Token', href: '/launch', icon: FiZap },
     { name: 'Agents', href: '/agents', icon: FiCpu },
     { name: 'Profile', href: '/profile', icon: FiUser },
     { name: 'Admin', href: '/admin', icon: FiSettings },
