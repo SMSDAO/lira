@@ -2,7 +2,10 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { FiHome, FiUser, FiZap, FiCpu, FiSettings, FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiUser, FiZap, FiCpu, FiSettings, FiBarChart2, FiCode } from 'react-icons/fi';
+import { useUserRole } from '@/hooks/useUserRole';
+import { UserRole, ROLE_CONFIGS } from '@/lib/rbac';
+import { useAccount } from 'wagmi';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -10,17 +13,32 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
+  const { address } = useAccount();
+  const userRole = useUserRole();
 
-  const navigation = [
+  // Base navigation available to all users
+  const baseNavigation = [
     { name: 'Home', href: '/', icon: FiHome },
     { name: 'Dashboard', href: '/dashboard', icon: FiBarChart2 },
     { name: 'Launch Token', href: '/launch', icon: FiZap },
     { name: 'Agents', href: '/agents', icon: FiCpu },
     { name: 'Profile', href: '/profile', icon: FiUser },
-    { name: 'Admin', href: '/admin', icon: FiSettings },
   ];
 
-  const isActive = (href: string) => router.pathname === href;
+  // Role-specific navigation
+  const roleNavigation = [];
+  
+  if (userRole === UserRole.ADMIN) {
+    roleNavigation.push({ name: 'Admin', href: '/admin', icon: FiSettings });
+  }
+  
+  if (userRole === UserRole.DEV || userRole === UserRole.ADMIN) {
+    roleNavigation.push({ name: 'Dev Portal', href: '/dev', icon: FiCode });
+  }
+
+  const navigation = [...baseNavigation, ...roleNavigation];
+
+  const isActive = (href: string) => router.pathname === href || router.pathname.startsWith(href + '/');
 
   return (
     <div className="min-h-screen bg-neo-darker">
@@ -57,6 +75,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Footer */}
           <div className="p-4 border-t border-neo-blue/30">
+            {address && (
+              <div className="mb-2 text-xs text-center">
+                <span className="text-gray-500">Role: </span>
+                <span className={`font-semibold ${
+                  userRole === UserRole.ADMIN ? 'text-neo-pink' :
+                  userRole === UserRole.DEV ? 'text-neo-purple' :
+                  'text-neo-blue'
+                }`}>
+                  {ROLE_CONFIGS[userRole].label}
+                </span>
+              </div>
+            )}
             <div className="text-xs text-gray-500 text-center">
               © 2026 Lira Protocol
             </div>
