@@ -38,7 +38,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navigation = [...baseNavigation, ...roleNavigation];
 
-  const isActive = (href: string) => router.pathname === href || router.pathname.startsWith(href + '/');
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return router.pathname === '/';
+    }
+    return router.pathname === href || router.pathname.startsWith(href + '/');
+  };
 
   return (
     <div className="min-h-screen bg-neo-darker">

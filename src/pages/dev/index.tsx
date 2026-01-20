@@ -15,8 +15,17 @@ export default function DevPortal() {
 
   // Redirect if not authorized
   if (isConnected && userRole !== UserRole.DEV && userRole !== UserRole.ADMIN) {
-    router.push('/dashboard');
-    return null;
+    if (typeof window !== 'undefined') {
+      router.push('/dashboard');
+    }
+    return (
+      <DashboardLayout>
+        <div className="text-center py-20">
+          <h2 className="text-2xl text-neo-blue mb-4">Redirecting...</h2>
+          <p className="text-gray-400">Redirecting to dashboard...</p>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   if (!isConnected) {
@@ -99,11 +108,11 @@ export default function DevPortal() {
                   <h3 className="text-xl font-bold text-neo-blue mb-4">Quick Links</h3>
                   <div className="space-y-3">
                     {[
-                      { label: 'API Documentation', href: '#', badge: 'v1.0' },
-                      { label: 'Smart Contract ABIs', href: '#', badge: 'Latest' },
-                      { label: 'Database Schema', href: '#', badge: '14 Tables' },
-                      { label: 'Environment Setup', href: '#', badge: 'Guide' },
-                      { label: 'Testing Suite', href: '#', badge: '33 Tests' },
+                      { label: 'API Documentation', href: '/dev#api', badge: 'v1.0' },
+                      { label: 'Smart Contract ABIs', href: '/dev#docs', badge: 'Latest' },
+                      { label: 'Database Schema', href: '/dev#docs', badge: '14 Tables' },
+                      { label: 'Environment Setup', href: '/dev#docs', badge: 'Guide' },
+                      { label: 'Testing Suite', href: '/dev#docs', badge: '33 Tests' },
                     ].map((link, idx) => (
                       <a
                         key={idx}
@@ -183,16 +192,16 @@ export default function DevPortal() {
                   </p>
                   <div className="space-y-3">
                     {[
-                      { title: 'Getting Started', description: 'Quick start guide for developers' },
-                      { title: 'Architecture', description: 'System architecture and design patterns' },
-                      { title: 'Smart Contracts', description: 'Contract ABIs and deployment guide' },
-                      { title: 'API Reference', description: 'Complete API endpoint documentation' },
-                      { title: 'Testing', description: 'Test suite and testing guidelines' },
-                      { title: 'Deployment', description: 'Deployment procedures and configurations' },
+                      { title: 'Getting Started', description: 'Quick start guide for developers', href: '/dev#docs' },
+                      { title: 'Architecture', description: 'System architecture and design patterns', href: '/dev#docs' },
+                      { title: 'Smart Contracts', description: 'Contract ABIs and deployment guide', href: '/dev#docs' },
+                      { title: 'API Reference', description: 'Complete API endpoint documentation', href: '/dev#api' },
+                      { title: 'Testing', description: 'Test suite and testing guidelines', href: '/dev#docs' },
+                      { title: 'Deployment', description: 'Deployment procedures and configurations', href: '/dev#docs' },
                     ].map((doc, idx) => (
                       <a
                         key={idx}
-                        href="#"
+                        href={doc.href}
                         className="block p-4 rounded-lg bg-neo-darker hover:bg-neo-darker/80 transition"
                       >
                         <h4 className="text-neo-blue font-semibold">{doc.title}</h4>
