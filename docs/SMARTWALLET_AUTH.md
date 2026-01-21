@@ -377,15 +377,13 @@ export const useAuth = () => useContext(AuthContext);
 Always verify wallet signatures on the server:
 
 ```typescript
-import { verifyMessage } from 'viem';
+import { recoverMessageAddress } from 'viem';
 
 async function verifySignature(address: string, signature: string, message: string) {
-  const recoveredAddress = await verifyMessage({
-    address,
+  const recoveredAddress = await recoverMessageAddress({
     message,
     signature,
   });
-  
   return recoveredAddress.toLowerCase() === address.toLowerCase();
 }
 ```
