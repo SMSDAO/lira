@@ -392,14 +392,24 @@ async function verifySignature(address: string, signature: string, message: stri
 Implement rate limiting for authentication endpoints:
 
 ```typescript
-// middleware/rate-limit.ts
-import rateLimit from 'express-rate-limit';
+// lib/rate-limit.ts
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per window
-  message: 'Too many authentication attempts',
+// Allow 5 authentication attempts per 15 minutes per identifier (e.g. IP or wallet address)
+export const authLimiter = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '15 m'),
+  analytics: true,
 });
+
+export async function limitAuthRequest(identifier: string) {
+  const { success } = await authLimiter.limit(identifier);
+
+  if (!success) {
+    throw new Error('Too many authentication attempts');
+  }
+}
 ```
 
 ### 4. Username Security
