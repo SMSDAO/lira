@@ -50,13 +50,21 @@ export const ROLE_CONFIGS: Record<UserRole, RoleConfig> = {
 };
 
 // Admin wallet addresses from environment
-const ADMIN_ADDRESSES = (process.env.ADMIN_ADDRESSES || '')
+const ADMIN_ADDRESSES = (
+  process.env.NEXT_PUBLIC_ADMIN_ADDRESSES ||
+  process.env.ADMIN_ADDRESSES ||
+  ''
+)
   .split(',')
   .map(addr => addr.trim().toLowerCase())
   .filter(Boolean);
 
 // Dev wallet addresses - can be extended
-const DEV_ADDRESSES = (process.env.DEV_ADDRESSES || '')
+const DEV_ADDRESSES = (
+  process.env.NEXT_PUBLIC_DEV_ADDRESSES ||
+  process.env.DEV_ADDRESSES ||
+  ''
+)
   .split(',')
   .map(addr => addr.trim().toLowerCase())
   .filter(Boolean);
