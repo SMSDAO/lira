@@ -137,8 +137,8 @@ npm run build
 |----------|----------|-------------|
 | `NEXT_PUBLIC_WALLET_CONNECT_ID` | Yes | WalletConnect Project ID |
 | `NEXT_PUBLIC_CHAIN_ID` | Yes | Chain ID (8453 for BASE) |
-| `ADMIN_ADDRESSES` | No | Comma-separated admin wallet addresses |
-| `DEV_ADDRESSES` | No | Comma-separated developer wallet addresses |
+| `NEXT_PUBLIC_ADMIN_ADDRESSES` | No | Comma-separated admin wallet addresses |
+| `NEXT_PUBLIC_DEV_ADDRESSES` | No | Comma-separated developer wallet addresses |
 
 See `.env.example` for the complete list.
 
