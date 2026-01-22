@@ -12,11 +12,13 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock Wagmi hooks
+const mockUseAccount = jest.fn(() => ({
+  address: '0x1234567890123456789012345678901234567890',
+  isConnected: true,
+}));
+
 jest.mock('wagmi', () => ({
-  useAccount: () => ({
-    address: '0x1234567890123456789012345678901234567890',
-    isConnected: true,
-  }),
+  useAccount: mockUseAccount,
   useContractWrite: () => ({
     write: jest.fn(),
     isLoading: false,
@@ -86,7 +88,7 @@ describe('Launch Page', () => {
 
   it('shows connect wallet message when not connected', () => {
     // Override the mock for this test
-    jest.spyOn(require('wagmi'), 'useAccount').mockReturnValue({
+    mockUseAccount.mockReturnValueOnce({
       address: undefined,
       isConnected: false,
     });
