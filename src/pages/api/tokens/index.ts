@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import crypto from 'crypto';
 
 type Token = {
   id: number;
@@ -57,11 +58,7 @@ export default function handler(
     }
 
     // Generate random contract address
-    const randomBytes = Array.from({ length: 20 }, () =>
-      Math.floor(Math.random() * 256)
-        .toString(16)
-        .padStart(2, '0')
-    ).join('');
+    const randomBytes = crypto.randomBytes(20).toString('hex');
 
     const token: Token = {
       id: Math.floor(Math.random() * 9000) + 1000,

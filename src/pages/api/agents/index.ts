@@ -56,7 +56,7 @@ export default function handler(
     }
 
     const agent: Agent = {
-      id: 'new-id',
+      id: String(Math.floor(Math.random() * 9000) + 1000),
       name,
       model_type,
       owner: '0x742d...5e5c',
