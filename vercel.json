@@ -1,11 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "env": {
     "NEXT_PUBLIC_CHAIN_ID": "8453",
     "NEXT_PUBLIC_CHAIN_NAME": "base"
