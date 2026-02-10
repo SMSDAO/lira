@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import Launch from '@/pages/launch/index';
 
 // Mock Next.js router
@@ -12,8 +12,6 @@ jest.mock('next/router', () => ({
 }));
 
 // Mock Wagmi hooks
-const mockUseAccount = jest.fn();
-
 jest.mock('wagmi', () => ({
   useAccount: jest.fn(() => ({
     address: '0x1234567890123456789012345678901234567890',
@@ -48,10 +46,6 @@ describe('Launch Page', () => {
 
   it('validates required fields', async () => {
     render(<Launch />);
-    // Find the button in the form, not the navigation
-    const buttons = screen.getAllByText(/Launch Token/i);
-    const launchButton = buttons.find(btn => btn.tagName === 'BUTTON') || buttons[buttons.length - 1];
-    
     // The form uses HTML5 validation with required attribute
     // Just verify that required inputs exist
     const inputs = screen.getAllByRole('spinbutton');
