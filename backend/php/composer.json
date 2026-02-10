@@ -1,0 +1,13 @@
+{
+    "name": "lira/php-api",
+    "description": "Lira Protocol PHP API",
+    "type": "project",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lira\\": "src/"
+        }
+    }
+}
