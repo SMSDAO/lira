@@ -3,24 +3,46 @@ const { ethers } = require("hardhat");
 
 describe("LiraTokenRegistry", function () {
   let registry;
+  let liraToken;
+  let tokenFactory;
   let owner;
   let user1;
   let user2;
-  let tokenFactory;
+  let daoOperator;
   let mockToken1;
   let mockToken2;
 
   beforeEach(async function () {
-    [owner, user1, user2, tokenFactory, mockToken1, mockToken2] = await ethers.getSigners();
+    [owner, user1, user2, daoOperator, tokenFactory, mockToken1, mockToken2] = await ethers.getSigners();
+    
+    // Deploy a mock LIRA token first
+    const LiraToken = await ethers.getContractFactory("LiraToken");
+    liraToken = await LiraToken.deploy(owner.address, owner.address);
+    await liraToken.waitForDeployment();
     
     const LiraTokenRegistry = await ethers.getContractFactory("LiraTokenRegistry");
-    registry = await LiraTokenRegistry.deploy();
+    registry = await LiraTokenRegistry.deploy(
+      await liraToken.getAddress(),
+      tokenFactory.address
+    );
     await registry.waitForDeployment();
   });
 
   describe("Deployment", function () {
     it("Should set the right owner", async function () {
       expect(await registry.owner()).to.equal(owner.address);
+    });
+
+    it("Should set the LIRA token address", async function () {
+      expect(await registry.liraToken()).to.equal(await liraToken.getAddress());
+    });
+
+    it("Should set the token factory address", async function () {
+      expect(await registry.tokenFactory()).to.equal(tokenFactory.address);
+    });
+
+    it("Should auto-authorize the token factory", async function () {
+      expect(await registry.authorizedRegistrars(tokenFactory.address)).to.be.true;
     });
 
     it("Should start with zero tokens", async function () {
