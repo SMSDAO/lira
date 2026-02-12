@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run env:validate && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
@@ -15,7 +15,13 @@
     "contracts:deploy": "hardhat run scripts/deploy.js",
     "php:serve": "php -S localhost:8000 -t backend/php/public",
     "go:build": "cd backend/go && go build -o bin/lira-api ./cmd/api",
-    "java:build": "cd backend/java && mvn clean package"
+    "java:build": "cd backend/java && mvn clean package",
+    "env:generate": "ts-node scripts/generate-env.ts",
+    "env:generate:beta": "ts-node scripts/generate-env.ts beta",
+    "env:generate:prod": "ts-node scripts/generate-env.ts production",
+    "env:validate": "ts-node scripts/validate-env.ts",
+    "wallet:generate": "ts-node scripts/generate-admin-wallet.ts",
+    "faucet:claim": "ts-node scripts/auto-claim.ts"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.4.0",
