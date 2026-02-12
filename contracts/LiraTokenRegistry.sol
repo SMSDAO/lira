@@ -41,6 +41,11 @@ contract LiraTokenRegistry is Ownable {
     // Authorized registrars (e.g., TokenLaunchFactory)
     mapping(address => bool) public authorizedRegistrars;
 
+    // LIRA governance integration
+    address public liraToken;           // Canonical LIRA governance token
+    address public tokenFactory;        // Main token launch factory
+    mapping(address => bool) public daoOperators;  // DAO governance operators
+
     // Events
     event TokenRegistered(
         address indexed tokenAddress,
@@ -62,6 +67,9 @@ contract LiraTokenRegistry is Ownable {
         address indexed newOwner
     );
 
+    event DAOOperatorUpdated(address indexed operator, bool status);
+    event TokenFactoryUpdated(address indexed oldFactory, address indexed newFactory);
+
     /**
      * @dev Modifier to restrict functions to authorized registrars or owner
      */
@@ -73,7 +81,39 @@ contract LiraTokenRegistry is Ownable {
         _;
     }
 
-    constructor() Ownable(msg.sender) {}
+    /**
+     * @dev Modifier to restrict functions to DAO operators or owner
+     */
+    modifier onlyDAOOrOwner() {
+        require(
+            daoOperators[msg.sender] || msg.sender == owner(),
+            "LiraTokenRegistry: not DAO or owner"
+        );
+        _;
+    }
+
+    /**
+     * @dev Modifier to restrict token registration to factory or DAO/owner
+     */
+    modifier onlyFactoryOrDAO() {
+        require(
+            msg.sender == tokenFactory || daoOperators[msg.sender] || msg.sender == owner(),
+            "LiraTokenRegistry: not factory or DAO"
+        );
+        _;
+    }
+
+    constructor(address _liraToken, address _tokenFactory) Ownable(msg.sender) {
+        require(_liraToken != address(0), "LiraTokenRegistry: zero LIRA token");
+        require(_tokenFactory != address(0), "LiraTokenRegistry: zero factory");
+        
+        liraToken = _liraToken;
+        tokenFactory = _tokenFactory;
+        
+        // Auto-authorize the token factory
+        authorizedRegistrars[_tokenFactory] = true;
+        emit RegistrarAuthorized(_tokenFactory, true);
+    }
 
     /**
      * @notice Register a new token in the LIRA ecosystem
@@ -85,7 +125,7 @@ contract LiraTokenRegistry is Ownable {
         address tokenAddress,
         address tokenOwner,
         TokenType tokenType
-    ) external onlyAuthorized {
+    ) external onlyFactoryOrDAO {
         require(tokenAddress != address(0), "LiraTokenRegistry: zero address");
         require(tokenOwner != address(0), "LiraTokenRegistry: zero owner");
         require(!allTokens.contains(tokenAddress), "LiraTokenRegistry: already registered");
@@ -152,6 +192,39 @@ contract LiraTokenRegistry is Ownable {
         require(registrar != address(0), "LiraTokenRegistry: zero address");
         authorizedRegistrars[registrar] = authorized;
         emit RegistrarAuthorized(registrar, authorized);
+    }
+
+    /**
+     * @notice Set or remove a DAO operator
+     * @param operator The operator address
+     * @param status Whether to grant or revoke DAO operator status
+     */
+    function setDAOOperator(address operator, bool status) external onlyOwner {
+        require(operator != address(0), "LiraTokenRegistry: zero address");
+        daoOperators[operator] = status;
+        emit DAOOperatorUpdated(operator, status);
+    }
+
+    /**
+     * @notice Update the token factory address
+     * @param _tokenFactory The new factory address
+     */
+    function setTokenFactory(address _tokenFactory) external onlyOwner {
+        require(_tokenFactory != address(0), "LiraTokenRegistry: zero address");
+        address oldFactory = tokenFactory;
+        
+        // Remove old factory from authorized registrars
+        if (oldFactory != address(0)) {
+            authorizedRegistrars[oldFactory] = false;
+            emit RegistrarAuthorized(oldFactory, false);
+        }
+        
+        // Set new factory
+        tokenFactory = _tokenFactory;
+        authorizedRegistrars[_tokenFactory] = true;
+        
+        emit TokenFactoryUpdated(oldFactory, _tokenFactory);
+        emit RegistrarAuthorized(_tokenFactory, true);
     }
 
     /**
