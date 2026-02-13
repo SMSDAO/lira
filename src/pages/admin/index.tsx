@@ -3,6 +3,8 @@ import Head from 'next/head';
 import { motion } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import DashboardLayout from '@/components/common/DashboardLayout';
+import BillingSection from '@/components/admin/BillingSection';
+import SecuritySection from '@/components/admin/SecuritySection';
 import { FiUsers, FiDollarSign, FiActivity, FiBarChart2 } from 'react-icons/fi';
 
 export default function AdminDashboard() {
@@ -230,6 +232,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'security' && <SecuritySection />}
 
             {activeTab === 'settings' && (
               <div className="space-y-6">
