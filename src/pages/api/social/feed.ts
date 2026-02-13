@@ -1,26 +1,5 @@
-import type { NextApiRequest, NextApiResponse} from 'next';
-
-// Mock feed data - replace with database queries
-const mockPosts = [
-  {
-    id: 1,
-    author: '0x742d35cc6634c0532925a3b844bc9e7595f0e5e5',
-    authorHandle: 'alice',
-    content: 'Just launched my first token on LIRA! 🚀',
-    timestamp: '2026-02-10T12:00:00Z',
-    likes: 42,
-    comments: 5,
-  },
-  {
-    id: 2,
-    author: '0x123...',
-    authorHandle: 'bob',
-    content: 'LIRA SOCIAL is amazing! Love the on-chain profiles.',
-    timestamp: '2026-02-10T11:30:00Z',
-    likes: 23,
-    comments: 3,
-  },
-];
+import type { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/lib/prisma';
 
 export default async function handler(
   req: NextApiRequest,
@@ -30,20 +9,108 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { type = 'global', page = 1, limit = 20 } = req.query;
+  const { address, filter = 'global', page = '1', limit = '20' } = req.query;
 
-  const pageNum = parseInt(page as string);
-  const limitNum = parseInt(limit as string);
-  const start = (pageNum - 1) * limitNum;
-  const end = start + limitNum;
+  const pageNum = parseInt(page as string, 10);
+  const limitNum = Math.min(parseInt(limit as string, 10), 100);
+  const skip = (pageNum - 1) * limitNum;
 
-  const paginatedPosts = mockPosts.slice(start, end);
+  try {
+    let posts;
+    let total;
 
-  return res.status(200).json({
-    posts: paginatedPosts,
-    page: pageNum,
-    limit: limitNum,
-    total: mockPosts.length,
-    hasMore: end < mockPosts.length,
-  });
+    if (filter === 'following' && address && typeof address === 'string') {
+      // Get posts from users that the address follows
+      const user = await prisma.user.findUnique({
+        where: { walletAddress: address.toLowerCase() },
+      });
+
+      if (!user) {
+        return res.status(200).json({
+          posts: [],
+          page: pageNum,
+          limit: limitNum,
+          total: 0,
+          hasMore: false,
+        });
+      }
+
+      // Get IDs of users being followed
+      const following = await prisma.socialEdge.findMany({
+        where: {
+          followerId: user.id,
+          edgeType: 'follow',
+        },
+        select: { followingId: true },
+      });
+
+      const followingIds = following.map(f => f.followingId);
+
+      [posts, total] = await Promise.all([
+        prisma.post.findMany({
+          where: {
+            authorId: { in: followingIds },
+          },
+          include: {
+            author: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limitNum,
+        }),
+        prisma.post.count({
+          where: {
+            authorId: { in: followingIds },
+          },
+        }),
+      ]);
+    } else {
+      // Global feed - get all posts
+      [posts, total] = await Promise.all([
+        prisma.post.findMany({
+          include: {
+            author: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limitNum,
+        }),
+        prisma.post.count(),
+      ]);
+    }
+
+    const formattedPosts = posts.map(post => ({
+      id: post.id,
+      content: post.content,
+      mediaUrls: post.mediaUrls || [],
+      author: {
+        address: post.author.walletAddress,
+        handle: post.author.profile?.handle || 'anonymous',
+        avatar: post.author.profile?.avatar || '',
+      },
+      createdAt: post.createdAt.toISOString(),
+      likes: 0, // TODO: Implement likes system
+      comments: 0, // TODO: Implement comments system
+      shares: 0, // TODO: Implement shares system
+    }));
+
+    return res.status(200).json({
+      posts: formattedPosts,
+      page: pageNum,
+      limit: limitNum,
+      total,
+      hasMore: skip + limitNum < total,
+    });
+  } catch (error) {
+    console.error('Error fetching feed:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
