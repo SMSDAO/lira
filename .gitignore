@@ -113,3 +113,4 @@ temp/
 .env.production
 *.env.backup
 
+logs/*.log
