@@ -2,6 +2,11 @@
  * PM2 Configuration for LIRA Protocol
  * Manages Next.js application in production without Docker
  * Compatible with Node 24+ on Windows 11 and Unix systems
+ * 
+ * For Windows 11 admin.exe:
+ * - Automatically syncs with blockchain contracts
+ * - Manages full app state across web + indexer + contracts
+ * - Real-time contract event monitoring
  */
 
 module.exports = {
@@ -18,14 +23,20 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
+        // Public RPC endpoints (no secrets) for Vercel compatibility
+        NEXT_PUBLIC_RPC_BASE_MAINNET: process.env.NEXT_PUBLIC_RPC_BASE_MAINNET || 'https://mainnet.base.org',
+        NEXT_PUBLIC_RPC_BASE_SEPOLIA: process.env.NEXT_PUBLIC_RPC_BASE_SEPOLIA || 'https://sepolia.base.org',
       },
       env_production: {
         NODE_ENV: 'production',
         PORT: 3000,
+        NEXT_PUBLIC_RPC_BASE_MAINNET: process.env.NEXT_PUBLIC_RPC_BASE_MAINNET || 'https://mainnet.base.org',
+        NEXT_PUBLIC_RPC_BASE_SEPOLIA: process.env.NEXT_PUBLIC_RPC_BASE_SEPOLIA || 'https://sepolia.base.org',
       },
       env_development: {
         NODE_ENV: 'development',
         PORT: 3000,
+        NEXT_PUBLIC_RPC_BASE_SEPOLIA: 'https://sepolia.base.org',
       },
       error_file: './logs/pm2-error.log',
       out_file: './logs/pm2-out.log',
@@ -40,7 +51,7 @@ module.exports = {
     {
       name: 'lira-indexer',
       script: 'npm',
-      args: 'run',
+      args: 'run dev',
       cwd: './indexer',
       instances: 1,
       exec_mode: 'fork',
@@ -49,6 +60,9 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         INDEXER_NETWORK: 'base-mainnet',
+        // Auto-sync with contracts for Windows 11 admin.exe
+        CONTRACT_SYNC_ENABLED: 'true',
+        CONTRACT_SYNC_INTERVAL: '15000', // 15 seconds
       },
       error_file: './logs/indexer-error.log',
       out_file: './logs/indexer-out.log',

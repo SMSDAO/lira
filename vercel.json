@@ -7,12 +7,14 @@
   "env": {
     "NEXT_PUBLIC_CHAIN_ID": "8453",
     "NEXT_PUBLIC_CHAIN_NAME": "base",
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_RPC_BASE_MAINNET": "https://mainnet.base.org",
+    "NEXT_PUBLIC_RPC_BASE_SEPOLIA": "https://sepolia.base.org"
   },
   "build": {
     "env": {
-      "NEXT_PUBLIC_RPC_BASE_SEPOLIA": "@next_public_rpc_base_sepolia",
-      "NEXT_PUBLIC_RPC_BASE_MAINNET": "@next_public_rpc_base_mainnet",
+      "NEXT_PUBLIC_RPC_BASE_SEPOLIA": "https://sepolia.base.org",
+      "NEXT_PUBLIC_RPC_BASE_MAINNET": "https://mainnet.base.org",
       "NEXT_PUBLIC_LIRA_TOKEN": "@next_public_lira_token",
       "NEXT_PUBLIC_LIRA_REGISTRY": "@next_public_lira_registry",
       "NEXT_PUBLIC_LIRA_PROFILE": "@next_public_lira_profile",
