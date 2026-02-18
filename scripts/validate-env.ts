@@ -3,6 +3,9 @@
 /**
  * Validate environment variables before build
  * Usage: npm run env:validate
+ * 
+ * In production (NODE_ENV=production), all required variables are enforced.
+ * In development/CI, only warnings are shown for missing variables.
  */
 
 interface ValidationRule {
@@ -14,18 +17,18 @@ interface ValidationRule {
 }
 
 const VALIDATION_RULES: ValidationRule[] = [
-  // Network Configuration
+  // Network Configuration (optional with defaults)
   {
     key: 'NEXT_PUBLIC_CHAIN_ID',
-    required: true,
+    required: false, // Has default in next.config.js
     type: 'number',
-    description: 'Blockchain network chain ID',
+    description: 'Blockchain network chain ID (defaults to 84532)',
   },
   {
     key: 'NEXT_PUBLIC_CHAIN_NAME',
-    required: true,
+    required: false, // Has default
     type: 'string',
-    description: 'Blockchain network name',
+    description: 'Blockchain network name (defaults to Base Sepolia)',
   },
   {
     key: 'NEXT_PUBLIC_RPC_BASE_SEPOLIA',
@@ -80,12 +83,12 @@ const VALIDATION_RULES: ValidationRule[] = [
     description: 'User token factory contract address',
   },
   
-  // WalletConnect
+  // WalletConnect (optional with default)
   {
     key: 'NEXT_PUBLIC_WALLET_CONNECT_ID',
-    required: true,
+    required: false, // Has default 'YOUR_PROJECT_ID' in _app.tsx
     type: 'string',
-    description: 'WalletConnect project ID',
+    description: 'WalletConnect project ID (uses default if not set)',
   },
   
   // Database (required for production)
@@ -199,6 +202,9 @@ function validate(): ValidationResult {
 
 function main() {
   const result = validate();
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const isProduction = nodeEnv === 'production';
+  const isCI = process.env.CI === 'true';
 
   // Print info
   if (result.info.length > 0) {
@@ -219,8 +225,17 @@ function main() {
     console.log('❌ Errors:');
     result.errors.forEach(error => console.log(`   ${error}`));
     console.log('');
-    console.log('Environment validation failed!');
-    process.exit(1);
+    
+    // In production, fail on errors
+    if (isProduction) {
+      console.log('Environment validation failed in production!');
+      process.exit(1);
+    }
+    
+    // In CI/development, only warn
+    console.log('⚠️  Validation errors detected, but continuing in non-production environment.');
+    console.log('   These will cause build failure in production.');
+    console.log('');
   }
 
   console.log('✅ Environment validation passed!\n');

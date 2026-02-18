@@ -44,21 +44,12 @@ export default async function handler(
         },
         orderBy: {
           collectedAt: 'desc'
-        },
-        include: {
-          token: {
-            select: {
-              name: true,
-              symbol: true,
-              contractAddress: true
-            }
-          }
         }
       });
 
       // Calculate summary statistics
       const totalFees = feeCollections.reduce((sum, fee) => 
-        sum + parseFloat(fee.amount || '0'), 0
+        sum + parseFloat(fee.amount.toString()), 0
       );
 
       const feesByToken = feeCollections.reduce((acc, fee) => {
@@ -66,14 +57,14 @@ export default async function handler(
         if (!acc[addr]) {
           acc[addr] = {
             tokenAddress: addr,
-            tokenName: fee.token?.name || 'Unknown',
-            tokenSymbol: fee.token?.symbol || '???',
-            totalAmount: 0,
-            count: 0
+            tokenName: 'Token', // Can be enriched by joining with Token table if needed
+            tokenSymbol: '???',
+            totalFees: 0, // Match component expectation
+            transactionCount: 0 // Match component expectation
           };
         }
-        acc[addr].totalAmount += parseFloat(fee.amount || '0');
-        acc[addr].count += 1;
+        acc[addr].totalFees += parseFloat(fee.amount.toString());
+        acc[addr].transactionCount += 1;
         return acc;
       }, {} as Record<string, any>);
 
@@ -83,12 +74,12 @@ export default async function handler(
         if (!acc[day]) {
           acc[day] = {
             date: day,
-            amount: 0,
-            count: 0
+            fees: 0, // Match component expectation
+            transactions: 0 // Match component expectation
           };
         }
-        acc[day].amount += parseFloat(fee.amount || '0');
-        acc[day].count += 1;
+        acc[day].fees += parseFloat(fee.amount.toString());
+        acc[day].transactions += 1;
         return acc;
       }, {} as Record<string, any>);
 
@@ -97,9 +88,25 @@ export default async function handler(
       );
 
       // Get current system settings for fee configuration
-      const systemSettings = await prisma.systemSetting.findFirst({
-        orderBy: { createdAt: 'desc' }
+      const feeConfigSetting = await prisma.systemSetting.findUnique({
+        where: { key: 'fee_configuration' }
       });
+      
+      let feeConfig = {
+        protocolFeePercent: 1,
+        creatorFeePercent: 2,
+        launchFeeEth: '0.01',
+        treasuryAddress: null
+      };
+      
+      if (feeConfigSetting) {
+        try {
+          const parsed = JSON.parse(feeConfigSetting.value);
+          feeConfig = { ...feeConfig, ...parsed };
+        } catch (e) {
+          console.error('Failed to parse fee configuration:', e);
+        }
+      }
 
       res.status(200).json({
         summary: {
@@ -115,12 +122,7 @@ export default async function handler(
         feesByToken: Object.values(feesByToken),
         chartData,
         recentCollections: feeCollections.slice(0, 10),
-        configuration: {
-          protocolFeePercent: systemSettings?.value?.protocolFeePercent || 1,
-          creatorFeePercent: systemSettings?.value?.creatorFeePercent || 2,
-          launchFeeETH: systemSettings?.value?.launchFeeETH || 0.01,
-          treasuryAddress: systemSettings?.value?.treasuryAddress || null
-        }
+        configuration: feeConfig
       });
     } catch (error) {
       console.error('Error fetching billing data:', error);
@@ -129,42 +131,66 @@ export default async function handler(
   } else if (req.method === 'PUT') {
     // Update fee configuration
     try {
-      const { protocolFeePercent, creatorFeePercent, launchFeeETH, treasuryAddress } = req.body;
+      const { protocolFeePercent, creatorFeePercent, launchFeeEth, treasuryAddress } = req.body;
 
       // Validation
-      if (protocolFeePercent && (protocolFeePercent < 0 || protocolFeePercent > 100)) {
+      if (protocolFeePercent !== undefined && (protocolFeePercent < 0 || protocolFeePercent > 100)) {
         return res.status(400).json({ error: 'Protocol fee must be between 0 and 100%' });
       }
-      if (creatorFeePercent && (creatorFeePercent < 0 || creatorFeePercent > 100)) {
+      if (creatorFeePercent !== undefined && (creatorFeePercent < 0 || creatorFeePercent > 100)) {
         return res.status(400).json({ error: 'Creator fee must be between 0 and 100%' });
       }
-      if (launchFeeETH && launchFeeETH < 0) {
+      if (launchFeeEth !== undefined && parseFloat(launchFeeEth) < 0) {
         return res.status(400).json({ error: 'Launch fee must be positive' });
       }
 
-      // Update or create system settings
-      const existingSettings = await prisma.systemSetting.findFirst({
-        orderBy: { createdAt: 'desc' }
+      // Get existing configuration
+      const existingConfig = await prisma.systemSetting.findUnique({
+        where: { key: 'fee_configuration' }
       });
 
-      const updatedValue = {
-        ...(existingSettings?.value as any || {}),
+      let currentConfig = {
+        protocolFeePercent: 1,
+        creatorFeePercent: 2,
+        launchFeeEth: '0.01',
+        treasuryAddress: null
+      };
+
+      if (existingConfig) {
+        try {
+          currentConfig = { ...currentConfig, ...JSON.parse(existingConfig.value) };
+        } catch (e) {
+          console.error('Failed to parse existing config:', e);
+        }
+      }
+
+      // Merge updates
+      const updatedConfig = {
+        ...currentConfig,
         ...(protocolFeePercent !== undefined && { protocolFeePercent }),
         ...(creatorFeePercent !== undefined && { creatorFeePercent }),
-        ...(launchFeeETH !== undefined && { launchFeeETH }),
+        ...(launchFeeEth !== undefined && { launchFeeEth }),
         ...(treasuryAddress !== undefined && { treasuryAddress })
       };
 
-      const systemSetting = await prisma.systemSetting.create({
-        data: {
+      // Upsert system setting
+      await prisma.systemSetting.upsert({
+        where: { key: 'fee_configuration' },
+        update: {
+          value: JSON.stringify(updatedConfig),
+          description: 'Protocol fee configuration'
+        },
+        create: {
           key: 'fee_configuration',
-          value: updatedValue
+          value: JSON.stringify(updatedConfig),
+          description: 'Protocol fee configuration',
+          category: 'billing'
         }
       });
 
       res.status(200).json({
         success: true,
-        configuration: systemSetting.value
+        configuration: updatedConfig
       });
     } catch (error) {
       console.error('Error updating fee configuration:', error);
