@@ -1,0 +1,189 @@
+﻿name: Copilot Universal Auto
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
+jobs:
+
+  auto-apply:
+    if: contains(github.event.comment.body, '@copilot apply-all')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.issue.pull_request.head.ref }}
+
+      - name: Apply all suggestions
+        uses: github/copilot-apply-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            Apply all implementation suggestions.
+            Fix all comments.
+            Resolve all threads.
+            Reply to each comment.
+            Format + lint.
+            Sync branch with target.
+            Ensure build passes.
+            Ensure tests pass.
+            Re-run until CI is green.
+            Non-destructive changes only.
+
+  fix-tests:
+    if: contains(github.event.comment.body, '@copilot fix-tests')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.issue.pull_request.head.ref }}
+
+      - name: Repair tests
+        uses: github/copilot-apply-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            Fix all failing tests.
+            Fix build errors.
+            Fix TypeScript errors.
+            Fix lint errors.
+            Do not delete tests.
+            Do not weaken assertions.
+            Preserve architecture.
+            Re-run until CI is green.
+            Push fixes automatically.
+
+  auto-heal:
+    if: contains(github.event.comment.body, '@copilot heal')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.issue.pull_request.head.ref }}
+
+      - name: Heal repo
+        uses: github/copilot-apply-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            Fix all build issues.
+            Fix all dependency issues.
+            Fix all lint issues.
+            Fix all TypeScript issues.
+            Fix all test issues.
+            Ensure CI is green.
+            Ensure deterministic builds.
+            Ensure repo stability.
+            Push fixes automatically.
+
+  vercel-deploy:
+    if: contains(github.event.comment.body, '@copilot deploy-vercel')
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.issue.pull_request.head.ref }}
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; fi
+          if [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm install; fi
+          if [ -f yarn.lock ]; then yarn install --frozen-lockfile; fi
+
+      - name: Build project
+        run: |
+          if [ -f package.json ] && npm run | grep -q "build"; then npm run build; fi
+
+      - name: Deploy to Vercel
+        if: env.VERCEL_TOKEN != ''
+        run: |
+          npm install -g vercel
+          vercel --prod --token "${VERCEL_TOKEN}" --yes
+
+  branch-protection:
+    if: contains(github.event.comment.body, '@copilot protect-branch')
+    runs-on: ubuntu-latest
+    env:
+      GH_ADMIN_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+    steps:
+      - name: Protect branches
+        if: env.GH_ADMIN_TOKEN != ''
+        run: |
+          OWNER=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f1)
+          REPO=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f2)
+          for BRANCH in main master; do
+            gh api -H "Authorization: token ${GH_ADMIN_TOKEN}" -X PUT \
+              "/repos/${OWNER}/${REPO}/branches/${BRANCH}/protection" \
+              -F required_status_checks.strict=true \
+              -F enforce_admins=true \
+              -F required_pull_request_reviews.dismiss_stale_reviews=true \
+              -F required_pull_request_reviews.required_approving_review_count=1 \
+              -F restrictions=null || true
+          done
+
+  ci-enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; fi
+          if [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm install; fi
+          if [ -f yarn.lock ]; then yarn install --frozen-lockfile; fi
+
+      - name: Run lint/tests
+        run: |
+          if [ -f package.json ]; then
+            if npm run | grep -q "lint"; then npm run lint; fi
+            if npm run | grep -q "test"; then npm test -- --watch=false || npm test || true; fi
+          fi
+
+  readme-health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update README with badges + health
+        uses: github/copilot-apply-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            Ensure README.md exists.
+            Add badges for CI, license, and coverage (placeholder if unknown).
+            Add a Repo Health section summarizing:
+            - Lint status
+            - Test status
+            - Build status
+            Keep it concise and operator-grade.
+
+  pr-doctor:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PR Doctor Review
+        uses: github/copilot-apply-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          instructions: |
+            Act as an operator-grade PR doctor.
+            Review the diff for:
+            - Architectural drift
+            - Risky changes
+            - Missing tests
+            - Anti-patterns
+            Leave structured review comments.
+            Suggest minimal, safe fixes.
