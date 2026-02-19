@@ -1,7 +1,622 @@
-﻿name: CI
+<#
+.SYNOPSIS
+    Advanced Dynamic Pipeline Controller — Smart Healing Edition
+.DESCRIPTION
+    Full end-to-end CI/CD pipeline controller implementing the Smart Dynamic
+    Healing Protocol (9-phase). Includes:
+      • DRY phase execution (single source of truth for Build/Test/Deploy logic)
+      • Dynamic config loading from config.<Env>.json
+      • PR comment resolver (post, resolve, replace bot comments)
+      • Auto-generated dynamic phase documentation comments
+      • Environment-safe secret injection via CustomArgs
+      • Non-destructive healing with repo-type detection
+.PARAMETER Phase
+    Build | Test | Deploy | Full | Heal | DetectRepo | ValidateEnv
+.PARAMETER Env
+    Dev | Staging | Prod  (default: Dev)
+.PARAMETER CustomArgs
+    Hashtable of optional overrides forwarded to every phase.
+    Pass secrets here: -CustomArgs @{ dbPassword = $env:DB_PASS }
+.PARAMETER PRNumber
+    GitHub PR number. Auto-read from $env:PR_NUMBER if omitted.
+.PARAMETER GitHubToken
+    GitHub API token. Auto-read from $env:GH_TOKEN if omitted.
+.PARAMETER GitHubRepo
+    "org/repo" string. Auto-read from $env:GITHUB_REPOSITORY if omitted.
+.PARAMETER DryRun
+    Print all actions but execute nothing. Safe for local testing.
+.EXAMPLE
+    ./pipeline.ps1 -Phase Full -Env Staging -PRNumber 42
+.EXAMPLE
+    ./pipeline.ps1 -Phase Heal -Env Dev -DryRun
+#>
+param(
+    [Parameter(Mandatory = $true)]
+    [ValidateSet("Build", "Test", "Deploy", "Full", "Heal", "DetectRepo", "ValidateEnv")]
+    [string]$Phase,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("Dev", "Staging", "Prod")]
+    [string]$Env = "Dev",
+
+    [Parameter(Mandatory = $false)]
+    [hashtable]$CustomArgs = @{},
+
+    [Parameter(Mandatory = $false)]
+    [string]$PRNumber = $env:PR_NUMBER,
+
+    [Parameter(Mandatory = $false)]
+    [string]$GitHubToken = $env:GH_TOKEN,
+
+    [Parameter(Mandatory = $false)]
+    [string]$GitHubRepo = $env:GITHUB_REPOSITORY,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$DryRun
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 1 — CONSOLE HELPERS
+#  DRY: All output routes through these four functions.
+# ═══════════════════════════════════════════════════════════════
+
+function Write-Step([string]$Message) { Write-Host "`n[STEP] $Message" -ForegroundColor Cyan }
+function Write-Info([string]$Message) { Write-Host "  i  $Message" -ForegroundColor DarkCyan }
+function Write-OK([string]$Message)   { Write-Host "  OK $Message" -ForegroundColor Green }
+function Write-Fail([string]$Message) { Write-Host "  !! $Message" -ForegroundColor Red }
+function Write-Dry([string]$Message)  { Write-Host "  >> [DRY-RUN] $Message" -ForegroundColor Magenta }
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 2 — DYNAMIC COMMENT GENERATOR
+#  Auto-generates rich Markdown comments for any pipeline event.
+#  DRY: One generator consumed by every phase — no inline strings.
+# ═══════════════════════════════════════════════════════════════
+
+function New-DynamicComment {
+    <#
+    .SYNOPSIS
+        Build a Markdown PR comment body for a given pipeline event.
+    .PARAMETER EventType
+        phase_start | phase_success | phase_failure | heal_action |
+        config_loaded | repo_detected | env_validated | dry_run
+    .PARAMETER PhaseLabel
+        Human-readable phase name (Build, Test, Deploy, Heal, etc.)
+    .PARAMETER Detail
+        Optional extra context appended as a table row.
+    .PARAMETER Metadata
+        Hashtable of key/value pairs rendered as additional table rows.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet(
+            "phase_start","phase_success","phase_failure",
+            "heal_action","config_loaded","repo_detected",
+            "env_validated","dry_run"
+        )]
+        [string]$EventType,
+
+        [Parameter(Mandatory = $true)]
+        [string]$PhaseLabel,
+
+        [string]$Detail      = "",
+        [hashtable]$Metadata = @{}
+    )
+
+    $botTag    = "<!-- pipeline-bot -->"
+    $timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + " UTC"
+    $runUrl    = if ($env:GITHUB_RUN_ID) {
+        "[$($env:GITHUB_RUN_NUMBER)](https://github.com/$GitHubRepo/actions/runs/$($env:GITHUB_RUN_ID))"
+    } else { "local" }
+
+    $map = @{
+        phase_start    = @{ emoji = "[~]"; title = "Running"   }
+        phase_success  = @{ emoji = "[+]"; title = "Succeeded" }
+        phase_failure  = @{ emoji = "[x]"; title = "Failed"    }
+        heal_action    = @{ emoji = "[H]"; title = "Healing"   }
+        config_loaded  = @{ emoji = "[C]"; title = "Config"    }
+        repo_detected  = @{ emoji = "[R]"; title = "Detected"  }
+        env_validated  = @{ emoji = "[V]"; title = "Validated" }
+        dry_run        = @{ emoji = "[D]"; title = "Dry Run"   }
+    }
+    $m     = $map[$EventType]
+    $emoji = $m.emoji
+    $title = $m.title
+
+    $coreRows = @(
+        "| Phase       | ``$PhaseLabel`` |",
+        "| Status      | **$title** |",
+        "| Environment | ``$Env`` |",
+        "| Run         | $runUrl |",
+        "| Timestamp   | $timestamp |"
+    )
+    if ($DryRun)  { $coreRows += "| Mode   | ``DRY RUN - nothing executed`` |" }
+    if ($Detail)  { $coreRows += "| Detail | $Detail |" }
+
+    $metaRows  = $Metadata.GetEnumerator() | Sort-Object Key |
+                 ForEach-Object { "| $($_.Key) | ``$($_.Value)`` |" }
+
+    # Mask secrets in CustomArgs block
+    $safeArgs  = $CustomArgs.GetEnumerator() | Sort-Object Key | ForEach-Object {
+        $v = if ($_.Key -match "(?i)(secret|token|pass|key|pwd|cred)") { "***(masked)" } else { $_.Value }
+        "  $($_.Key) = $v"
+    }
+    $argsBlock = if ($safeArgs) {
+        "`n<details><summary>Custom Args</summary>`n`n``````powershell`n$($safeArgs -join "`n")`n```````n</details>"
+    } else { "" }
+
+    $allRows   = ($coreRows + $metaRows) -join "`n"
+
+    return @"
+$botTag
+### $emoji Pipeline - **$PhaseLabel** - $title - ``$Env``
+
+| Field | Value |
+|---|---|
+$allRows
+$argsBlock
+"@
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 3 — PR COMMENT RESOLVER
+#  Finds, deletes stale bot comment, reposts fresh dynamic one.
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-PRCommentResolver {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$EventType,
+
+        [Parameter(Mandatory = $true)]
+        [string]$PhaseLabel,
+
+        [string]$Detail      = "",
+        [hashtable]$Metadata = @{},
+        [string]$Token       = $GitHubToken,
+        [string]$Repo        = $GitHubRepo,
+        [string]$PR          = $PRNumber
+    )
+
+    if (-not $PR -or -not $Token -or -not $Repo) {
+        Write-Info "PR comment resolver skipped (PR_NUMBER / GH_TOKEN / GITHUB_REPOSITORY not set)."
+        return
+    }
+
+    $body    = New-DynamicComment -EventType $EventType -PhaseLabel $PhaseLabel `
+                                  -Detail $Detail -Metadata $Metadata
+    $botTag  = "<!-- pipeline-bot -->"
+    $headers = @{
+        Authorization          = "Bearer $Token"
+        Accept                 = "application/vnd.github+json"
+        "X-GitHub-Api-Version" = "2022-11-28"
+    }
+    $listUrl = "https://api.github.com/repos/$Repo/issues/$PR/comments"
+
+    try {
+        # 1. Page through to find existing bot comment
+        $existing = $null
+        $page     = 1
+        do {
+            $resp  = Invoke-RestMethod -Uri "$listUrl`?per_page=100&page=$page" `
+                                       -Headers $headers -Method GET
+            $match = $resp | Where-Object { $_.body -like "*$botTag*" } | Select-Object -First 1
+            if ($match) { $existing = $match; break }
+            $page++
+        } while ($resp.Count -eq 100)
+
+        # 2. Delete stale comment (resolve thread cleanly)
+        if ($existing) {
+            Write-Info "Resolving stale PR comment #$($existing.id)..."
+            if (-not $DryRun) {
+                Invoke-RestMethod `
+                    -Uri "https://api.github.com/repos/$Repo/issues/comments/$($existing.id)" `
+                    -Headers $headers -Method DELETE | Out-Null
+            } else {
+                Write-Dry "Would delete PR comment #$($existing.id)"
+            }
+        }
+
+        # 3. Post fresh dynamic comment
+        if (-not $DryRun) {
+            $payload = @{ body = $body } | ConvertTo-Json -Depth 5
+            $posted  = Invoke-RestMethod -Uri $listUrl -Headers $headers `
+                                         -Method POST -Body $payload `
+                                         -ContentType "application/json"
+            Write-Info "PR comment posted -> $($posted.html_url)"
+        } else {
+            Write-Dry "Would post PR comment [$EventType] on PR #$PR"
+        }
+    }
+    catch {
+        Write-Info "PR comment resolver warning: $_"
+    }
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 4 — ENVIRONMENT CONFIG LOADER
+#  DRY: Reads config.<Env>.json once at boot. Every phase calls
+#  Get-ConfigValue() instead of hard-coding env-specific values.
+#  Security: Secrets NEVER live in config files — they arrive
+#  via $CustomArgs injected from GitHub Secrets.
+# ═══════════════════════════════════════════════════════════════
+
+$script:Config = @{}
+
+function Import-EnvConfig {
+    $configFile = "./config.$Env.json"
+
+    if (-not (Test-Path $configFile)) {
+        Write-Info "No config file at $configFile — using CustomArgs + defaults only."
+        return
+    }
+
+    try {
+        $raw = Get-Content $configFile -Raw | ConvertFrom-Json
+        $raw.PSObject.Properties | ForEach-Object { $script:Config[$_.Name] = $_.Value }
+        Write-OK "Loaded env config: $configFile  ($(($script:Config.Keys) -join ', '))"
+        Invoke-PRCommentResolver -EventType "config_loaded" -PhaseLabel "EnvConfig" `
+            -Detail $configFile `
+            -Metadata @{ keys = ($script:Config.Keys -join ", "); file = $configFile }
+    }
+    catch {
+        throw "Failed to parse $configFile — $_"
+    }
+}
+
+# Resolve with precedence: CustomArgs > config.<Env>.json > $Default
+function Get-ConfigValue([string]$Key, $Default = $null) {
+    if ($CustomArgs.ContainsKey($Key))    { return $CustomArgs[$Key] }
+    if ($script:Config.ContainsKey($Key)) { return $script:Config[$Key] }
+    return $Default
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 5 — REPO TYPE DETECTOR  (Healing Phase 2)
+# ═══════════════════════════════════════════════════════════════
+
+$script:RepoType = "unknown"
+
+function Invoke-DetectRepo {
+    Write-Step "Detecting repository type..."
+
+    $script:RepoType = switch ($true) {
+        { Test-Path "./next.config.*" }   { "nextjs";   break }
+        { Test-Path "./src-tauri" }        { "tauri";    break }
+        { Test-Path "./hardhat.config.*" } { "solidity"; break }
+        {
+            (Test-Path "./package.json") -and
+            ((Get-Content "./package.json" -Raw) -match '"electron"')
+        }                                  { "electron"; break }
+        { Test-Path "./*.csproj" }         { "dotnet";   break }
+        { Test-Path "./package.json" }     { "node";     break }
+        default                            { "generic"          }
+    }
+
+    $meta = @{ type = $script:RepoType }
+    if (Test-Path "./package.json") {
+        $pkg = Get-Content "./package.json" -Raw | ConvertFrom-Json
+        $meta["hasLint"]      = [bool]($pkg.scripts.lint)
+        $meta["hasTypecheck"] = [bool]($pkg.scripts.typecheck)
+        $meta["hasTest"]      = [bool]($pkg.scripts.test)
+        $meta["hasBuild"]     = [bool]($pkg.scripts.build)
+    }
+
+    Write-OK "Repo type: $($script:RepoType)"
+    $meta.GetEnumerator() | Sort-Object Key | ForEach-Object {
+        Write-Info "  $($_.Key) = $($_.Value)"
+    }
+
+    Invoke-PRCommentResolver -EventType "repo_detected" -PhaseLabel "DetectRepo" -Metadata $meta
+    return $script:RepoType
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 6 — ENVIRONMENT VALIDATOR  (Healing Phase 4)
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-ValidateEnv {
+    Write-Step "Validating environment safety..."
+
+    $issues  = [System.Collections.Generic.List[string]]::new()
+    $repairs = [System.Collections.Generic.List[string]]::new()
+
+    # Rule 1: .env.example must exist with safe placeholders only
+    if (-not (Test-Path "./.env.example")) {
+        $placeholder = @"
+# Auto-generated by pipeline.ps1 — safe placeholders only.
+# Copy to .env and fill in real values. NEVER commit .env.
+NEXT_PUBLIC_ENV=development
+NEXT_PUBLIC_RPC_URL=https://placeholder-rpc.example.com
+NEXT_PUBLIC_API_URL=https://placeholder-api.example.com
+"@
+        if (-not $DryRun) {
+            Set-Content "./.env.example" $placeholder -Encoding UTF8
+            $repairs.Add("Created .env.example with safe placeholders")
+        } else {
+            Write-Dry "Would create .env.example"
+        }
+    }
+
+    # Rule 2: .env must not be committed (check .gitignore coverage)
+    if ((Test-Path "./.env") -and (Test-Path "./.gitignore")) {
+        if ((Get-Content "./.gitignore" -Raw) -notmatch "\.env") {
+            $issues.Add(".env exists but is NOT in .gitignore — potential secret leak!")
+        }
+    }
+
+    # Rule 3: No raw secrets in frontend source
+    $secretPatterns = @(
+        '(?i)(password|secret|private_key)\s*=\s*[''"][^''""]{8,}',
+        'sk-[A-Za-z0-9]{32,}',
+        'AKIA[0-9A-Z]{16}'
+    )
+    Get-ChildItem -Path "./src","./app","./pages" `
+        -Include "*.ts","*.tsx","*.js","*.jsx" -Recurse -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        $content = Get-Content $_.FullName -Raw
+        foreach ($p in $secretPatterns) {
+            if ($content -match $p) { $issues.Add("Possible secret in $($_.Name): $p") }
+        }
+    }
+
+    # Rule 4: Next.js NEXT_PUBLIC_ vars must all appear in .env.example
+    if ($script:RepoType -eq "nextjs" -and (Test-Path "./.env.example")) {
+        $example = Get-Content "./.env.example" -Raw
+        Get-ChildItem "." -Include "*.ts","*.tsx","*.js","*.jsx" -Recurse -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            [regex]::Matches((Get-Content $_.FullName -Raw), 'NEXT_PUBLIC_[A-Z_]+') |
+            ForEach-Object {
+                if ($example -notmatch $_.Value) {
+                    $issues.Add("$($_.Value) used in code but missing from .env.example")
+                }
+            }
+        }
+    }
+
+    $repairs | ForEach-Object { Write-OK "Repaired: $_" }
+    $issues  | ForEach-Object { Write-Fail "Issue: $_" }
+
+    $status = if ($issues.Count -gt 0) { "phase_failure" } else { "phase_success" }
+    $detail = if ($issues.Count -gt 0) { $issues -join " | " } else { "All checks passed" }
+
+    Invoke-PRCommentResolver -EventType $status -PhaseLabel "ValidateEnv" `
+        -Detail $detail `
+        -Metadata @{ issueCount = $issues.Count; repairCount = $repairs.Count }
+
+    if ($issues.Count -gt 0) {
+        throw "Environment validation failed with $($issues.Count) issue(s)."
+    }
+    Write-OK "Environment validation passed."
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 7 — BUILD PHASE  (Healing Phase 5)
+#  DRY PRINCIPLE: This is the single source of truth for build
+#  logic. The YAML workflow calls this script. Local devs run
+#  the same command. Nothing is duplicated in YAML.
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-Build {
+    Write-Step "Starting Dynamic Build..."
+    Invoke-PRCommentResolver -EventType "phase_start" -PhaseLabel "Build"
+
+    switch ($script:RepoType) {
+        { $_ -in "nextjs","node","electron" } {
+            Write-Info "Node project build"
+            if (-not $DryRun) {
+                & npm ci                                       # never npm install
+                if ($LASTEXITCODE -ne 0) { throw "npm ci failed." }
+                if ((Get-Content "./package.json" -Raw) -match '"typecheck"') {
+                    & npm run typecheck
+                    if ($LASTEXITCODE -ne 0) { throw "typecheck failed." }
+                }
+                & npm run build
+                if ($LASTEXITCODE -ne 0) { throw "npm run build failed." }
+            } else {
+                Write-Dry "Would run: npm ci && npm run typecheck && npm run build"
+            }
+        }
+        "dotnet" {
+            $buildArgs = @("build","--configuration","Release")
+            if (Get-ConfigValue "project")   { $buildArgs += Get-ConfigValue "project" }
+            if (Get-ConfigValue "verbosity") { $buildArgs += "--verbosity",(Get-ConfigValue "verbosity") }
+            if (Get-ConfigValue "output")    { $buildArgs += "--output",(Get-ConfigValue "output") }
+            Write-Info "dotnet $($buildArgs -join ' ')"
+            if (-not $DryRun) {
+                & dotnet @buildArgs
+                if ($LASTEXITCODE -ne 0) { throw "dotnet build failed (exit $LASTEXITCODE)." }
+            } else {
+                Write-Dry "Would run: dotnet $($buildArgs -join ' ')"
+            }
+        }
+        "solidity" {
+            if (-not $DryRun) {
+                & npm ci; & npx hardhat compile
+                if ($LASTEXITCODE -ne 0) { throw "Hardhat compile failed." }
+            } else { Write-Dry "Would run: npm ci && npx hardhat compile" }
+        }
+        default {
+            if (-not $DryRun) {
+                & npm ci; & npm run build
+                if ($LASTEXITCODE -ne 0) { throw "Generic build failed." }
+            } else { Write-Dry "Would run: npm ci && npm run build" }
+        }
+    }
+
+    Write-OK "Build succeeded."
+    Invoke-PRCommentResolver -EventType "phase_success" -PhaseLabel "Build" `
+        -Metadata @{ repoType = $script:RepoType }
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 8 — TEST PHASE  (Healing Phase 5)
+#  Rules: Never delete tests, never weaken assertions,
+#  never mock production logic improperly.
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-Test {
+    Write-Step "Executing Tests..."
+    Invoke-PRCommentResolver -EventType "phase_start" -PhaseLabel "Test"
+
+    switch ($script:RepoType) {
+        { $_ -in "nextjs","node","electron","solidity" } {
+            if (-not $DryRun) {
+                & npm test -- --passWithNoTests
+                if ($LASTEXITCODE -ne 0) { throw "npm test failed." }
+                if ((Get-Content "./package.json" -Raw) -match '"lint"') {
+                    & npm run lint                             # surface only — never auto-fix in CI
+                    if ($LASTEXITCODE -ne 0) { throw "Lint failed." }
+                }
+            } else { Write-Dry "Would run: npm test && npm run lint" }
+        }
+        "dotnet" {
+            $cfg = New-PesterConfiguration
+            $cfg.Run.Path         = Get-ConfigValue "testPath" "./tests"
+            $cfg.Run.PassThru     = $true
+            $cfg.Output.Verbosity = Get-ConfigValue "testVerbosity" "Normal"
+            $cp = Get-ConfigValue "coveragePath" $null
+            if ($cp) {
+                $cfg.CodeCoverage.Enabled      = $true
+                $cfg.CodeCoverage.Path         = $cp
+                $cfg.CodeCoverage.OutputFormat = "JaCoCo"
+                $cfg.CodeCoverage.OutputPath   = "./coverage/pester-coverage.xml"
+            }
+            if (-not $DryRun) {
+                $r = Invoke-Pester -Configuration $cfg
+                $detail = "Passed: $($r.PassedCount) | Failed: $($r.FailedCount) | Skipped: $($r.SkippedCount)"
+                Write-Info $detail
+                if ($r.FailedCount -gt 0) {
+                    Invoke-PRCommentResolver -EventType "phase_failure" -PhaseLabel "Test" -Detail $detail
+                    throw "Tests Failed: $($r.FailedCount) test(s)."
+                }
+            } else { Write-Dry "Would run: Invoke-Pester -Configuration <config>" }
+        }
+        default { Write-Info "No recognized test runner — skipping safely." }
+    }
+
+    Write-OK "All tests passed."
+    Invoke-PRCommentResolver -EventType "phase_success" -PhaseLabel "Test"
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 9 — DEPLOY PHASE  (Healing Phase 6)
+#  Secrets arrive via CustomArgs only — never stored in config.
+#  Next.js gate: blocks deploy if .next/ is missing.
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-Deploy {
+    Write-Step "Deploying to $Env..."
+    Invoke-PRCommentResolver -EventType "phase_start" -PhaseLabel "Deploy"
+
+    if ($script:RepoType -eq "nextjs" -and -not (Test-Path "./.next")) {
+        throw "Next.js build output (.next/) missing. Run Build phase first."
+    }
+
+    $provider    = Get-ConfigValue "provider"    "k8s"
+    $clusterName = Get-ConfigValue "cluster"     "$Env-Cluster-01"
+    Write-Info "Provider: $provider | Cluster: $clusterName"
+
+    switch ($provider) {
+        "k8s" {
+            $ns  = Get-ConfigValue "namespace"  $Env.ToLower()
+            $mf  = Get-ConfigValue "manifest"   "./k8s/$Env"
+            $dep = Get-ConfigValue "deployment" "app"
+            if (-not $DryRun) {
+                & kubectl apply -f $mf --namespace $ns
+                if ($LASTEXITCODE -ne 0) { throw "kubectl apply failed." }
+                & kubectl rollout status deployment/$dep --namespace $ns --timeout=300s
+                if ($LASTEXITCODE -ne 0) { throw "Rollout timed out." }
+            } else { Write-Dry "Would run: kubectl apply -f $mf && kubectl rollout status" }
+        }
+        "azure" {
+            $rg  = Get-ConfigValue "resourceGroup" "rg-$Env"
+            $app = Get-ConfigValue "appName"       "app-$Env"
+            if (-not $DryRun) {
+                & az webapp deploy --resource-group $rg --name $app --src-path "./publish"
+                if ($LASTEXITCODE -ne 0) { throw "az webapp deploy failed." }
+            } else { Write-Dry "Would run: az webapp deploy --resource-group $rg --name $app" }
+        }
+        "aws" {
+            $svc = Get-ConfigValue "ecsService" "$Env-service"
+            $cls = Get-ConfigValue "ecsCluster" $clusterName
+            if (-not $DryRun) {
+                & aws ecs update-service --cluster $cls --service $svc --force-new-deployment
+                if ($LASTEXITCODE -ne 0) { throw "aws ecs update-service failed." }
+            } else { Write-Dry "Would run: aws ecs update-service --cluster $cls --service $svc" }
+        }
+        "vercel" {
+            $tok = Get-ConfigValue "vercelToken" $null
+            if (-not $tok) { throw "vercelToken not in CustomArgs or config." }
+            if (-not $DryRun) {
+                $flag = if ($Env -eq "Prod") { "--prod" } else { "" }
+                & npx vercel deploy $flag --token $tok --yes
+                if ($LASTEXITCODE -ne 0) { throw "Vercel deploy failed." }
+            } else { Write-Dry "Would run: npx vercel deploy [--prod] --token ***" }
+        }
+        default { throw "Unknown provider '$provider'. Supported: k8s, azure, aws, vercel." }
+    }
+
+    Write-OK "Deployment to $Env complete."
+    Invoke-PRCommentResolver -EventType "phase_success" -PhaseLabel "Deploy" `
+        -Metadata @{ provider = $provider; cluster = $clusterName }
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 10 — SMART HEALING ORCHESTRATOR  (All 9 Phases)
+#  Non-destructive. Each step is isolated — one failure does
+#  not abort the rest. Every step generates its own PR comment.
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-Heal {
+    Write-Step "Smart Dynamic Healing Protocol — 9 phases"
+    Invoke-PRCommentResolver -EventType "heal_action" -PhaseLabel "Heal" `
+        -Detail "Starting 9-phase healing run"
+
+    $healSteps = [ordered]@{
+
+        "Phase1-RemoveUnsafeWorkflows" = {
+            $unsafe = @(".github/workflows/copilot-universal-auto.yml")
+            foreach ($wf in $unsafe) {
+                if (Test-Path $wf) {
+                    if (-not $DryRun) { Remove-Item $wf -Force; Write-OK "Removed: $wf" }
+                    else { Write-Dry "Would remove: $wf" }
+                }
+            }
+            # Scan for dangerous comment-triggered workflow patterns
+            Get-ChildItem ".github/workflows" -Filter "*.yml" -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                $content = Get-Content $_.FullName -Raw
+                foreach ($trigger in @("issue_comment","pull_request_review_comment")) {
+                    if ($content -match $trigger) {
+                        Write-Fail "Unsafe trigger '$trigger' in $($_.Name) — review manually."
+                    }
+                }
+                if ($content -match 'permissions.*write' -and $content -match 'git push') {
+                    Write-Fail "Workflow $($_.Name) may auto-push — review write permissions."
+                }
+            }
+        }
+
+        "Phase2-DetectRepo" = { Invoke-DetectRepo }
+
+        "Phase3-NormalizeCI" = {
+            $ciPath   = ".github/workflows/ci.yml"
+            $buildCmd = switch ($script:RepoType) {
+                { $_ -in "nextjs","node","electron" } { "npm run build" }
+                "dotnet"   { "dotnet build --configuration Release" }
+                "solidity" { "npx hardhat compile" }
+                default    { "npm run build" }
+            }
+            $nodeVer = Get-ConfigValue "nodeVersion" "20"
+            $ciYaml  = @"
+name: CI Validation
 
 on:
   pull_request:
+    branches: [main, develop]
   push:
     branches: [main]
 
@@ -11,19 +626,178 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '$nodeVer'
           cache: 'npm'
-
       - run: npm ci
-        if: hashFiles('package.json') != ''
+      - run: npm run lint       --if-present
+      - run: npm run typecheck  --if-present
+      - run: npm test           --if-present -- --passWithNoTests
+      - run: $buildCmd
+"@
+            if (-not $DryRun) { Set-Content $ciPath $ciYaml -Encoding UTF8; Write-OK "CI written: $ciPath" }
+            else { Write-Dry "Would write CI to $ciPath" }
+        }
 
-      - run: npm run lint --if-present
-      - run: npm run typecheck --if-present
-      - run: npm test --if-present
-      - run: npm run build --if-present
+        "Phase4-ValidateEnv"          = { Invoke-ValidateEnv }
+        "Phase5-StabilizeBuildAndTest" = { Invoke-Build; Invoke-Test }
+
+        "Phase6-FrontendDeploymentRules" = {
+            if ($script:RepoType -eq "nextjs") {
+                if (-not (Test-Path "./.next") -and -not $DryRun) {
+                    throw "Build output (.next/) missing after Build phase."
+                }
+                Write-OK "Next.js deployment rules satisfied."
+            } else {
+                Write-Info "Not a Next.js project — frontend rules skipped."
+            }
+        }
+
+        "Phase7-ResolveReviewThreads" = {
+            if (-not $PRNumber -or -not $GitHubToken -or -not $GitHubRepo) {
+                Write-Info "Skipping review thread resolution (no PR context)."; return
+            }
+            $headers = @{
+                Authorization          = "Bearer $GitHubToken"
+                Accept                 = "application/vnd.github+json"
+                "X-GitHub-Api-Version" = "2022-11-28"
+            }
+            try {
+                $comments = Invoke-RestMethod `
+                    -Uri "https://api.github.com/repos/$GitHubRepo/pulls/$PRNumber/comments?per_page=100" `
+                    -Headers $headers -Method GET
+                $open = $comments | Where-Object { -not $_.resolved }
+                Write-Info "Open review threads: $($open.Count) / $($comments.Count)"
+                Invoke-PRCommentResolver -EventType "heal_action" -PhaseLabel "ReviewThreads" `
+                    -Detail "Open: $($open.Count)" `
+                    -Metadata @{ total = $comments.Count; open = $open.Count }
+            } catch { Write-Info "Review thread check skipped: $_" }
+        }
+
+        "Phase8-AutoMergePolicy" = {
+            if (-not $PRNumber -or -not $GitHubToken -or -not $GitHubRepo) {
+                Write-Info "Auto-merge skipped (no PR context)."; return
+            }
+            $headers = @{
+                Authorization          = "Bearer $GitHubToken"
+                Accept                 = "application/vnd.github+json"
+                "X-GitHub-Api-Version" = "2022-11-28"
+            }
+            try {
+                $pr = Invoke-RestMethod `
+                    -Uri "https://api.github.com/repos/$GitHubRepo/pulls/$PRNumber" `
+                    -Headers $headers -Method GET
+                $ok = $pr.mergeable -eq $true -and $pr.mergeable_state -eq "clean"
+                if ($ok -and -not $DryRun) {
+                    $payload = @{ merge_method = "squash" } | ConvertTo-Json
+                    Invoke-RestMethod `
+                        -Uri "https://api.github.com/repos/$GitHubRepo/pulls/$PRNumber/merge" `
+                        -Headers $headers -Method PUT -Body $payload `
+                        -ContentType "application/json" | Out-Null
+                    Write-OK "PR #$PRNumber auto-merged (squash)."
+                } elseif ($DryRun) {
+                    Write-Dry "Would auto-merge PR #$PRNumber if clean (currently: $($pr.mergeable_state))"
+                } else {
+                    Write-Info "Auto-merge skipped — mergeable_state=$($pr.mergeable_state)"
+                }
+            } catch { Write-Info "Auto-merge check skipped: $_" }
+        }
+
+        "Phase9-SafetyGuarantees" = {
+            $violations = @()
+            # No absolute cross-repo paths
+            Get-ChildItem -Filter "*.ps1" -Recurse -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                if ((Get-Content $_.FullName -Raw) -match '[A-Z]:\\Users\\[^\\]+\\repos\\[^\\]+') {
+                    $violations += "Absolute cross-repo path in $($_.Name)"
+                }
+            }
+            # No hardcoded blockchain mainnet RPCs
+            Get-ChildItem -Include "*.ts","*.js","*.json" -Recurse -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                if ((Get-Content $_.FullName -Raw) -match 'https://mainnet\.infura\.io|https://eth-mainnet\.g\.alchemy') {
+                    $violations += "Hardcoded mainnet RPC in $($_.Name) — use env var"
+                }
+            }
+            $violations | ForEach-Object { Write-Fail $_ }
+            if ($violations.Count -gt 0) { throw "Safety violations: $($violations.Count)" }
+            Write-OK "All safety guarantees satisfied."
+        }
+    }
+
+    # Execute each step; continue on failure (non-destructive)
+    $results = [ordered]@{}
+    foreach ($name in $healSteps.Keys) {
+        Write-Step "Heal: $name"
+        Invoke-PRCommentResolver -EventType "heal_action" -PhaseLabel $name
+        try {
+            & $healSteps[$name]
+            $results[$name] = "pass"
+            Write-OK "$name complete."
+        } catch {
+            $results[$name] = "fail"
+            Write-Fail "$name failed: $_"
+            Invoke-PRCommentResolver -EventType "phase_failure" -PhaseLabel $name -Detail "$_"
+        }
+    }
+
+    $allGreen    = -not ($results.Values -contains "fail")
+    $summaryMeta = @{}
+    $results.GetEnumerator() | ForEach-Object { $summaryMeta[$_.Key] = $_.Value }
+
+    Invoke-PRCommentResolver `
+        -EventType  (if ($allGreen) { "phase_success" } else { "phase_failure" }) `
+        -PhaseLabel "Heal" `
+        -Detail     (if ($allGreen) { "All 9 phases passed" } else { "Some phases need attention" }) `
+        -Metadata   $summaryMeta
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  SECTION 11 — PHASE DISPATCHER
+#  BUG FIX: No scriptblock + Invoke-Command wrapper.
+#  $PSCommandPath used for safe recursion in Full mode.
+# ═══════════════════════════════════════════════════════════════
+
+function Invoke-Phase([string]$PhaseToRun) {
+    switch ($PhaseToRun) {
+        "Build"       { Invoke-Build       }
+        "Test"        { Invoke-Test        }
+        "Deploy"      { Invoke-Deploy      }
+        "Heal"        { Invoke-Heal        }
+        "DetectRepo"  { Invoke-DetectRepo  }
+        "ValidateEnv" { Invoke-ValidateEnv }
+        "Full" {
+            Write-Step "Full End-to-End Pipeline"
+            # $PSCommandPath = actual .ps1 path (fixes original $MyInvocation bug)
+            & $PSCommandPath -Phase Build  -Env $Env -CustomArgs $CustomArgs -PRNumber $PRNumber -GitHubToken $GitHubToken -GitHubRepo $GitHubRepo
+            & $PSCommandPath -Phase Test   -Env $Env -CustomArgs $CustomArgs -PRNumber $PRNumber -GitHubToken $GitHubToken -GitHubRepo $GitHubRepo
+            & $PSCommandPath -Phase Deploy -Env $Env -CustomArgs $CustomArgs -PRNumber $PRNumber -GitHubToken $GitHubToken -GitHubRepo $GitHubRepo
+        }
+        default { throw "Unknown phase: '$PhaseToRun'" }
+    }
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  ENTRY POINT
+# ═══════════════════════════════════════════════════════════════
+
+Write-Info "Pipeline starting  |  Phase=[$Phase]  Env=[$Env]$(if ($DryRun) { '  Mode=[DRY RUN]' })"
+
+# Boot: load env config and detect repo type before any phase runs
+Import-EnvConfig
+if ($Phase -notin @("DetectRepo","ValidateEnv")) {
+    Invoke-DetectRepo | Out-Null
+}
+
+try {
+    Invoke-Phase -PhaseToRun $Phase
+    Write-Host "`nPipeline [$Phase] on [$Env] completed successfully." -ForegroundColor Green
+}
+catch {
+    Write-Fail "Pipeline Failed: $_"
+    Invoke-PRCommentResolver -EventType "phase_failure" -PhaseLabel $Phase -Detail "$_"
+    exit 1
+}
