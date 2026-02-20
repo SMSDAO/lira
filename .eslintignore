@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+hardhat.config.js
+test/
+scripts/
+backend/
+*.test.js
+*.test.ts
+*.test.tsx

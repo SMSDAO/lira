@@ -1,0 +1,105 @@
+name: Windows Admin Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-windows-admin:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pkg globally
+        run: npm install -g pkg
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Create admin executable
+        run: |
+          pkg . --targets node24-win-x64 --output admin.exe --config package.json
+        continue-on-error: true
+
+      - name: Verify admin.exe
+        run: |
+          if (Test-Path admin.exe) {
+            Write-Output "✅ admin.exe built successfully"
+            $size = (Get-Item admin.exe).Length / 1MB
+            Write-Output "File size: $size MB"
+          } else {
+            Write-Output "⚠️ admin.exe not found, will use npm start instead"
+          }
+        shell: pwsh
+
+      - name: Create Windows deployment package
+        run: |
+          New-Item -ItemType Directory -Force -Path windows-dist
+          if (Test-Path admin.exe) {
+            Copy-Item admin.exe windows-dist/
+          }
+          Copy-Item -Recurse .next windows-dist/
+          Copy-Item package.json windows-dist/
+          Copy-Item ecosystem.config.js windows-dist/
+          Compress-Archive -Path windows-dist/* -DestinationPath lira-admin-windows.zip
+        shell: pwsh
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lira-admin-windows
+          path: lira-admin-windows.zip
+          retention-days: 30
+
+      - name: Create README for Windows deployment
+        run: |
+          @"
+          # LIRA Admin Dashboard for Windows 11
+
+          ## Requirements
+          - Windows 11
+          - Node.js 24+
+
+          ## Installation
+
+          ### Option 1: Using admin.exe (if available)
+          1. Extract all files
+          2. Double-click admin.exe
+          3. Open http://localhost:3000 in your browser
+
+          ### Option 2: Using npm (recommended)
+          1. Extract all files
+          2. Open PowerShell in the extracted directory
+          3. Run: npm install
+          4. Run: npm run pm2:start
+          5. Open http://localhost:3000 in your browser
+
+          ## PM2 Commands
+          - Start: npm run pm2:start
+          - Stop: npm run pm2:stop
+          - Restart: npm run pm2:restart
+          - Logs: npm run pm2:logs
+          - Monitor: npm run pm2:monit
+
+          ## Environment Setup
+          1. Copy .env.example to .env
+          2. Fill in your production keys
+          3. Restart the application
+
+          ## Support
+          For issues, visit: https://github.com/SMSDAO/lira/issues
+          "@ | Out-File -FilePath windows-dist/README.txt -Encoding UTF8
+        shell: pwsh

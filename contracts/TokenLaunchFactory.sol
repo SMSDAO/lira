@@ -5,10 +5,26 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+// Import the registry interface
+interface ILiraTokenRegistry {
+    enum TokenType {
+        PROJECT,
+        USER,
+        SOCIAL
+    }
+    
+    function registerToken(
+        address tokenAddress,
+        address tokenOwner,
+        TokenType tokenType
+    ) external;
+}
+
 /**
  * @title TokenLaunchFactory
  * @dev Automatic token launch factory with Zora-inspired bonding curve
  * @notice Allows users to launch tokens automatically with built-in liquidity
+ * @notice Integrates with LiraTokenRegistry to auto-register all launched tokens
  */
 contract TokenLaunchFactory is Ownable, ReentrancyGuard {
     struct TokenLaunch {
@@ -27,6 +43,7 @@ contract TokenLaunchFactory is Ownable, ReentrancyGuard {
     uint256 public protocolFeePercent = 100; // 1% in basis points
     address public feeCollector;
     address public liraToken;
+    ILiraTokenRegistry public registry;
     
     // Token launches tracking
     TokenLaunch[] public launches;
@@ -44,12 +61,20 @@ contract TokenLaunchFactory is Ownable, ReentrancyGuard {
     );
     event LaunchFeeUpdated(uint256 newFee);
     event ProtocolFeeUpdated(uint256 newFeePercent);
+    event TokenRegistered(address indexed tokenAddress, address indexed creator);
     
-    constructor(address _liraToken, address _feeCollector) Ownable(msg.sender) {
+    constructor(
+        address _liraToken,
+        address _feeCollector,
+        address _registry
+    ) Ownable(msg.sender) {
         require(_liraToken != address(0), "Invalid LIRA token");
         require(_feeCollector != address(0), "Invalid fee collector");
+        require(_registry != address(0), "Invalid registry");
+        
         liraToken = _liraToken;
         feeCollector = _feeCollector;
+        registry = ILiraTokenRegistry(_registry);
     }
     
     /**
@@ -95,6 +120,13 @@ contract TokenLaunchFactory is Ownable, ReentrancyGuard {
         // Transfer launch fee to collector
         payable(feeCollector).transfer(launchFee);
         
+        // Register token in the LIRA registry as PROJECT type
+        registry.registerToken(
+            tokenAddress,
+            msg.sender,
+            ILiraTokenRegistry.TokenType.PROJECT
+        );
+        
         emit TokenLaunched(
             tokenAddress,
             msg.sender,
@@ -103,6 +135,7 @@ contract TokenLaunchFactory is Ownable, ReentrancyGuard {
             initialSupply,
             block.timestamp
         );
+        emit TokenRegistered(tokenAddress, msg.sender);
         
         return tokenAddress;
     }

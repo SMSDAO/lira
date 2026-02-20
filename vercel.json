@@ -1,7 +1,31 @@
 {
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
   "env": {
     "NEXT_PUBLIC_CHAIN_ID": "8453",
-    "NEXT_PUBLIC_CHAIN_NAME": "base"
+    "NEXT_PUBLIC_CHAIN_NAME": "base",
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_RPC_BASE_MAINNET": "https://mainnet.base.org",
+    "NEXT_PUBLIC_RPC_BASE_SEPOLIA": "https://sepolia.base.org"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_RPC_BASE_SEPOLIA": "https://sepolia.base.org",
+      "NEXT_PUBLIC_RPC_BASE_MAINNET": "https://mainnet.base.org",
+      "NEXT_PUBLIC_LIRA_TOKEN": "@next_public_lira_token",
+      "NEXT_PUBLIC_LIRA_REGISTRY": "@next_public_lira_registry",
+      "NEXT_PUBLIC_LIRA_PROFILE": "@next_public_lira_profile",
+      "NEXT_PUBLIC_LIRA_SOCIAL_GRAPH": "@next_public_lira_social_graph",
+      "NEXT_PUBLIC_FACTORY": "@next_public_factory",
+      "NEXT_PUBLIC_USER_FACTORY": "@next_public_user_factory",
+      "NEXT_PUBLIC_ADMIN_WALLET": "@next_public_admin_wallet",
+      "NEXT_PUBLIC_WALLET_CONNECT_ID": "@next_public_wallet_connect_id",
+      "DATABASE_URL": "@database_url",
+      "JWT_SECRET": "@jwt_secret"
+    }
   },
   "headers": [
     {
@@ -18,8 +42,35 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
     }
-  ]
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
+  "github": {
+    "enabled": true,
+    "autoAlias": true,
+    "silent": false,
+    "autoJobCancelation": true
+  }
 }

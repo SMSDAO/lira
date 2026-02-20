@@ -1,0 +1,256 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ====================
+// Users & Profiles
+// ====================
+
+model User {
+  id            Int       @id @default(autoincrement())
+  walletAddress String    @unique @map("wallet_address") @db.VarChar(42)
+  handle        String?   @unique @db.VarChar(32)
+  email         String?   @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  role          String    @default("user") @db.VarChar(20)
+  isVerified    Boolean   @default(false) @map("is_verified")
+  lastLogin     DateTime? @map("last_login")
+
+  // Relations
+  profile         Profile?
+  followersEdges  SocialEdge[] @relation("Follower")
+  followingEdges  SocialEdge[] @relation("Following")
+  posts           Post[]
+  notifications   Notification[]
+  tokenRoles      UserTokenRole[]
+
+  @@index([walletAddress])
+  @@index([handle])
+  @@index([role])
+  @@map("users")
+}
+
+model Profile {
+  id                  Int      @id @default(autoincrement())
+  userId              Int      @unique @map("user_id")
+  bio                 String?  @db.Text
+  avatarUrl           String?  @map("avatar_url") @db.VarChar(500)
+  bannerUrl           String?  @map("banner_url") @db.VarChar(500)
+  website             String?  @db.VarChar(500)
+  twitter             String?  @db.VarChar(100)
+  discord             String?  @db.VarChar(100)
+  telegram            String?  @db.VarChar(100)
+  metadataUri         String?  @map("metadata_uri") @db.VarChar(500)
+  primaryTokenAddress String?  @map("primary_token_address") @db.VarChar(42)
+  preferences         Json     @default("{}")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([primaryTokenAddress])
+  @@map("profiles")
+}
+
+// ====================
+// Social Graph
+// ====================
+
+model SocialEdge {
+  id          Int      @id @default(autoincrement())
+  followerId  Int      @map("follower_id")
+  followingId Int      @map("following_id")
+  edgeType    String   @map("edge_type") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId, edgeType])
+  @@index([followerId, edgeType])
+  @@index([followingId, edgeType])
+  @@map("social_edges")
+}
+
+// ====================
+// Tokens
+// ====================
+
+model Token {
+  id              Int       @id @default(autoincrement())
+  contractAddress String    @unique @map("contract_address") @db.VarChar(42)
+  name            String    @db.VarChar(255)
+  symbol          String    @db.VarChar(50)
+  decimals        Int       @default(18)
+  totalSupply     Decimal?  @map("total_supply") @db.Decimal(78, 0)
+  tokenType       String?   @map("token_type") @db.VarChar(20)
+  creatorAddress  String    @map("creator_address") @db.VarChar(42)
+  ownerAddress    String    @map("owner_address") @db.VarChar(42)
+  registryId      Int?      @map("registry_id")
+  isActive        Boolean   @default(true) @map("is_active")
+  launchedAt      DateTime? @map("launched_at")
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  events     TokenEvent[]
+  stats      TokenStat[]
+  userRoles  UserTokenRole[]
+
+  @@index([contractAddress])
+  @@index([creatorAddress])
+  @@index([ownerAddress])
+  @@index([tokenType])
+  @@map("tokens")
+}
+
+model TokenEvent {
+  id              Int      @id @default(autoincrement())
+  tokenAddress    String   @map("token_address") @db.VarChar(42)
+  eventType       String   @map("event_type") @db.VarChar(50)
+  fromAddress     String?  @map("from_address") @db.VarChar(42)
+  toAddress       String?  @map("to_address") @db.VarChar(42)
+  amount          Decimal? @db.Decimal(78, 0)
+  transactionHash String   @map("transaction_hash") @db.VarChar(66)
+  blockNumber     Int      @map("block_number")
+  blockTimestamp  DateTime @map("block_timestamp")
+  logIndex        Int      @map("log_index")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  token Token @relation(fields: [tokenAddress], references: [contractAddress])
+
+  @@index([tokenAddress])
+  @@index([eventType])
+  @@index([fromAddress])
+  @@index([toAddress])
+  @@index([blockNumber])
+  @@index([blockTimestamp])
+  @@map("token_events")
+}
+
+model TokenStat {
+  id              Int      @id @default(autoincrement())
+  tokenAddress    String   @map("token_address") @db.VarChar(42)
+  holderCount     Int      @default(0) @map("holder_count")
+  transactionCount Int      @default(0) @map("transaction_count")
+  volume24h       Decimal  @default(0) @map("volume_24h") @db.Decimal(78, 0)
+  volume7d        Decimal  @default(0) @map("volume_7d") @db.Decimal(78, 0)
+  volume30d       Decimal  @default(0) @map("volume_30d") @db.Decimal(78, 0)
+  volumeTotal     Decimal  @default(0) @map("volume_total") @db.Decimal(78, 0)
+  marketCap       Decimal? @map("market_cap") @db.Decimal(78, 0)
+  priceUsd        Decimal? @map("price_usd") @db.Decimal(20, 8)
+  lastUpdated     DateTime @default(now()) @map("last_updated")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  token Token @relation(fields: [tokenAddress], references: [contractAddress])
+
+  @@index([tokenAddress])
+  @@map("token_stats")
+}
+
+model UserTokenRole {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  tokenAddress String   @map("token_address") @db.VarChar(42)
+  role         String   @db.VarChar(20)
+  balance      Decimal? @db.Decimal(78, 0)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token Token @relation(fields: [tokenAddress], references: [contractAddress])
+
+  @@unique([userId, tokenAddress, role])
+  @@index([userId])
+  @@index([tokenAddress])
+  @@index([role])
+  @@map("user_token_roles")
+}
+
+// ====================
+// Social Features
+// ====================
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  authorId    Int      @map("author_id")
+  content     String   @db.Text
+  mediaUrls   Json     @default("[]") @map("media_urls")
+  metadata    Json     @default("{}")
+  likeCount   Int      @default(0) @map("like_count")
+  commentCount Int     @default(0) @map("comment_count")
+  shareCount  Int      @default(0) @map("share_count")
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  type        String   @db.VarChar(50)
+  title       String   @db.VarChar(255)
+  message     String   @db.Text
+  link        String?  @db.VarChar(500)
+  isRead      Boolean  @default(false) @map("is_read")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ====================
+// Admin & Configuration
+// ====================
+
+model SystemSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(100)
+  value       String   @db.Text
+  description String?  @db.Text
+  category    String   @default("general") @db.VarChar(50)
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("system_settings")
+}
+
+model FeeCollection {
+  id              Int      @id @default(autoincrement())
+  tokenAddress    String   @map("token_address") @db.VarChar(42)
+  feeType         String   @map("fee_type") @db.VarChar(20)
+  amount          Decimal  @db.Decimal(78, 0)
+  collectorAddress String  @map("collector_address") @db.VarChar(42)
+  transactionHash String   @map("transaction_hash") @db.VarChar(66)
+  blockNumber     Int      @map("block_number")
+  collectedAt     DateTime @map("collected_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([tokenAddress])
+  @@index([feeType])
+  @@index([collectedAt])
+  @@map("fee_collections")
+}
