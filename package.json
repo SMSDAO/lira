@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run env:validate && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
@@ -15,10 +15,30 @@
     "contracts:deploy": "hardhat run scripts/deploy.js",
     "php:serve": "php -S localhost:8000 -t backend/php/public",
     "go:build": "cd backend/go && go build -o bin/lira-api ./cmd/api",
-    "java:build": "cd backend/java && mvn clean package"
+    "java:build": "cd backend/java && mvn clean package",
+    "env:generate": "ts-node scripts/generate-env.ts",
+    "env:generate:beta": "ts-node scripts/generate-env.ts beta",
+    "env:generate:prod": "ts-node scripts/generate-env.ts production",
+    "env:validate": "ts-node scripts/validate-env.ts",
+    "wallet:generate": "ts-node scripts/generate-admin-wallet.ts",
+    "faucet:claim": "ts-node scripts/auto-claim.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:logs": "pm2 logs lira",
+    "pm2:monit": "pm2 monit",
+    "admin:build": "pkg . --targets node24-win-x64 --output admin.exe"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.4.0",
+    "@prisma/client": "^5.22.0",
     "@rainbow-me/rainbowkit": "^2.0.0",
     "@tanstack/react-query": "^5.17.0",
     "autoprefixer": "^10.4.17",
@@ -64,13 +84,21 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "prisma": "^5.22.0",
     "solidity-coverage": "^0.8.17",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": ">=24.0.0",
+    "npm": ">=10.0.0"
+  },
+  "pm2": {
+    "name": "lira",
+    "script": "npm",
+    "args": "start",
+    "instances": 1,
+    "exec_mode": "cluster"
   }
 }

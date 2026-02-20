@@ -24,20 +24,24 @@ describe('Home Page', () => {
 
   it('displays hero section', () => {
     render(<Home />);
-    expect(screen.getByText(/Decentralized Token Launch/i)).toBeInTheDocument();
+    expect(screen.getByText(/Quantum-Powered/i)).toBeInTheDocument();
   });
 
   it('displays feature cards', () => {
     render(<Home />);
     expect(screen.getByText(/Auto Token Launch/i)).toBeInTheDocument();
-    expect(screen.getByText(/Quantum Oracle/i)).toBeInTheDocument();
+    // Use getAllByText since "Quantum Oracle" may appear multiple times
+    const quantumTexts = screen.getAllByText(/Quantum Oracle/i);
+    expect(quantumTexts.length).toBeGreaterThan(0);
     expect(screen.getByText(/Parallel Agents/i)).toBeInTheDocument();
   });
 
   it('displays CTA buttons', () => {
     render(<Home />);
-    expect(screen.getByText(/Launch Token/i)).toBeInTheDocument();
-    expect(screen.getByText(/View Dashboard/i)).toBeInTheDocument();
+    // Use getAllByText since "Launch Token" appears multiple times
+    const launchButtons = screen.getAllByText(/Launch.*Token/i);
+    expect(launchButtons.length).toBeGreaterThan(0);
+    expect(screen.getByText(/Explore Dashboard/i)).toBeInTheDocument();
   });
 
   it('renders Connect Wallet button', () => {

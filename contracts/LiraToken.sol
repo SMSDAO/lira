@@ -8,8 +8,21 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title LiraToken
- * @dev LIRA base token with Zora-inspired logic for BASE and Monad mainnets
- * @notice This is the core governance and utility token for the Lira protocol
+ * @notice CANONICAL MAIN TOKEN - Root governance and utility token for the LIRA ecosystem
+ * @dev This is the official LIRA token that controls all subtokens and protocol operations
+ * 
+ * Key Features:
+ * - Fixed max supply of 1 billion tokens
+ * - Initial supply of 100 million tokens
+ * - Governance rights over all LIRA protocol contracts
+ * - Fee collection and treasury management
+ * - Minting control system for controlled token generation
+ * - Compatible with BASE and Monad mainnets
+ * 
+ * All tokens launched through TokenLaunchFactory are registered as subtokens
+ * under this canonical LIRA token in the LiraTokenRegistry.
+ * 
+ * @custom:security-contact security@lira.ai
  */
 contract LiraToken is ERC20, Ownable, ReentrancyGuard, Pausable {
     // Token constants

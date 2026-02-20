@@ -1,8 +1,7 @@
-﻿name: CI
+name: CI
 
 on:
   pull_request:
-    branches: [main, develop]
   push:
     branches: [main]
   workflow_dispatch:
@@ -22,10 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node 24
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
