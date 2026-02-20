@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: ["main", "master"]
   pull_request:
-    branches: ["main", "master"]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,49 +12,36 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-
-  resolve:
-    name: Resolve Config
+  validate:
+    name: Validate (Lint • Type • Test • Build)
     runs-on: ubuntu-latest
-    outputs:
-      target_env: ${{ steps.set.outputs.target_env }}
-    steps:
-      - name: Determine environment
-        id: set
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "target_env=Prod" >> $GITHUB_OUTPUT
-          elif [[ "${GITHUB_REF_NAME}" == "master" ]]; then
-            echo "target_env=Prod" >> $GITHUB_OUTPUT
-          else
-            echo "target_env=Dev" >> $GITHUB_OUTPUT
-          fi
 
-  build:
-    name: Build
-    needs: resolve
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        if: hashFiles('package.json') != ''
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
         if: hashFiles('package.json') != ''
         run: npm ci
 
-      - name: Run Build Phase
-        shell: pwsh
-        run: |
-          ./pipeline.ps1 -Phase Build -Env ${{ needs.resolve.outputs.target_env }}
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Test
+        run: npm test --if-present
+
+      - name: Build
+        run: npm run build --if-present
 
       - name: Upload build artifacts
         if: success()
@@ -62,47 +49,7 @@ jobs:
         with:
           name: build-output
           path: |
-            ./dist/
-            ./.next/
+            dist/
+            .next/
+          if-no-files-found: ignore
           retention-days: 3
-
-  test:
-    name: Test
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: ./
-
-      - name: Run Test Phase
-        shell: pwsh
-        run: |
-          ./pipeline.ps1 -Phase Test -Env ${{ needs.resolve.outputs.target_env }}
-
-  deploy:
-    name: Deploy
-    needs: test
-    if: github.event_name == 'push' && needs.test.result == 'success'
-    runs-on: ubuntu-latest
-    environment: ${{ needs.resolve.outputs.target_env }}
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: ./
-
-      - name: Run Deploy Phase
-        shell: pwsh
-        run: |
-          ./pipeline.ps1 -Phase Deploy -Env ${{ needs.resolve.outputs.target_env }}
