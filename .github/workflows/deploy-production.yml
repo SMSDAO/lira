@@ -159,7 +159,7 @@ jobs:
 
       - name: Health check – deployment addresses recorded
         run: |
-          if [ -d "deployments" ] && [ "$(ls -A deployments 2>/dev/null)" ]; then
+          if [ -d "deployments" ] && [ -n "$(ls -A deployments 2>/dev/null)" ]; then
             echo "✅ Deployment address files:"
             ls -la deployments/
           else
