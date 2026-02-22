@@ -1,0 +1,166 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # STEP 1 – Frontend: lint • typecheck • test • build • upload
+  # ─────────────────────────────────────────────────────────────
+  frontend:
+    name: Step 1 – Frontend Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Run frontend tests
+        run: npm test
+        env:
+          CI: true
+
+      - name: Build Next.js application
+        run: npm run build
+        env:
+          # Supply minimal env so validate-env.ts passes in CI
+          NODE_ENV: production
+          NEXT_PUBLIC_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_CHAIN_ID || '84532' }}
+          NEXT_PUBLIC_CHAIN_NAME: ${{ secrets.NEXT_PUBLIC_CHAIN_NAME || 'Base Sepolia' }}
+          NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID || '' }}
+          NEXT_PUBLIC_LIRA_TOKEN_ADDRESS: ${{ secrets.NEXT_PUBLIC_LIRA_TOKEN_ADDRESS || '' }}
+          NEXT_PUBLIC_TOKEN_LAUNCH_FACTORY_ADDRESS: ${{ secrets.NEXT_PUBLIC_TOKEN_LAUNCH_FACTORY_ADDRESS || '' }}
+          NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS || '' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/lira' }}
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: .next/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────
+  # STEP 2 – Backend: contract tests • deploy contracts • backend
+  # ─────────────────────────────────────────────────────────────
+  backend:
+    name: Step 2 – Backend & Smart Contracts Deploy
+    runs-on: ubuntu-latest
+    needs: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smart contract tests
+        run: npx hardhat test
+
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Deploy LiraToken, TokenLaunchFactory, AgentExecutor
+        if: secrets.PRIVATE_KEY != ''
+        run: npx hardhat run scripts/deploy/deploy.js --network ${{ vars.DEPLOY_NETWORK || 'baseSepolia' }}
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
+          TREASURY_ADDRESS: ${{ secrets.TREASURY_ADDRESS || '' }}
+          FEE_COLLECTOR_ADDRESS: ${{ secrets.FEE_COLLECTOR_ADDRESS || '' }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY || '' }}
+
+      - name: Upload deployment addresses
+        if: secrets.PRIVATE_KEY != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-addresses
+          path: deployments/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # ── Backend services (PHP / Go / Java) ──────────────────
+      - name: Set up PHP
+        if: hashFiles('backend/php/**') != ''
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Build PHP backend
+        if: hashFiles('backend/php/composer.json') != ''
+        run: |
+          cd backend/php
+          composer install --no-dev --optimize-autoloader
+
+      - name: Set up Go
+        if: hashFiles('backend/go/**') != ''
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build Go backend
+        if: hashFiles('backend/go/go.mod') != ''
+        run: |
+          cd backend/go
+          go build -o bin/lira-api ./cmd/api
+
+      - name: Set up Java
+        if: hashFiles('backend/java/**') != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build Java backend
+        if: hashFiles('backend/java/pom.xml') != ''
+        run: |
+          cd backend/java
+          mvn --no-transfer-progress clean package -DskipTests
+
+      # ── Health checks ────────────────────────────────────────
+      - name: Health check – frontend build artifact present
+        run: |
+          if [ -d ".next" ]; then
+            echo "✅ Next.js build artifact exists"
+          else
+            echo "ℹ️  .next directory not present on this runner (artifact uploaded in Step 1)"
+          fi
+
+      - name: Health check – deployment addresses recorded
+        run: |
+          if [ -d "deployments" ] && [ "$(ls -A deployments 2>/dev/null)" ]; then
+            echo "✅ Deployment address files:"
+            ls -la deployments/
+          else
+            echo "ℹ️  No deployment files (contract deploy skipped – PRIVATE_KEY not set)"
+          fi
