@@ -9,9 +9,14 @@ async function main() {
   // Deploy LiraToken
   console.log("\n1. Deploying LiraToken...");
   const LiraToken = await hre.ethers.getContractFactory("LiraToken");
+  const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS || deployer.address;
+  const FEE_COLLECTOR_ADDRESS = process.env.FEE_COLLECTOR_ADDRESS || deployer.address;
+  console.log("Treasury:", TREASURY_ADDRESS);
+  console.log("Fee Collector:", FEE_COLLECTOR_ADDRESS);
+
   const liraToken = await LiraToken.deploy(
-    deployer.address, // treasury
-    deployer.address  // feeCollector
+    TREASURY_ADDRESS,
+    FEE_COLLECTOR_ADDRESS
   );
   await liraToken.waitForDeployment();
   const liraTokenAddress = await liraToken.getAddress();
@@ -22,7 +27,7 @@ async function main() {
   const TokenLaunchFactory = await hre.ethers.getContractFactory("TokenLaunchFactory");
   const launchFactory = await TokenLaunchFactory.deploy(
     liraTokenAddress,
-    deployer.address // feeCollector
+    FEE_COLLECTOR_ADDRESS
   );
   await launchFactory.waitForDeployment();
   const launchFactoryAddress = await launchFactory.getAddress();
@@ -32,7 +37,7 @@ async function main() {
   console.log("\n3. Deploying AgentExecutor...");
   const AgentExecutor = await hre.ethers.getContractFactory("AgentExecutor");
   const agentExecutor = await AgentExecutor.deploy(
-    deployer.address // feeCollector
+    FEE_COLLECTOR_ADDRESS
   );
   await agentExecutor.waitForDeployment();
   const agentExecutorAddress = await agentExecutor.getAddress();

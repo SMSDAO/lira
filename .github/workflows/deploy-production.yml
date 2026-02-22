@@ -1,9 +1,13 @@
-name: Deploy to Production
+name: Production Validation & Deploy
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
+# Note: Vercel automatically deploys the frontend when code is pushed to main
+# (configured in vercel.json). This workflow acts as a pre-deployment validation
+# gate and handles smart contract deployment and backend build checks.
 
 concurrency:
   group: deploy-production
@@ -17,7 +21,7 @@ jobs:
   # STEP 1 – Frontend: lint • typecheck • test • build • upload
   # ─────────────────────────────────────────────────────────────
   frontend:
-    name: Step 1 – Frontend Build & Deploy
+    name: Step 1 – Frontend Validation & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +39,9 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
       - name: Run frontend tests
         run: npm test
         env:
@@ -43,16 +50,18 @@ jobs:
       - name: Build Next.js application
         run: npm run build
         env:
-          # Supply minimal env so validate-env.ts passes in CI
+          # Supply minimal env so validate-env.ts passes in CI.
+          # Vercel injects the real values at deploy time via vercel.json.
           NODE_ENV: production
           NEXT_PUBLIC_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_CHAIN_ID || '84532' }}
           NEXT_PUBLIC_CHAIN_NAME: ${{ secrets.NEXT_PUBLIC_CHAIN_NAME || 'Base Sepolia' }}
           NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID || '' }}
-          NEXT_PUBLIC_LIRA_TOKEN: ${{ secrets.NEXT_PUBLIC_LIRA_TOKEN_ADDRESS || '' }}
-          NEXT_PUBLIC_FACTORY: ${{ secrets.NEXT_PUBLIC_TOKEN_LAUNCH_FACTORY_ADDRESS || '' }}
-          NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS || '' }}
+          NEXT_PUBLIC_LIRA_TOKEN: ${{ secrets.NEXT_PUBLIC_LIRA_TOKEN || '' }}
+          NEXT_PUBLIC_FACTORY: ${{ secrets.NEXT_PUBLIC_FACTORY || '' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/lira' }}
 
+      # Build artifact archived for debugging and audit purposes.
+      # Vercel performs the actual frontend deployment on every main push.
       - name: Upload frontend build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -80,7 +89,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Deployment gate: if these smart contract tests fail, the backend deploy will be blocked.
+      # Deployment gate: all smart contract tests must pass before deployment.
       - name: Run smart contract tests
         run: npx hardhat test
 
@@ -88,16 +97,18 @@ jobs:
         run: npx hardhat compile
 
       - name: Deploy LiraToken, TokenLaunchFactory, AgentExecutor
-        if: secrets.PRIVATE_KEY != ''
+        if: ${{ secrets.PRIVATE_KEY != '' }}
         run: npx hardhat run scripts/deploy/deploy.js --network ${{ vars.DEPLOY_NETWORK || 'baseSepolia' }}
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
           BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
+          TREASURY_ADDRESS: ${{ secrets.TREASURY_ADDRESS || '' }}
+          FEE_COLLECTOR_ADDRESS: ${{ secrets.FEE_COLLECTOR_ADDRESS || '' }}
           BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY || '' }}
 
       - name: Upload deployment addresses
-        if: secrets.PRIVATE_KEY != ''
+        if: ${{ secrets.PRIVATE_KEY != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: deployment-addresses
@@ -105,7 +116,16 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+      # ── Database migrations ──────────────────────────────────
+      - name: Run database migrations
+        if: ${{ secrets.DATABASE_URL != '' }}
+        run: npm run db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       # ── Backend services (PHP / Go / Java) ──────────────────
+      # These steps are compilation/validation checks only.
+      # Backend service deployment is handled by separate pipelines.
       - name: Set up PHP
         if: hashFiles('backend/php/**') != ''
         uses: shivammathur/setup-php@v2
@@ -143,18 +163,13 @@ jobs:
           cd backend/java
           mvn --no-transfer-progress clean package -DskipTests
 
-      - name: Document backend build behavior
-        run: |
-          echo "PHP / Go / Java backend builds in this workflow are used as compilation/validation checks only."
-          echo "Compiled backend artifacts are not deployed or uploaded by this workflow."
-          echo "Deployment of backend services is handled by separate deployment workflows or pipelines."
       # ── Health checks ────────────────────────────────────────
       - name: Health check – frontend build artifact present
         run: |
           if [ -d ".next" ]; then
             echo "✅ Next.js build artifact exists"
           else
-            echo "ℹ️  .next directory not present on this runner (artifact uploaded in Step 1)"
+            echo "ℹ️  .next directory not present on this runner (artifact uploaded in Step 1; Vercel deploys from main push)"
           fi
 
       - name: Health check – deployment addresses recorded
@@ -165,3 +180,4 @@ jobs:
           else
             echo "ℹ️  No deployment files (contract deploy skipped – PRIVATE_KEY not set)"
           fi
+
