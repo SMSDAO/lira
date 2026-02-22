@@ -48,8 +48,8 @@ jobs:
           NEXT_PUBLIC_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_CHAIN_ID || '84532' }}
           NEXT_PUBLIC_CHAIN_NAME: ${{ secrets.NEXT_PUBLIC_CHAIN_NAME || 'Base Sepolia' }}
           NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID || '' }}
-          NEXT_PUBLIC_LIRA_TOKEN_ADDRESS: ${{ secrets.NEXT_PUBLIC_LIRA_TOKEN_ADDRESS || '' }}
-          NEXT_PUBLIC_TOKEN_LAUNCH_FACTORY_ADDRESS: ${{ secrets.NEXT_PUBLIC_TOKEN_LAUNCH_FACTORY_ADDRESS || '' }}
+          NEXT_PUBLIC_LIRA_TOKEN: ${{ secrets.NEXT_PUBLIC_LIRA_TOKEN_ADDRESS || '' }}
+          NEXT_PUBLIC_FACTORY: ${{ secrets.NEXT_PUBLIC_TOKEN_LAUNCH_FACTORY_ADDRESS || '' }}
           NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS || '' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/lira' }}
 
