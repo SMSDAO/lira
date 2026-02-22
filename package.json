@@ -8,6 +8,7 @@
     "build": "npm run env:validate && next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "contracts:compile": "hardhat compile",
