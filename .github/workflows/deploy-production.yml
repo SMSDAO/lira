@@ -94,8 +94,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
           BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org' }}
-          TREASURY_ADDRESS: ${{ secrets.TREASURY_ADDRESS || '' }}
-          FEE_COLLECTOR_ADDRESS: ${{ secrets.FEE_COLLECTOR_ADDRESS || '' }}
           BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY || '' }}
 
       - name: Upload deployment addresses
