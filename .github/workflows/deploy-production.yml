@@ -147,6 +147,11 @@ jobs:
           cd backend/java
           mvn --no-transfer-progress clean package -DskipTests
 
+      - name: Document backend build behavior
+        run: |
+          echo "PHP / Go / Java backend builds in this workflow are used as compilation/validation checks only."
+          echo "Compiled backend artifacts are not deployed or uploaded by this workflow."
+          echo "Deployment of backend services is handled by separate deployment workflows or pipelines."
       # ── Health checks ────────────────────────────────────────
       - name: Health check – frontend build artifact present
         run: |
