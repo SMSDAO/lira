@@ -80,6 +80,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Deployment gate: if these smart contract tests fail, the backend deploy will be blocked.
       - name: Run smart contract tests
         run: npx hardhat test
 
