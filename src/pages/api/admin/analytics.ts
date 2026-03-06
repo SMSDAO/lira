@@ -26,7 +26,7 @@ export default async function handler(
           prisma.token.findUnique({
             where: { contractAddress: tokenAddress as string },
             include: {
-              roles: {
+              userRoles: {
                 take: 10,
                 orderBy: { balance: 'desc' },
                 include: { user: true }
@@ -52,14 +52,14 @@ export default async function handler(
           if (!acc[day]) acc[day] = { date: day, count: 0 };
           acc[day].count += 1;
           return acc;
-        }, {} as Record<string, any>);
+        }, {} as Record<string, { date: string; count: number }>);
 
         res.status(200).json({
           token,
           stats,
           events: events.slice(0, 20),
           eventsByDay: Object.values(eventsByDay),
-          topHolders: token?.roles || []
+          topHolders: token?.userRoles || []
         });
       } else {
         // Overall analytics

@@ -73,23 +73,35 @@ export default async function handler(
       orderBy: { createdAt: 'desc' },
     });
 
-    const formatToken = (token: any, stats: any) => ({
-      address: token.contractAddress,
-      name: token.name,
-      symbol: token.symbol,
-      type: token.tokenType,
-      holders: stats?.holderCount || 0,
-      volume: stats?.totalVolume || '0',
-      marketCap: stats?.marketCap || '0',
-      createdAt: token.createdAt.toISOString(),
-    });
+    type TokenWithStats = {
+      contractAddress: string;
+      name: string;
+      symbol: string;
+      tokenType: string | null;
+      createdAt: Date;
+      stats: Array<{ holderCount: number; volumeTotal: unknown; marketCap: unknown }>;
+    };
+
+    const formatToken = (token: TokenWithStats, stats: TokenWithStats['stats']) => {
+      const stat = Array.isArray(stats) ? stats[0] : stats;
+      return {
+        address: token.contractAddress,
+        name: token.name,
+        symbol: token.symbol,
+        type: token.tokenType,
+        holders: stat?.holderCount || 0,
+        volume: stat?.volumeTotal?.toString() || '0',
+        marketCap: stat?.marketCap?.toString() || '0',
+        createdAt: token.createdAt.toISOString(),
+      };
+    };
 
     return res.status(200).json({
       created: createdTokens.map(t => formatToken(t, t.stats)),
       holding: holdingRoles.map(r => ({
         ...formatToken(r.token, r.token.stats),
         balance: r.balance || '0',
-        value: r.valueUsd || '0',
+        value: '0',
       })),
       social: socialTokens.map(t => formatToken(t, t.stats)),
     });

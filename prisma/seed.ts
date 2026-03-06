@@ -11,16 +11,13 @@ async function main() {
     update: {},
     create: {
       walletAddress: '0x742d35cc6634c0532925a3b844bc9e7595f0e5e5',
+      handle: 'alice',
       profile: {
         create: {
-          handle: 'alice',
           bio: 'Token creator and LIRA enthusiast 🚀',
-          avatar: 'https://avatar.example.com/alice.png',
-          socialLinks: {
-            twitter: 'alice_crypto',
-            github: 'alice',
-            website: 'https://alice.xyz',
-          },
+          avatarUrl: 'https://avatar.example.com/alice.png',
+          twitter: 'alice_crypto',
+          website: 'https://alice.xyz',
         },
       },
     },
@@ -31,15 +28,13 @@ async function main() {
     update: {},
     create: {
       walletAddress: '0x8626f6940e2eb28930efb4cef49b2d1f2c9c1199',
+      handle: 'bob',
       profile: {
         create: {
-          handle: 'bob',
           bio: 'DeFi developer building on LIRA',
-          avatar: 'https://avatar.example.com/bob.png',
-          socialLinks: {
-            twitter: 'bob_defi',
-            discord: 'bob#1234',
-          },
+          avatarUrl: 'https://avatar.example.com/bob.png',
+          twitter: 'bob_defi',
+          discord: 'bob#1234',
         },
       },
     },
@@ -50,11 +45,11 @@ async function main() {
     update: {},
     create: {
       walletAddress: '0xdd2fd4581271e230360230f9337d5c0430bf44c0',
+      handle: 'carol',
       profile: {
         create: {
-          handle: 'carol',
           bio: 'Artist and NFT creator',
-          avatar: 'https://avatar.example.com/carol.png',
+          avatarUrl: 'https://avatar.example.com/carol.png',
         },
       },
     },
@@ -123,6 +118,7 @@ async function main() {
       symbol: 'ALT',
       tokenType: 'PROJECT',
       creatorAddress: alice.walletAddress,
+      ownerAddress: alice.walletAddress,
       totalSupply: '1000000000000000000000000',
       decimals: 18,
       metadata: {
@@ -142,6 +138,7 @@ async function main() {
       symbol: 'BOB',
       tokenType: 'SOCIAL',
       creatorAddress: bob.walletAddress,
+      ownerAddress: bob.walletAddress,
       totalSupply: '500000000000000000000000',
       decimals: 18,
       metadata: {
@@ -154,24 +151,24 @@ async function main() {
 
   // Create token stats
   await prisma.tokenStat.upsert({
-    where: { tokenId: aliceToken.id },
+    where: { tokenAddress: aliceToken.contractAddress },
     update: {},
     create: {
-      tokenId: aliceToken.id,
+      tokenAddress: aliceToken.contractAddress,
       holderCount: 123,
-      totalVolume: '15500000000000000000',
+      volumeTotal: '15500000000000000000',
       marketCap: '5000000000000000000000',
       transactionCount: 456,
     },
   });
 
   await prisma.tokenStat.upsert({
-    where: { tokenId: bobToken.id },
+    where: { tokenAddress: bobToken.contractAddress },
     update: {},
     create: {
-      tokenId: bobToken.id,
+      tokenAddress: bobToken.contractAddress,
       holderCount: 89,
-      totalVolume: '8200000000000000000',
+      volumeTotal: '8200000000000000000',
       marketCap: '2500000000000000000000',
       transactionCount: 234,
     },
@@ -182,16 +179,16 @@ async function main() {
   // Create user token roles
   await prisma.userTokenRole.upsert({
     where: {
-      userId_tokenId_role: {
+      userId_tokenAddress_role: {
         userId: alice.id,
-        tokenId: aliceToken.id,
+        tokenAddress: aliceToken.contractAddress,
         role: 'creator',
       },
     },
     update: {},
     create: {
       userId: alice.id,
-      tokenId: aliceToken.id,
+      tokenAddress: aliceToken.contractAddress,
       role: 'creator',
       balance: '500000000000000000000000',
     },
@@ -199,19 +196,18 @@ async function main() {
 
   await prisma.userTokenRole.upsert({
     where: {
-      userId_tokenId_role: {
+      userId_tokenAddress_role: {
         userId: bob.id,
-        tokenId: aliceToken.id,
+        tokenAddress: aliceToken.contractAddress,
         role: 'holder',
       },
     },
     update: {},
     create: {
       userId: bob.id,
-      tokenId: aliceToken.id,
+      tokenAddress: aliceToken.contractAddress,
       role: 'holder',
       balance: '10000000000000000000000',
-      valueUsd: '500',
     },
   });
 
@@ -278,3 +274,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

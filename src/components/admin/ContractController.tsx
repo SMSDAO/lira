@@ -5,21 +5,29 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useAccount, useSigner } from 'wagmi';
-import { AdminContractController, CONTRACT_ADDRESSES, RPC_ENDPOINTS } from '@/lib/contracts';
+import { useAccount, useWalletClient } from 'wagmi';
+import { ethers } from 'ethers';
+import { AdminContractController, CONTRACT_ADDRESSES } from '@/lib/contracts';
 import { FiRefreshCw, FiCheck, FiX, FiAlertTriangle, FiExternalLink } from 'react-icons/fi';
 
 export default function ContractController() {
-  const { address, isConnected } = useAccount();
-  const { data: signer } = useSigner();
+  const { isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
+
+  const getEthersSigner = async (): Promise<ethers.Signer | null> => {
+    if (!walletClient) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const provider = new ethers.BrowserProvider(walletClient as any);
+    return provider.getSigner();
+  };
   
   const [controller] = useState(() => new AdminContractController());
   const [loading, setLoading] = useState(true);
-  const [networkInfo, setNetworkInfo] = useState<any>(null);
-  const [liraInfo, setLiraInfo] = useState<any>(null);
-  const [registryStats, setRegistryStats] = useState<any>(null);
-  const [registeredTokens, setRegisteredTokens] = useState<any[]>([]);
-  const [treasuryBalance, setTreasuryBalance] = useState<any>(null);
+  const [networkInfo, setNetworkInfo] = useState<Record<string, unknown> | null>(null);
+  const [liraInfo, setLiraInfo] = useState<Record<string, unknown> | null>(null);
+  const [registryStats, setRegistryStats] = useState<Record<string, unknown> | null>(null);
+  const [registeredTokens, setRegisteredTokens] = useState<Record<string, unknown>[]>([]);
+  const [treasuryBalance, setTreasuryBalance] = useState<Record<string, unknown> | null>(null);
   const [syncing, setSyncing] = useState(false);
 
   // Fetch all contract data
@@ -62,6 +70,7 @@ export default function ContractController() {
 
   // Admin operations
   const handleSetDAOOperator = async (operatorAddress: string, status: boolean) => {
+    const signer = await getEthersSigner();
     if (!signer) {
       alert('Please connect your wallet');
       return;
@@ -82,6 +91,7 @@ export default function ContractController() {
   };
 
   const handleUpdateTokenStatus = async (tokenAddress: string, isActive: boolean) => {
+    const signer = await getEthersSigner();
     if (!signer) {
       alert('Please connect your wallet');
       return;
@@ -133,19 +143,19 @@ export default function ContractController() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <span className="text-gray-400 text-sm">Network</span>
-              <p className="text-white font-mono">{networkInfo.name}</p>
+              <p className="text-white font-mono">{String(networkInfo.name)}</p>
             </div>
             <div>
               <span className="text-gray-400 text-sm">Chain ID</span>
-              <p className="text-white font-mono">{networkInfo.chainId}</p>
+              <p className="text-white font-mono">{String(networkInfo.chainId)}</p>
             </div>
             <div>
               <span className="text-gray-400 text-sm">Block Number</span>
-              <p className="text-white font-mono">{networkInfo.blockNumber}</p>
+              <p className="text-white font-mono">{String(networkInfo.blockNumber)}</p>
             </div>
             <div>
               <span className="text-gray-400 text-sm">RPC</span>
-              <p className="text-white font-mono text-xs truncate">{networkInfo.rpcUrl}</p>
+              <p className="text-white font-mono text-xs truncate">{String(networkInfo.rpcUrl)}</p>
             </div>
           </div>
         )}
@@ -183,11 +193,11 @@ export default function ContractController() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-gray-400 text-sm">Total Supply</span>
-              <p className="text-white font-mono text-xl">{parseFloat(liraInfo.totalSupply).toLocaleString()} LIRA</p>
+              <p className="text-white font-mono text-xl">{parseFloat(String(liraInfo.totalSupply)).toLocaleString()} LIRA</p>
             </div>
             <div>
               <span className="text-gray-400 text-sm">Symbol</span>
-              <p className="text-white font-mono text-xl">{liraInfo.symbol}</p>
+              <p className="text-white font-mono text-xl">{String(liraInfo.symbol)}</p>
             </div>
           </div>
         </div>
@@ -200,11 +210,11 @@ export default function ContractController() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-gray-400 text-sm">ETH Balance</span>
-              <p className="text-white font-mono text-xl">{parseFloat(treasuryBalance.eth).toFixed(4)} ETH</p>
+              <p className="text-white font-mono text-xl">{parseFloat(String(treasuryBalance.eth)).toFixed(4)} ETH</p>
             </div>
             <div>
               <span className="text-gray-400 text-sm">LIRA Balance</span>
-              <p className="text-white font-mono text-xl">{parseFloat(treasuryBalance.lira).toLocaleString()} LIRA</p>
+              <p className="text-white font-mono text-xl">{parseFloat(String(treasuryBalance.lira)).toLocaleString()} LIRA</p>
             </div>
           </div>
         </div>
@@ -216,7 +226,7 @@ export default function ContractController() {
           <h3 className="text-lg font-bold text-neo-blue mb-4">Token Registry</h3>
           <div>
             <span className="text-gray-400 text-sm">Total Registered Tokens</span>
-            <p className="text-white font-mono text-3xl">{registryStats.totalTokens}</p>
+            <p className="text-white font-mono text-3xl">{String(registryStats.totalTokens)}</p>
           </div>
         </div>
       )}
@@ -229,11 +239,11 @@ export default function ContractController() {
         ) : (
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {registeredTokens.map((token) => (
-              <div key={token.address} className="border border-gray-800 rounded-lg p-4 hover:border-neo-blue/50 transition">
+              <div key={String(token.address)} className="border border-gray-800 rounded-lg p-4 hover:border-neo-blue/50 transition">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h4 className="text-white font-bold">{token.name} ({token.symbol})</h4>
-                    <code className="text-gray-400 text-xs">{token.address}</code>
+                    <h4 className="text-white font-bold">{String(token.name)} ({String(token.symbol)})</h4>
+                    <code className="text-gray-400 text-xs">{String(token.address)}</code>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs ${
@@ -251,10 +261,10 @@ export default function ContractController() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Owner: {token.owner.slice(0, 10)}...</span>
+                  <span className="text-gray-500">Owner: {String(token.owner).slice(0, 10)}...</span>
                   {isConnected && (
                     <button
-                      onClick={() => handleUpdateTokenStatus(token.address, !token.isActive)}
+                      onClick={() => handleUpdateTokenStatus(String(token.address), !token.isActive)}
                       className="text-neo-blue hover:underline text-xs"
                     >
                       {token.isActive ? 'Deactivate' : 'Activate'}
