@@ -27,7 +27,8 @@ export default async function handler(
       }
       
       if (creator) {
-        where.creatorAddress = creator as string;
+        const creatorStr = Array.isArray(creator) ? creator[0] : creator as string;
+        where.creatorAddress = creatorStr.toLowerCase();
       }
 
       if (status === 'active') {

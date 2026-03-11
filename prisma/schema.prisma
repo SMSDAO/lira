@@ -156,7 +156,6 @@ model TokenStat {
 
   token Token @relation(fields: [tokenAddress], references: [contractAddress])
 
-  @@index([tokenAddress])
   @@map("token_stats")
 }
 
