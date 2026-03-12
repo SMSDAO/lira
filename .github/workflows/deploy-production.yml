@@ -4,10 +4,26 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      deploy_contracts:
+        description: 'Deploy smart contracts (requires PRIVATE_KEY secret)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+      run_migrations:
+        description: 'Run database migrations (requires DATABASE_URL secret)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
 
 # Note: Vercel automatically deploys the frontend when code is pushed to main
 # (configured in vercel.json). This workflow acts as a pre-deployment validation
 # gate and handles smart contract deployment and backend build checks.
+#
+# Contract deployment and DB migrations are intentionally gated behind
+# workflow_dispatch (manual trigger) to prevent accidental redeploys on every push.
 
 concurrency:
   group: deploy-production
@@ -96,8 +112,8 @@ jobs:
       - name: Compile contracts
         run: npx hardhat compile
 
-      - name: Deploy LiraToken, TokenLaunchFactory, AgentExecutor
-        if: ${{ secrets.PRIVATE_KEY != '' }}
+      - name: Deploy LiraToken, LiraTokenRegistry, TokenLaunchFactory, AgentExecutor
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_contracts == 'true' && secrets.PRIVATE_KEY != '' }}
         run: npx hardhat run scripts/deploy/deploy.js --network ${{ vars.DEPLOY_NETWORK || 'baseSepolia' }}
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
@@ -108,7 +124,7 @@ jobs:
           BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY || '' }}
 
       - name: Upload deployment addresses
-        if: ${{ secrets.PRIVATE_KEY != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_contracts == 'true' && secrets.PRIVATE_KEY != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: deployment-addresses
@@ -117,8 +133,10 @@ jobs:
           retention-days: 30
 
       # ── Database migrations ──────────────────────────────────
+      # Runs only on manual workflow_dispatch with run_migrations=true to
+      # prevent schema changes from applying automatically on every push.
       - name: Run database migrations
-        if: ${{ secrets.DATABASE_URL != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_migrations == 'true' && secrets.DATABASE_URL != '' }}
         run: npm run db:migrate:deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
