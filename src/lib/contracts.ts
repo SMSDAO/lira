@@ -30,8 +30,9 @@ export function getProvider(network: 'sepolia' | 'mainnet' = 'mainnet'): ethers.
 }
 
 // Get signer (for admin operations via wallet)
-export function getSigner(walletProvider: any): ethers.Signer {
-  return new ethers.BrowserProvider(walletProvider).getSigner();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getSigner(walletProvider: any): Promise<ethers.Signer> {
+  return await new ethers.BrowserProvider(walletProvider).getSigner();
 }
 
 /**
@@ -114,7 +115,7 @@ export function getContract(
 ): ethers.Contract {
   const address = CONTRACT_ADDRESSES[contractName];
   const provider = getProvider(network);
-  const abi = CONTRACT_ABIS[contractName] || [];
+  const abi = (contractName in CONTRACT_ABIS ? CONTRACT_ABIS[contractName as keyof typeof CONTRACT_ABIS] : []) as string[];
   
   return new ethers.Contract(address, abi, provider);
 }
@@ -127,7 +128,7 @@ export function getContractWithSigner(
   signer: ethers.Signer
 ): ethers.Contract {
   const address = CONTRACT_ADDRESSES[contractName];
-  const abi = CONTRACT_ABIS[contractName] || [];
+  const abi = (contractName in CONTRACT_ABIS ? CONTRACT_ABIS[contractName as keyof typeof CONTRACT_ABIS] : []) as string[];
   
   return new ethers.Contract(address, abi, signer);
 }
@@ -239,7 +240,7 @@ export class AdminContractController {
       return { success: true, txHash: tx.hash };
     } catch (error) {
       console.error('Error setting DAO operator:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error as Error).message };
     }
   }
 
@@ -253,7 +254,7 @@ export class AdminContractController {
       return { success: true, txHash: tx.hash };
     } catch (error) {
       console.error('Error updating token status:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error as Error).message };
     }
   }
 
@@ -267,7 +268,7 @@ export class AdminContractController {
       return { success: true, txHash: tx.hash };
     } catch (error) {
       console.error('Error setting protocol fee:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: (error as Error).message };
     }
   }
 

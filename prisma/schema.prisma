@@ -142,7 +142,7 @@ model TokenEvent {
 
 model TokenStat {
   id              Int      @id @default(autoincrement())
-  tokenAddress    String   @map("token_address") @db.VarChar(42)
+  tokenAddress    String   @unique @map("token_address") @db.VarChar(42)
   holderCount     Int      @default(0) @map("holder_count")
   transactionCount Int      @default(0) @map("transaction_count")
   volume24h       Decimal  @default(0) @map("volume_24h") @db.Decimal(78, 0)
@@ -156,7 +156,6 @@ model TokenStat {
 
   token Token @relation(fields: [tokenAddress], references: [contractAddress])
 
-  @@index([tokenAddress])
   @@map("token_stats")
 }
 

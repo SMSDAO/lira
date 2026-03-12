@@ -20,14 +20,15 @@ export default async function handler(
       const skip = (pageNum - 1) * limitNum;
 
       // Build where clause
-      const where: any = {};
+      const where: { tokenType?: string; isActive?: boolean; creatorAddress?: string } = {};
       
       if (type) {
-        where.tokenType = type;
+        where.tokenType = Array.isArray(type) ? type[0] : type as string;
       }
       
       if (creator) {
-        where.creatorAddress = creator as string;
+        const creatorStr = Array.isArray(creator) ? creator[0] : creator as string;
+        where.creatorAddress = creatorStr.toLowerCase();
       }
 
       if (status === 'active') {
@@ -46,7 +47,7 @@ export default async function handler(
           include: {
             stats: true,
             _count: {
-              select: { events: true, roles: true }
+              select: { events: true, userRoles: true }
             }
           }
         }),

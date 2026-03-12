@@ -5,21 +5,63 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useAccount, useSigner } from 'wagmi';
-import { AdminContractController, CONTRACT_ADDRESSES, RPC_ENDPOINTS } from '@/lib/contracts';
+import { useAccount, useWalletClient } from 'wagmi';
+import { ethers } from 'ethers';
+import { AdminContractController, CONTRACT_ADDRESSES } from '@/lib/contracts';
 import { FiRefreshCw, FiCheck, FiX, FiAlertTriangle, FiExternalLink } from 'react-icons/fi';
 
+interface NetworkInfo {
+  chainId: number;
+  name: string;
+  blockNumber: number;
+  rpcUrl: string;
+}
+
+interface LiraTokenInfo {
+  address: string;
+  totalSupply: string;
+  decimals: number;
+  symbol: string;
+}
+
+interface RegistryStats {
+  totalTokens: number;
+  registryAddress: string;
+}
+
+interface RegisteredToken {
+  address: string;
+  owner: string;
+  tokenType: number;
+  name: string;
+  symbol: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
+interface TreasuryBalance {
+  eth: string;
+  lira: string;
+}
+
 export default function ContractController() {
-  const { address, isConnected } = useAccount();
-  const { data: signer } = useSigner();
+  const { isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
+
+  const getEthersSigner = async (): Promise<ethers.Signer | null> => {
+    if (!walletClient) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const provider = new ethers.BrowserProvider(walletClient as any);
+    return provider.getSigner();
+  };
   
   const [controller] = useState(() => new AdminContractController());
   const [loading, setLoading] = useState(true);
-  const [networkInfo, setNetworkInfo] = useState<any>(null);
-  const [liraInfo, setLiraInfo] = useState<any>(null);
-  const [registryStats, setRegistryStats] = useState<any>(null);
-  const [registeredTokens, setRegisteredTokens] = useState<any[]>([]);
-  const [treasuryBalance, setTreasuryBalance] = useState<any>(null);
+  const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [liraInfo, setLiraInfo] = useState<LiraTokenInfo | null>(null);
+  const [registryStats, setRegistryStats] = useState<RegistryStats | null>(null);
+  const [registeredTokens, setRegisteredTokens] = useState<RegisteredToken[]>([]);
+  const [treasuryBalance, setTreasuryBalance] = useState<TreasuryBalance | null>(null);
   const [syncing, setSyncing] = useState(false);
 
   // Fetch all contract data
@@ -62,6 +104,7 @@ export default function ContractController() {
 
   // Admin operations
   const handleSetDAOOperator = async (operatorAddress: string, status: boolean) => {
+    const signer = await getEthersSigner();
     if (!signer) {
       alert('Please connect your wallet');
       return;
@@ -82,6 +125,7 @@ export default function ContractController() {
   };
 
   const handleUpdateTokenStatus = async (tokenAddress: string, isActive: boolean) => {
+    const signer = await getEthersSigner();
     if (!signer) {
       alert('Please connect your wallet');
       return;
