@@ -93,8 +93,8 @@ export default async function handler(
       mediaUrls: post.mediaUrls || [],
       author: {
         address: post.author.walletAddress,
-        handle: post.author.profile?.handle || 'anonymous',
-        avatar: post.author.profile?.avatar || '',
+        handle: post.author.handle || 'anonymous',
+        avatar: post.author.profile?.avatarUrl || '',
       },
       createdAt: post.createdAt.toISOString(),
       likes: 0, // TODO: Implement likes system

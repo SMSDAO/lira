@@ -66,7 +66,7 @@ export default async function handler(
         acc[addr].totalFees += parseFloat(fee.amount.toString());
         acc[addr].transactionCount += 1;
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, { tokenAddress: string; tokenName: string; tokenSymbol: string; totalFees: number; transactionCount: number }>);
 
       // Group by day for charts
       const feesByDay = feeCollections.reduce((acc, fee) => {
@@ -81,9 +81,9 @@ export default async function handler(
         acc[day].fees += parseFloat(fee.amount.toString());
         acc[day].transactions += 1;
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, { date: string; fees: number; transactions: number }>);
 
-      const chartData = Object.values(feesByDay).sort((a: any, b: any) => 
+      const chartData = Object.values(feesByDay).sort((a, b) => 
         a.date.localeCompare(b.date)
       );
 

@@ -24,13 +24,12 @@ export default async function handler(
 
       return res.status(200).json({
         address: user.walletAddress,
-        handle: user.profile.handle,
+        handle: user.handle,
         bio: user.profile.bio,
-        avatar: user.profile.avatar,
-        website: user.profile.socialLinks?.website || '',
-        twitter: user.profile.socialLinks?.twitter || '',
-        github: user.profile.socialLinks?.github || '',
-        discord: user.profile.socialLinks?.discord || '',
+        avatar: user.profile.avatarUrl,
+        website: user.profile.website || '',
+        twitter: user.profile.twitter || '',
+        discord: user.profile.discord || '',
         updatedAt: user.profile.updatedAt.toISOString(),
         createdAt: user.createdAt.toISOString(),
       });
@@ -41,7 +40,7 @@ export default async function handler(
   }
 
   if (req.method === 'POST') {
-    const { handle, bio, avatar, website, twitter, github, discord, walletAddress } = req.body;
+    const { handle, bio, avatar, website, twitter, discord, walletAddress } = req.body;
 
     if (!walletAddress || !handle) {
       return res.status(400).json({ error: 'Wallet address and handle required' });
@@ -56,12 +55,12 @@ export default async function handler(
       const addressKey = walletAddress.toLowerCase();
 
       // Check if handle is already taken by another user
-      const existingProfile = await prisma.profile.findUnique({
+      const existingUser = await prisma.user.findUnique({
         where: { handle },
-        include: { user: true },
+        include: { profile: true },
       });
 
-      if (existingProfile && existingProfile.user.walletAddress !== addressKey) {
+      if (existingUser && existingUser.walletAddress !== addressKey) {
         return res.status(409).json({ error: 'Handle already taken' });
       }
 
@@ -70,30 +69,33 @@ export default async function handler(
         where: { walletAddress: addressKey },
         create: {
           walletAddress: addressKey,
+          handle,
           profile: {
             create: {
-              handle,
               bio: bio || '',
-              avatar: avatar || '',
-              socialLinks: {
-                website: website || '',
-                twitter: twitter || '',
-                github: github || '',
-                discord: discord || '',
-              },
+              avatarUrl: avatar || '',
+              website: website || '',
+              twitter: twitter || '',
+              discord: discord || '',
             },
           },
         },
         update: {
+          handle,
           profile: {
-            update: {
-              handle,
-              bio: bio || '',
-              avatar: avatar || '',
-              socialLinks: {
+            upsert: {
+              create: {
+                bio: bio || '',
+                avatarUrl: avatar || '',
                 website: website || '',
                 twitter: twitter || '',
-                github: github || '',
+                discord: discord || '',
+              },
+              update: {
+                bio: bio || '',
+                avatarUrl: avatar || '',
+                website: website || '',
+                twitter: twitter || '',
                 discord: discord || '',
               },
             },
@@ -102,15 +104,15 @@ export default async function handler(
         include: { profile: true },
       });
 
-      const isNew = !existingProfile;
+      const isNew = !existingUser;
 
       return res.status(isNew ? 201 : 200).json({
         message: 'Profile saved',
         profile: {
           address: user.walletAddress,
-          handle: user.profile!.handle,
+          handle: user.handle,
           bio: user.profile!.bio,
-          avatar: user.profile!.avatar,
+          avatar: user.profile!.avatarUrl,
           updatedAt: user.profile!.updatedAt.toISOString(),
         },
       });
@@ -122,3 +124,4 @@ export default async function handler(
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+

@@ -1,13 +1,13 @@
 import { ReactNode, ButtonHTMLAttributes } from 'react';
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface NeoButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type NeoButtonProps = Omit<HTMLMotionProps<'button'>, 'children'> & ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   glow?: boolean;
   loading?: boolean;
-}
+};
 
 export default function NeoButton({
   children,

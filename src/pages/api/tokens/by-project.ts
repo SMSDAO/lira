@@ -16,11 +16,9 @@ export default async function handler(
   }
 
   try {
-    let token;
-
     if (address && typeof address === 'string') {
       // Find token by contract address
-      token = await prisma.token.findUnique({
+      const token = await prisma.token.findUnique({
         where: { contractAddress: address.toLowerCase() },
         include: {
           stats: true,
@@ -60,6 +58,9 @@ export default async function handler(
         take: 20,
       });
 
+      const tokenMeta = token.metadata as Record<string, string> | null;
+      const stat = token.stats[0];
+
       return res.status(200).json({
         token: {
           address: token.contractAddress,
@@ -67,34 +68,33 @@ export default async function handler(
           symbol: token.symbol,
           type: token.tokenType,
           creator: token.creatorAddress,
-          totalSupply: token.totalSupply,
-          maxSupply: token.maxSupply,
+          totalSupply: token.totalSupply?.toString() || '0',
           decimals: token.decimals,
-          description: token.metadata?.description || '',
-          website: token.metadata?.website || '',
-          twitter: token.metadata?.twitter || '',
-          discord: token.metadata?.discord || '',
+          description: tokenMeta?.description || '',
+          website: tokenMeta?.website || '',
+          twitter: tokenMeta?.twitter || '',
+          discord: tokenMeta?.discord || '',
           createdAt: token.createdAt.toISOString(),
         },
-        stats: token.stats ? {
-          holders: token.stats.holderCount,
-          volume: token.stats.totalVolume,
-          marketCap: token.stats.marketCap,
-          transactions: token.stats.transactionCount,
-          lastUpdated: token.stats.updatedAt.toISOString(),
+        stats: stat ? {
+          holders: stat.holderCount,
+          volume: stat.volumeTotal?.toString() || '0',
+          marketCap: stat.marketCap?.toString() || null,
+          transactions: stat.transactionCount,
+          lastUpdated: stat.lastUpdated.toISOString(),
         } : null,
         recentEvents: token.events.map(e => ({
           type: e.eventType,
-          data: e.eventData,
-          txHash: e.txHash,
+          data: e.metadata,
+          txHash: e.transactionHash,
           timestamp: e.createdAt.toISOString(),
         })),
         topHolders: token.userRoles.map(r => ({
           address: r.user.walletAddress,
-          handle: r.user.profile?.handle || null,
-          balance: r.balance || '0',
-          percentage: token.stats?.holderCount 
-            ? ((parseFloat(r.balance || '0') / parseFloat(token.totalSupply)) * 100).toFixed(2)
+          handle: r.user.handle || null,
+          balance: r.balance?.toString() || '0',
+          percentage: (stat?.holderCount && token.totalSupply && token.totalSupply.toString() !== '0')
+            ? ((parseFloat(r.balance?.toString() || '0') / parseFloat(token.totalSupply.toString())) * 100).toFixed(2)
             : '0',
         })),
         subtokens: subtokens.map(st => ({
@@ -102,7 +102,7 @@ export default async function handler(
           name: st.name,
           symbol: st.symbol,
           type: st.tokenType,
-          holders: st.stats?.holderCount || 0,
+          holders: st.stats[0]?.holderCount || 0,
         })),
       });
     }
@@ -123,8 +123,8 @@ export default async function handler(
           name: t.name,
           symbol: t.symbol,
           type: t.tokenType,
-          holders: t.stats?.holderCount || 0,
-          volume: t.stats?.totalVolume || '0',
+          holders: t.stats[0]?.holderCount || 0,
+          volume: t.stats[0]?.volumeTotal?.toString() || '0',
           createdAt: t.createdAt.toISOString(),
         })),
       });
@@ -136,3 +136,4 @@ export default async function handler(
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+

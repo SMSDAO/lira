@@ -4,7 +4,7 @@ import Head from 'next/head';
 import DashboardLayout from '@/components/common/DashboardLayout';
 import NeoCard from '@/components/neo/NeoCard';
 import NeoButton from '@/components/neo/NeoButton';
-import { FiGlobe, FiTwitter, FiMessageCircle } from 'react-icons/fi';
+import { FiMessageCircle } from 'react-icons/fi';
 
 interface Profile {
   address: string;

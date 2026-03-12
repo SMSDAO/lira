@@ -63,12 +63,17 @@ npm run pm2:monit    # Interactive monitor
 # Create database
 createdb lira
 
-# Run migrations
-npm run db:migrate
+# Apply schema to database (development)
+npm run db:push
+
+# Or run migrations (production/CI)
+npm run db:migrate:deploy
 
 # Seed data
 npm run db:seed
 ```
+
+> **Note**: If upgrading from a previous version, always run `npm run db:migrate:deploy` (production) or `npm run db:push` (development) to apply any schema changes (e.g., new unique constraints or columns) before starting the application. Skipping this step will cause runtime errors.
 
 ## Monitoring
 

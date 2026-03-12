@@ -10,6 +10,7 @@ coverage/
 
 # Next.js
 .next/
+tsconfig.tsbuildinfo
 out/
 build/
 dist/

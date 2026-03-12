@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiAlertTriangle, FiCheckCircle, FiShield } from 'react-icons/fi';
+import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 
 interface SecurityData {
   contractAddresses: Record<string, string>;
