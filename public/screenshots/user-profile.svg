@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+  <defs>
+    <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9d4edd;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="avatarBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9d4edd;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#050810;stop-opacity:1" />
+    </linearGradient>
+    <filter id="avatarGlow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="800" fill="#050810"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="0" width="256" height="800" fill="#0a0e1a"/>
+  <line x1="256" y1="0" x2="256" y2="800" stroke="#00d4ff" stroke-width="1" opacity="0.3"/>
+
+  <!-- Logo -->
+  <rect x="0" y="0" width="256" height="80" fill="#0a0e1a"/>
+  <line x1="0" y1="80" x2="256" y2="80" stroke="#00d4ff" stroke-width="1" opacity="0.2"/>
+  <rect x="24" y="22" width="40" height="40" rx="10" fill="url(#logoBg)"/>
+  <text x="44" y="48" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#050810" text-anchor="middle">L</text>
+  <text x="76" y="48" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#00d4ff">LIRA</text>
+
+  <!-- Nav items -->
+  <rect x="12" y="96" width="232" height="44" rx="8" fill="none"/>
+  <text x="48" y="123" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">⌂</text>
+  <text x="72" y="123" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Home</text>
+
+  <rect x="12" y="148" width="232" height="44" rx="8" fill="none"/>
+  <text x="48" y="175" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">📊</text>
+  <text x="72" y="175" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Dashboard</text>
+
+  <rect x="12" y="200" width="232" height="44" rx="8" fill="none"/>
+  <text x="48" y="227" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">⚡</text>
+  <text x="72" y="227" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Launch Token</text>
+
+  <rect x="12" y="252" width="232" height="44" rx="8" fill="none"/>
+  <text x="48" y="279" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">🤖</text>
+  <text x="72" y="279" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Agents</text>
+
+  <!-- Profile (active) -->
+  <rect x="12" y="304" width="232" height="44" rx="8" fill="#00d4ff" opacity="0.15"/>
+  <text x="48" y="331" font-family="Arial, sans-serif" font-size="14" fill="#00d4ff">👤</text>
+  <text x="72" y="331" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00d4ff">Profile</text>
+
+  <!-- Sidebar footer -->
+  <line x1="0" y1="756" x2="256" y2="756" stroke="#00d4ff" stroke-width="1" opacity="0.2"/>
+  <text x="128" y="780" font-family="Arial, sans-serif" font-size="11" fill="#4b5563" text-anchor="middle">Role: </text>
+  <text x="160" y="780" font-family="Arial, sans-serif" font-size="11" fill="#00d4ff">User</text>
+  <text x="128" y="796" font-family="Arial, sans-serif" font-size="10" fill="#374151" text-anchor="middle">© 2026 Lira Protocol</text>
+
+  <!-- Top Bar -->
+  <rect x="256" y="0" width="1024" height="64" fill="#0a0e1a" opacity="0.9"/>
+  <line x1="256" y1="64" x2="1280" y2="64" stroke="#00d4ff" stroke-width="1" opacity="0.3"/>
+  <rect x="280" y="16" width="260" height="32" rx="8" fill="#050810" stroke="#00d4ff" stroke-width="1" opacity="0.4"/>
+  <text x="300" y="36" font-family="Arial, sans-serif" font-size="13" fill="#4b5563">🔍  Search...</text>
+  <rect x="1100" y="16" width="156" height="32" rx="16" fill="#00d4ff" opacity="0.12" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <text x="1178" y="36" font-family="Arial, sans-serif" font-size="12" fill="#00d4ff" text-anchor="middle">0x742d...e5e5</text>
+
+  <!-- Profile Card -->
+  <rect x="280" y="84" width="968" height="200" rx="14" fill="url(#cardBg)" stroke="#00d4ff" stroke-width="1" opacity="0.5"/>
+
+  <!-- Avatar circle -->
+  <circle cx="372" cy="184" r="64" fill="url(#avatarBg)" filter="url(#avatarGlow)" opacity="0.9"/>
+  <text x="372" y="200" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#050810" text-anchor="middle">A</text>
+
+  <!-- Online indicator -->
+  <circle cx="414" cy="228" r="10" fill="#0a0e1a"/>
+  <circle cx="414" cy="228" r="7" fill="#06ffa5"/>
+
+  <!-- User info -->
+  <text x="468" y="138" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#00d4ff">@alice</text>
+  <text x="468" y="164" font-family="Arial, sans-serif" font-size="13" fill="#4b5563">0x742d35cc6634c0532925a3b844bc9e7595f0e5e5</text>
+  <text x="468" y="192" font-family="Arial, sans-serif" font-size="15" fill="#9ca3af">Building on LIRA 🚀</text>
+
+  <!-- Social links -->
+  <text x="468" y="218" font-family="Arial, sans-serif" font-size="13" fill="#6b7280">🌐 example.com</text>
+  <text x="610" y="218" font-family="Arial, sans-serif" font-size="13" fill="#6b7280">🐦 @alice</text>
+
+  <!-- Following/Followers -->
+  <text x="468" y="248" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">42</text>
+  <text x="490" y="248" font-family="Arial, sans-serif" font-size="13" fill="#9ca3af"> Following</text>
+  <text x="580" y="248" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">123</text>
+  <text x="602" y="248" font-family="Arial, sans-serif" font-size="13" fill="#9ca3af"> Followers</text>
+
+  <!-- Action buttons -->
+  <rect x="860" y="154" width="100" height="36" rx="8" fill="#00d4ff"/>
+  <text x="910" y="177" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#050810" text-anchor="middle">Follow</text>
+  <rect x="976" y="154" width="124" height="36" rx="8" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+  <text x="1038" y="177" font-family="Arial, sans-serif" font-size="14" fill="#00d4ff" text-anchor="middle">✉ Message</text>
+
+  <!-- Edit Profile button -->
+  <rect x="860" y="204" width="240" height="36" rx="8" fill="none" stroke="#4b5563" stroke-width="1"/>
+  <text x="980" y="227" font-family="Arial, sans-serif" font-size="13" fill="#9ca3af" text-anchor="middle">✏️ Edit Profile</text>
+
+  <!-- Token Stats Card -->
+  <rect x="280" y="302" width="460" height="180" rx="14" fill="url(#cardBg)" stroke="#00d4ff" stroke-width="1" opacity="0.4"/>
+  <text x="308" y="334" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00d4ff">Tokens</text>
+
+  <rect x="296" y="348" width="130" height="80" rx="10" fill="#050810" stroke="#00d4ff" stroke-width="1" opacity="0.3"/>
+  <text x="361" y="384" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">3</text>
+  <text x="361" y="406" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Created</text>
+
+  <rect x="436" y="348" width="130" height="80" rx="10" fill="#050810" stroke="#9d4edd" stroke-width="1" opacity="0.3"/>
+  <text x="501" y="384" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">7</text>
+  <text x="501" y="406" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Holding</text>
+
+  <rect x="576" y="348" width="130" height="80" rx="10" fill="#050810" stroke="#06ffa5" stroke-width="1" opacity="0.3"/>
+  <text x="641" y="384" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">2</text>
+  <text x="641" y="406" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Launched</text>
+
+  <!-- Agent Stats Card -->
+  <rect x="756" y="302" width="492" height="180" rx="14" fill="url(#cardBg)" stroke="#9d4edd" stroke-width="1" opacity="0.4"/>
+  <text x="784" y="334" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#9d4edd">Agent Stats</text>
+
+  <rect x="770" y="348" width="135" height="80" rx="10" fill="#050810" stroke="#9d4edd" stroke-width="1" opacity="0.3"/>
+  <text x="837" y="384" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">5</text>
+  <text x="837" y="406" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Active</text>
+
+  <rect x="915" y="348" width="135" height="80" rx="10" fill="#050810" stroke="#00d4ff" stroke-width="1" opacity="0.3"/>
+  <text x="982" y="384" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">18</text>
+  <text x="982" y="406" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Total Runs</text>
+
+  <rect x="1060" y="348" width="170" height="80" rx="10" fill="#050810" stroke="#06ffa5" stroke-width="1" opacity="0.3"/>
+  <text x="1145" y="384" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">$1,340</text>
+  <text x="1145" y="406" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle">Earned</text>
+
+  <!-- Recent Activity Card -->
+  <rect x="280" y="498" width="968" height="278" rx="14" fill="url(#cardBg)" stroke="#00d4ff" stroke-width="1" opacity="0.4"/>
+  <text x="308" y="530" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00d4ff">Recent Activity</text>
+
+  <!-- Activity items -->
+  <!-- Item 1 -->
+  <rect x="296" y="544" width="936" height="50" rx="8" fill="#050810"/>
+  <rect x="304" y="556" width="26" height="26" rx="13" fill="#06ffa5" opacity="0.2"/>
+  <text x="317" y="573" font-family="Arial, sans-serif" font-size="14" fill="#06ffa5" text-anchor="middle">↑</text>
+  <text x="344" y="569" font-family="Arial, sans-serif" font-size="14" fill="white">Launched token </text>
+  <text x="452" y="569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00d4ff">QUANTUM</text>
+  <text x="540" y="569" font-family="Arial, sans-serif" font-size="14" fill="white"> on BASE mainnet</text>
+  <text x="1220" y="569" font-family="Arial, sans-serif" font-size="12" fill="#4b5563" text-anchor="end">2 hours ago</text>
+  <text x="344" y="585" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">Token deployed to 0x8B9a...3F2d with 50 ETH initial liquidity</text>
+
+  <!-- Item 2 -->
+  <rect x="296" y="602" width="936" height="50" rx="8" fill="#050810"/>
+  <rect x="304" y="614" width="26" height="26" rx="13" fill="#9d4edd" opacity="0.2"/>
+  <text x="317" y="631" font-family="Arial, sans-serif" font-size="14" fill="#9d4edd" text-anchor="middle">🤖</text>
+  <text x="344" y="627" font-family="Arial, sans-serif" font-size="14" fill="white">Agent </text>
+  <text x="388" y="627" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9d4edd">Market Analysis</text>
+  <text x="504" y="627" font-family="Arial, sans-serif" font-size="14" fill="white"> completed 12 predictions</text>
+  <text x="1220" y="627" font-family="Arial, sans-serif" font-size="12" fill="#4b5563" text-anchor="end">5 hours ago</text>
+  <text x="344" y="643" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">Accuracy rate: 78% — earned 0.12 ETH in rewards</text>
+
+  <!-- Item 3 -->
+  <rect x="296" y="660" width="936" height="50" rx="8" fill="#050810"/>
+  <rect x="304" y="672" width="26" height="26" rx="13" fill="#00d4ff" opacity="0.2"/>
+  <text x="317" y="689" font-family="Arial, sans-serif" font-size="14" fill="#00d4ff" text-anchor="middle">💰</text>
+  <text x="344" y="685" font-family="Arial, sans-serif" font-size="14" fill="white">Received </text>
+  <text x="410" y="685" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#06ffa5">0.45 ETH</text>
+  <text x="466" y="685" font-family="Arial, sans-serif" font-size="14" fill="white"> trading fee reward</text>
+  <text x="1220" y="685" font-family="Arial, sans-serif" font-size="12" fill="#4b5563" text-anchor="end">1 day ago</text>
+  <text x="344" y="701" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">From LIRA/ETH pool — automatically compounded</text>
+
+  <!-- Item 4 -->
+  <rect x="296" y="718" width="936" height="50" rx="8" fill="#050810"/>
+  <rect x="304" y="730" width="26" height="26" rx="13" fill="#ff006e" opacity="0.2"/>
+  <text x="317" y="747" font-family="Arial, sans-serif" font-size="14" fill="#ff006e" text-anchor="middle">👤</text>
+  <text x="344" y="743" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00d4ff">@bob</text>
+  <text x="388" y="743" font-family="Arial, sans-serif" font-size="14" fill="white"> started following you</text>
+  <text x="1220" y="743" font-family="Arial, sans-serif" font-size="12" fill="#4b5563" text-anchor="end">2 days ago</text>
+  <text x="344" y="759" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">You now have 123 followers</text>
+</svg>
