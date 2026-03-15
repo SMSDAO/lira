@@ -1,7 +1,7 @@
 /**
  * CSRF protection helpers for Next.js API routes.
- * Double-submit cookie pattern: server sets a token in a cookie;
- * client must echo it in the X-CSRF-Token header.
+ * Double-submit cookie pattern: server sets a readable (non-HttpOnly) cookie;
+ * browser JS reads it and echoes the value in the X-CSRF-Token header.
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -9,12 +9,16 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 const CSRF_HEADER = 'x-csrf-token';
 const CSRF_COOKIE = 'csrf_token';
 
-/** Generate a random CSRF token */
+/** Generate a random CSRF token using a runtime-agnostic approach. */
 export function generateCsrfToken(): string {
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     const bytes = new Uint8Array(24);
     crypto.getRandomValues(bytes);
-    return Buffer.from(bytes).toString('base64url');
+    // Runtime-agnostic base64url (no Buffer dependency)
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
   }
   return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 }
@@ -44,10 +48,19 @@ export function validateCsrf(req: NextApiRequest, res: NextApiResponse): boolean
   return true;
 }
 
-/** Set a new CSRF cookie in the response. */
+/**
+ * Set the CSRF cookie in the response.
+ * The cookie is intentionally NOT HttpOnly so that browser JS can read and
+ * echo it in the X-CSRF-Token header (double-submit pattern).
+ * Secure is only set in production to allow localhost development.
+ */
 export function setCsrfCookie(res: NextApiResponse, token: string): void {
-  res.setHeader(
-    'Set-Cookie',
-    `${CSRF_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Secure`,
-  );
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieFlags = [
+    `${CSRF_COOKIE}=${token}`,
+    'Path=/',
+    'SameSite=Strict',
+    ...(isProduction ? ['Secure'] : []),
+  ].join('; ');
+  res.setHeader('Set-Cookie', cookieFlags);
 }

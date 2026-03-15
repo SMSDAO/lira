@@ -2,7 +2,11 @@
 
 ## Authentication
 
-All mutating API routes require a valid SIWE session cookie or `Authorization: Bearer <token>` header.
+> **Current status:** The authentication middleware (SIWE session cookie) is implemented in
+> `src/pages/api/auth/verify.ts`, which issues a signed `lira_session` HttpOnly cookie.
+> Individual routes that require authentication should validate this cookie.
+> Currently the majority of read endpoints are public; write endpoints use rate limiting
+> and input validation. Full per-route auth guards will be added incrementally.
 
 Rate limits are enforced per IP:
 - Standard API: 120 req/min

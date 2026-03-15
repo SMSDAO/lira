@@ -88,6 +88,8 @@ export class SimpleScheduler {
   private static instance: SimpleScheduler;
   private handlers: Map<JobName, JobHandler> = new Map();
   private runs: JobRun[] = [];
+  /** Maximum run history entries retained in memory. */
+  private static readonly MAX_RUNS = 500;
 
   static getInstance(): SimpleScheduler {
     if (!SimpleScheduler.instance) {
@@ -106,6 +108,10 @@ export class SimpleScheduler {
 
     const run: JobRun = { jobName, startedAt: Date.now(), status: 'running' };
     this.runs.unshift(run);
+    // Trim history to avoid unbounded memory growth
+    if (this.runs.length > SimpleScheduler.MAX_RUNS) {
+      this.runs.length = SimpleScheduler.MAX_RUNS;
+    }
 
     try {
       await handler(jobName);

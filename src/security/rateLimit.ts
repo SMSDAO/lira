@@ -13,6 +13,15 @@ interface WindowEntry {
 
 const store = new Map<string, WindowEntry>();
 
+/** Opportunistically remove entries whose window has expired to prevent unbounded growth. */
+function pruneExpired(now: number): void {
+  // Only prune when the store exceeds a threshold to avoid O(n) on every request
+  if (store.size < 500) return;
+  for (const [key, entry] of store) {
+    if (entry.resetAt <= now) store.delete(key);
+  }
+}
+
 export interface RateLimitOptions {
   /** Maximum requests per window */
   max: number;
@@ -45,6 +54,8 @@ export function rateLimit(options: RateLimitOptions) {
   ): boolean {
     const key = keyGenerator(req);
     const now = Date.now();
+
+    pruneExpired(now);
 
     let entry = store.get(key);
     if (!entry || entry.resetAt <= now) {

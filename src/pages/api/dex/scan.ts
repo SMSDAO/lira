@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { runDexScan } from '@/dex/scanner';
-import { apiLimiter } from '@/security/rateLimit';
+import { strictLimiter } from '@/security/rateLimit';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (!apiLimiter(req, res)) return;
+  if (!strictLimiter(req, res)) return;
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

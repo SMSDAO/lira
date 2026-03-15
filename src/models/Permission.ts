@@ -193,7 +193,10 @@ export const ROLE_PERMISSIONS: Record<Role, PermissionSet> = {
     Permissions.MOD_REVIEW,
   ],
   [Role.SUPER_ADMIN]: [
-    // Inherits everything – wildcard handled in helpers
+    // Explicitly lists every permission (same as admin).
+    // roleHasPermission uses array membership; super-admin gets all permissions
+    // because all are enumerated here. Use roleAtLeast() when you only need to
+    // check privilege level rather than a specific permission.
     Permissions.DASHBOARD_VIEW,
     Permissions.LAUNCH_CREATE,
     Permissions.AGENTS_VIEW,

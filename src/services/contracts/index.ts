@@ -62,32 +62,38 @@ export function parseRevertReason(error: unknown): string {
 
 /**
  * Registry of deployed contract addresses per chain.
- * Populated from environment variables at startup.
+ * Env var names match the existing convention in src/lib/contracts.ts
+ * and scripts/validate-env.ts.
  */
 export const CONTRACT_ADDRESSES: Record<string, Record<ContractName, string>> = {
   base: {
     LiraToken: process.env.NEXT_PUBLIC_LIRA_TOKEN ?? '',
-    LiraTokenRegistry: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ?? '',
+    LiraTokenRegistry: process.env.NEXT_PUBLIC_LIRA_REGISTRY ?? '',
     TokenLaunchFactory: process.env.NEXT_PUBLIC_FACTORY ?? '',
-    LiraProfile: process.env.NEXT_PUBLIC_PROFILE_ADDRESS ?? '',
-    LiraSocialGraph: process.env.NEXT_PUBLIC_SOCIAL_GRAPH_ADDRESS ?? '',
-    AgentExecutor: process.env.NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS ?? '',
-    LiraAccessToken: process.env.NEXT_PUBLIC_ACCESS_TOKEN_ADDRESS ?? '',
+    LiraProfile: process.env.NEXT_PUBLIC_LIRA_PROFILE ?? '',
+    LiraSocialGraph: process.env.NEXT_PUBLIC_LIRA_SOCIAL_GRAPH ?? '',
+    AgentExecutor: process.env.NEXT_PUBLIC_LIRA_AGENT_EXECUTOR ?? '',
+    LiraAccessToken: process.env.NEXT_PUBLIC_LIRA_ACCESS_TOKEN ?? '',
   },
   'base-sepolia': {
     LiraToken: process.env.NEXT_PUBLIC_LIRA_TOKEN ?? '',
-    LiraTokenRegistry: process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ?? '',
+    LiraTokenRegistry: process.env.NEXT_PUBLIC_LIRA_REGISTRY ?? '',
     TokenLaunchFactory: process.env.NEXT_PUBLIC_FACTORY ?? '',
-    LiraProfile: process.env.NEXT_PUBLIC_PROFILE_ADDRESS ?? '',
-    LiraSocialGraph: process.env.NEXT_PUBLIC_SOCIAL_GRAPH_ADDRESS ?? '',
-    AgentExecutor: process.env.NEXT_PUBLIC_AGENT_EXECUTOR_ADDRESS ?? '',
-    LiraAccessToken: process.env.NEXT_PUBLIC_ACCESS_TOKEN_ADDRESS ?? '',
+    LiraProfile: process.env.NEXT_PUBLIC_LIRA_PROFILE ?? '',
+    LiraSocialGraph: process.env.NEXT_PUBLIC_LIRA_SOCIAL_GRAPH ?? '',
+    AgentExecutor: process.env.NEXT_PUBLIC_LIRA_AGENT_EXECUTOR ?? '',
+    LiraAccessToken: process.env.NEXT_PUBLIC_LIRA_ACCESS_TOKEN ?? '',
   },
 };
 
+/**
+ * Returns the contract address for a given chain/contract pair.
+ * Returns `undefined` when the address is unset or empty (never returns an empty string).
+ */
 export function getContractAddress(
   chain: string,
   contract: ContractName,
 ): string | undefined {
-  return CONTRACT_ADDRESSES[chain]?.[contract];
+  const addr = CONTRACT_ADDRESSES[chain]?.[contract];
+  return addr && addr.length > 0 ? addr : undefined;
 }

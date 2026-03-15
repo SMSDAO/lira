@@ -14,11 +14,14 @@ export const config = {
   chainName: process.env.NEXT_PUBLIC_CHAIN_NAME ?? 'Base',
   rpcUrl: process.env.NEXT_PUBLIC_RPC_URL ?? 'https://mainnet.base.org',
 
-  // WalletConnect
-  walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? '',
+  // WalletConnect - matches existing convention in src/pages/_app.tsx and scripts/validate-env.ts
+  walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? '',
 
   // Auth
-  sessionSecret: process.env.SESSION_SECRET ?? 'dev-secret-change-in-production',
+  sessionSecret:
+    process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET
+      ? (() => { throw new Error('SESSION_SECRET must be set in production'); })()
+      : (process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'),
   sessionMaxAgeMs: 24 * 60 * 60 * 1000, // 24 h
 
   // AI / Image generation

@@ -6,7 +6,7 @@
 export { TimelineStore } from '@/models/TimelineEvent';
 export type { TimelineEvent, TimelineEventType, TimelineEventSeverity } from '@/models/TimelineEvent';
 import { TimelineStore } from '@/models/TimelineEvent';
-import type { TimelineEvent } from '@/models/TimelineEvent';
+import type { TimelineEvent, TimelineEventType } from '@/models/TimelineEvent';
 
 /** Singleton timeline store for the current process. */
 export const timeline = TimelineStore.getInstance();
@@ -15,12 +15,14 @@ export const timeline = TimelineStore.getInstance();
 export function trackUserAction(params: {
   userId: string;
   walletAddress?: string;
+  /** Explicit timeline event type; use 'user.profile_update', 'user.wallet_connect', etc. */
+  type?: TimelineEventType;
   action: string;
   description?: string;
   metadata?: Record<string, unknown>;
 }): TimelineEvent {
   return timeline.add({
-    type: 'user.login',
+    type: params.type ?? 'user.profile_update',
     severity: 'info',
     userId: params.userId,
     walletAddress: params.walletAddress,

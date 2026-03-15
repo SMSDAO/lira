@@ -131,13 +131,13 @@ function ClusterTab() {
       <h3 className="text-xl font-semibold text-white">Cluster Health</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Nodes', value: '1', color: 'neo-blue' },
-          { label: 'CPU', value: '12%', color: 'neo-green' },
-          { label: 'Memory', value: '38%', color: 'neo-green' },
-          { label: 'Uptime', value: '99.9%', color: 'neo-green' },
+          { label: 'Nodes', value: '1', cls: 'text-neo-blue' },
+          { label: 'CPU', value: '12%', cls: 'text-neo-green' },
+          { label: 'Memory', value: '38%', cls: 'text-neo-green' },
+          { label: 'Uptime', value: '99.9%', cls: 'text-neo-green' },
         ].map(item => (
           <div key={item.label} className="bg-neo-darker rounded-lg p-4 text-center">
-            <div className={`text-2xl font-bold text-${item.color}`}>{item.value}</div>
+            <div className={`text-2xl font-bold ${item.cls}`}>{item.value}</div>
             <div className="text-gray-400 text-sm">{item.label}</div>
           </div>
         ))}

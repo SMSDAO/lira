@@ -5,12 +5,30 @@
 
 export type ImageEngine = 'openai' | 'stable-diffusion' | 'replicate';
 
-export type ImageCategory =
-  | 'nft-artwork'
-  | 'profile-avatar'
-  | 'banner'
-  | 'token-logo'
-  | 'collection-artwork';
+export const VALID_IMAGE_CATEGORIES = [
+  'nft-artwork',
+  'profile-avatar',
+  'banner',
+  'token-logo',
+  'collection-artwork',
+] as const;
+
+export type ImageCategory = (typeof VALID_IMAGE_CATEGORIES)[number];
+
+/**
+ * DALL-E 3 only supports specific square/rectangular sizes.
+ * Map requested dimensions to the nearest supported size.
+ */
+type OpenAiSize = '1024x1024' | '1792x1024' | '1024x1792';
+
+const OPENAI_SUPPORTED_SIZES: OpenAiSize[] = ['1024x1024', '1792x1024', '1024x1792'];
+
+function resolveOpenAiSize(width: number, height: number): OpenAiSize {
+  const ratio = width / height;
+  if (ratio > 1.2) return '1792x1024';  // landscape
+  if (ratio < 0.8) return '1024x1792';  // portrait
+  return '1024x1024';                    // square (default)
+}
 
 export interface GenerateImageParams {
   prompt: string;
@@ -76,7 +94,13 @@ async function generateOpenAi(
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY is not set');
 
-  const size = `${width}x${height}` as '1024x1024' | '512x512' | '256x256';
+  // Resolve to a supported DALL-E 3 size (never blindly cast arbitrary dimensions)
+  const size = resolveOpenAiSize(width, height);
+  // Validate the resolved size is actually in the supported list (compile + runtime guard)
+  if (!OPENAI_SUPPORTED_SIZES.includes(size)) {
+    throw new Error(`Unsupported image size for OpenAI: ${size}`);
+  }
+
   const res = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -86,16 +110,55 @@ async function generateOpenAi(
   if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
 
   const data = (await res.json()) as { data: Array<{ url: string }> };
+  const [outW, outH] = size.split('x').map(Number);
   return {
     id: `img_openai_${Date.now()}`,
     url: data.data[0].url,
     engine: 'openai',
     category: params.category,
     prompt,
-    width,
-    height,
+    width: outW,
+    height: outH,
     createdAt: Date.now(),
   };
+}
+
+/** Replicate poll timeout (ms) */
+const REPLICATE_POLL_TIMEOUT = 120_000;
+const REPLICATE_POLL_INTERVAL = 2_000;
+
+/**
+ * Replicate predictions are asynchronous. This helper polls the prediction
+ * URL until the job succeeds or fails (or times out).
+ */
+async function pollReplicatePrediction(
+  predictionUrl: string,
+  token: string,
+): Promise<string> {
+  const deadline = Date.now() + REPLICATE_POLL_TIMEOUT;
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, REPLICATE_POLL_INTERVAL));
+    const res = await fetch(predictionUrl, {
+      headers: { 'Authorization': `Token ${token}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`Replicate poll error: ${res.status}`);
+    const pred = (await res.json()) as {
+      status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
+      output?: string[];
+      error?: string;
+    };
+    if (pred.status === 'succeeded') {
+      const url = pred.output?.[0];
+      if (!url) throw new Error('Replicate returned no output URL');
+      return url;
+    }
+    if (pred.status === 'failed' || pred.status === 'canceled') {
+      throw new Error(`Replicate prediction ${pred.status}: ${pred.error ?? 'unknown'}`);
+    }
+    // status is 'starting' or 'processing' – keep polling
+  }
+  throw new Error('Replicate prediction timed out');
 }
 
 async function generateReplicate(
@@ -114,14 +177,19 @@ async function generateReplicate(
       version: 'stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf',
       input: { prompt, width, height },
     }),
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(30_000),
   });
   if (!res.ok) throw new Error(`Replicate API error: ${res.status}`);
 
-  const prediction = (await res.json()) as { id: string; output?: string[] };
+  const prediction = (await res.json()) as { id: string; urls?: { get?: string } };
+  const pollUrl = prediction.urls?.get ?? `https://api.replicate.com/v1/predictions/${prediction.id}`;
+
+  // Poll until the async job completes
+  const imageUrl = await pollReplicatePrediction(pollUrl, token);
+
   return {
     id: `img_replicate_${prediction.id}`,
-    url: prediction.output?.[0] ?? '',
+    url: imageUrl,
     engine: 'replicate',
     category: params.category,
     prompt,
@@ -159,3 +227,4 @@ async function generateStableDiffusion(
     createdAt: Date.now(),
   };
 }
+

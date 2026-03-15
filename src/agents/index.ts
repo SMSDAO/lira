@@ -112,6 +112,8 @@ export class AgentCoordinator {
   private static instance: AgentCoordinator;
   private agents: Map<string, BaseAgent> = new Map();
   private taskQueue: AgentTask[] = [];
+  /** Maximum tasks held in the in-process queue before dropping low-priority work. */
+  private static readonly MAX_QUEUE_DEPTH = 1_000;
 
   static getInstance(): AgentCoordinator {
     if (!AgentCoordinator.instance) {
@@ -134,6 +136,10 @@ export class AgentCoordinator {
     this.taskQueue.push(full);
     // Sort by priority descending
     this.taskQueue.sort((a, b) => b.priority - a.priority);
+    // Enforce max queue depth – drop the lowest-priority tail items
+    if (this.taskQueue.length > AgentCoordinator.MAX_QUEUE_DEPTH) {
+      this.taskQueue.splice(AgentCoordinator.MAX_QUEUE_DEPTH);
+    }
     agentBus.emit('coordinator:enqueued', full);
     return full;
   }

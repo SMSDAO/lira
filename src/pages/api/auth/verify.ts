@@ -12,7 +12,36 @@ const schema = {
 };
 
 /**
- * POST /api/auth/verify – verifies a SIWE signature and issues a session.
+ * Sign a session payload using HMAC-SHA256 with SESSION_SECRET.
+ * Returns a base64url-encoded token that can be verified server-side.
+ * Only runs in Node.js environments (not Edge).
+ */
+async function signSessionToken(payload: Record<string, unknown>): Promise<string> {
+  const secret = process.env.SESSION_SECRET ?? 'dev-secret-change-in-production';
+  const data = JSON.stringify(payload);
+
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return `${btoa(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}.${b64}`;
+  }
+
+  // Node.js fallback
+  const { createHmac } = await import('crypto');
+  const mac = createHmac('sha256', secret).update(data).digest('base64url');
+  return `${Buffer.from(data).toString('base64url')}.${mac}`;
+}
+
+/**
+ * POST /api/auth/verify – verifies a SIWE signature and issues a signed session token.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!authLimiter(req, res)) return;
@@ -34,20 +63,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'Invalid signature', detail: result.error });
   }
 
-  const session = {
+  const sessionPayload = {
     address,
     chainId: 8453,
     signedAt: Date.now(),
     expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-    nonce: Math.random().toString(36).slice(2),
   };
 
-  const validation = validateWalletSession(session);
+  const validation = validateWalletSession({ ...sessionPayload, nonce: '' });
   if (!validation.valid) {
     return res.status(401).json({ error: validation.reason });
   }
 
   auditLog.record({ action: 'auth.login', actor: address, ip: req.headers['x-forwarded-for'] as string });
 
-  return res.status(200).json({ session, authenticated: true });
+  const token = await signSessionToken(sessionPayload);
+
+  // Issue the session token as an HttpOnly cookie so it cannot be read by JS
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.setHeader(
+    'Set-Cookie',
+    [
+      `lira_session=${token}`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Strict',
+      `Max-Age=${24 * 60 * 60}`,
+      ...(isProduction ? ['Secure'] : []),
+    ].join('; '),
+  );
+
+  return res.status(200).json({ authenticated: true, expiresAt: sessionPayload.expiresAt });
 }

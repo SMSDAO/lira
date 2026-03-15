@@ -1,6 +1,8 @@
 /**
- * Auto-generated contract interfaces for all Lira smart contracts.
- * These types are derived from the ABI definitions in src/lib/contracts.ts.
+ * Contract interfaces for all Lira smart contracts.
+ * Derived from the actual ABI definitions in src/lib/contracts.ts.
+ *
+ * Keep these in sync with CONTRACT_ABIS in src/lib/contracts.ts.
  */
 
 // ---------------------------------------------------------------------------
@@ -14,33 +16,35 @@ export interface ILiraToken {
   totalSupply(): Promise<bigint>;
   balanceOf(account: string): Promise<bigint>;
   transfer(to: string, amount: bigint): Promise<boolean>;
-  approve(spender: string, amount: bigint): Promise<boolean>;
-  allowance(owner: string, spender: string): Promise<bigint>;
+  setTreasury(treasury: string): Promise<void>;
+  setProtocolFee(fee: bigint): Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
 // LiraTokenRegistry
 // ---------------------------------------------------------------------------
 
+/** Matches the tuple returned by getToken() in the registry ABI. */
+export interface RegistryTokenInfo {
+  contractAddress: string;
+  owner: string;
+  tokenType: number;    // uint8
+  name: string;
+  symbol: string;
+  isActive: boolean;
+  createdAt: bigint;
+}
+
 export interface ILiraTokenRegistry {
-  registerToken(
-    tokenAddress: string,
-    creator: string,
-    name: string,
-    symbol: string,
-    totalSupply: bigint,
-  ): Promise<void>;
-  getToken(tokenAddress: string): Promise<{
-    tokenAddress: string;
-    creator: string;
-    name: string;
-    symbol: string;
-    totalSupply: bigint;
-    registeredAt: bigint;
-    active: boolean;
-  }>;
-  getTokensByCreator(creator: string): Promise<string[]>;
-  isRegistered(tokenAddress: string): Promise<boolean>;
+  /** registerToken(address tokenAddress, address owner, uint8 tokenType) */
+  registerToken(tokenAddress: string, owner: string, tokenType: number): Promise<void>;
+  updateToken(tokenAddress: string, isActive: boolean): Promise<void>;
+  getToken(tokenAddress: string): Promise<RegistryTokenInfo>;
+  getAllTokens(): Promise<string[]>;
+  getTokensByType(tokenType: number): Promise<string[]>;
+  getTokensByOwner(owner: string): Promise<string[]>;
+  setDAOOperator(operator: string, status: boolean): Promise<void>;
+  setTokenFactory(factory: string): Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -48,26 +52,35 @@ export interface ILiraTokenRegistry {
 // ---------------------------------------------------------------------------
 
 export interface ITokenLaunchFactory {
+  /**
+   * launchToken(string name, string symbol, uint256 initialSupply, uint256 liquidityAmount)
+   * payable – caller must supply ETH for the launch fee
+   */
   launchToken(
     name: string,
     symbol: string,
-    totalSupply: bigint,
-    launchFee: bigint,
+    initialSupply: bigint,
+    liquidityAmount: bigint,
   ): Promise<string>; // returns new token address
-  getLaunchFee(): Promise<bigint>;
-  setLaunchFee(fee: bigint): Promise<void>;
-  getTokensLaunchedBy(creator: string): Promise<string[]>;
+  getLaunchedTokens(creator: string): Promise<string[]>;
 }
 
 // ---------------------------------------------------------------------------
 // LiraProfile
 // ---------------------------------------------------------------------------
 
+/** Matches the tuple returned by getProfile() in the profile ABI. */
+export interface ProfileInfo {
+  handle: string;
+  metadataURI: string;
+  primaryToken: string;
+  createdAt: bigint;
+}
+
 export interface ILiraProfile {
-  createProfile(handle: string, metadataUri: string): Promise<void>;
-  updateProfile(handle: string, metadataUri: string): Promise<void>;
-  getProfile(owner: string): Promise<{ handle: string; metadataUri: string; createdAt: bigint }>;
-  handleExists(handle: string): Promise<boolean>;
+  createProfile(handle: string, metadataURI: string): Promise<void>;
+  updateProfile(metadataURI: string): Promise<void>;
+  getProfile(user: string): Promise<ProfileInfo>;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,11 +88,13 @@ export interface ILiraProfile {
 // ---------------------------------------------------------------------------
 
 export interface ILiraSocialGraph {
-  follow(target: string): Promise<void>;
-  unfollow(target: string): Promise<void>;
+  follow(user: string): Promise<void>;
+  unfollow(user: string): Promise<void>;
+  block(user: string): Promise<void>;
+  unblock(user: string): Promise<void>;
   getFollowers(user: string): Promise<string[]>;
   getFollowing(user: string): Promise<string[]>;
-  isFollowing(follower: string, target: string): Promise<boolean>;
+  isFollowing(follower: string, following: string): Promise<boolean>;
 }
 
 // ---------------------------------------------------------------------------

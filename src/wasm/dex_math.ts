@@ -46,10 +46,25 @@ export function calcPriceImpact(
 
 const Q96 = 2n ** 96n;
 
-/** Convert a sqrtPriceX96 to a human-readable price. */
+/**
+ * Convert a sqrtPriceX96 to a human-readable price.
+ * Uses fixed-point bigint arithmetic throughout to avoid Number overflow for
+ * large Uniswap v3 sqrtPriceX96 values, converting to Number only at the end.
+ */
 export function sqrtPriceX96ToPrice(sqrtPriceX96: bigint, decimals0 = 18, decimals1 = 18): number {
-  const price = Number(sqrtPriceX96 * sqrtPriceX96) / Number(Q96 * Q96);
-  return price * 10 ** (decimals0 - decimals1);
+  // price = (sqrtPriceX96 / 2^96)^2 = sqrtPriceX96^2 / 2^192
+  // To keep precision, we scale the result before dividing:
+  //   price * 10^18 = sqrtPriceX96^2 * 10^18 / 2^192
+  const SCALE = 10n ** 18n;
+  const numerator = sqrtPriceX96 * sqrtPriceX96 * SCALE;
+  const denominator = Q96 * Q96;
+  const rawPriceScaled = numerator / denominator;
+  // Adjust for token decimal difference
+  const decimalAdjust = decimals0 - decimals1;
+  const price = Number(rawPriceScaled) / 1e18;
+  return decimalAdjust >= 0
+    ? price * 10 ** decimalAdjust
+    : price / 10 ** (-decimalAdjust);
 }
 
 /** Calculate the tick from a given price. */

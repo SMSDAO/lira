@@ -6,8 +6,8 @@
  */
 
 export interface SiweVerifyResult {
+  /** Whether the signature is valid for the expected address. */
   valid: boolean;
-  recoveredAddress?: string;
   error?: string;
 }
 
@@ -15,7 +15,9 @@ export interface SiweVerifyResult {
  * Verify a Sign-In-With-Ethereum (EIP-191) signature.
  *
  * When the WASM binary is available it runs in < 1 ms.
- * The pure-JS fallback uses the viem verifyMessage utility.
+ * The pure-JS fallback uses the viem verifyMessage utility which returns
+ * a boolean (not a recovered address). Use a separate recovery helper if
+ * you need the recovered address.
  */
 export async function verifySiweSignature(
   message: string,
@@ -24,16 +26,14 @@ export async function verifySiweSignature(
 ): Promise<SiweVerifyResult> {
   try {
     // Attempt to load WASM binary (compiled via wasm-pack)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const wasmModule = (globalThis as Record<string, unknown>).__liraWasm;
     if (wasmModule && typeof wasmModule === 'object') {
       const cryptoMod = (wasmModule as Record<string, unknown>).crypto;
       if (cryptoMod && typeof cryptoMod === 'function') {
-        const recovered: string = (cryptoMod as (m: string, s: string) => string)(message, signature);
-        return {
-          valid: recovered.toLowerCase() === expectedAddress.toLowerCase(),
-          recoveredAddress: recovered,
-        };
+        const valid: boolean = (cryptoMod as (m: string, s: string, a: string) => boolean)(
+          message, signature, expectedAddress,
+        );
+        return { valid };
       }
     }
   } catch {
@@ -43,15 +43,13 @@ export async function verifySiweSignature(
   // Pure-JS fallback: dynamic import to avoid SSR issues
   try {
     const { verifyMessage } = await import('viem');
-    const recovered = await verifyMessage({
+    // verifyMessage returns a boolean when address is provided
+    const valid = await verifyMessage({
       address: expectedAddress as `0x${string}`,
       message,
       signature: signature as `0x${string}`,
     });
-    return {
-      valid: recovered,
-      recoveredAddress: recovered ? expectedAddress : undefined,
-    };
+    return { valid };
   } catch (err) {
     return {
       valid: false,

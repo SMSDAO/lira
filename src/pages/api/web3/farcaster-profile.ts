@@ -3,7 +3,7 @@ import { fetchFarcasterProfile, toCreatorIdentity } from '@/auth/farcaster';
 import { apiLimiter } from '@/security/rateLimit';
 
 /**
- * GET /api/web3/farcaster/profile?fid=<fid>
+ * GET /api/web3/farcaster-profile?fid=<fid>
  * Fetches a Farcaster profile and maps it to creator identity.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

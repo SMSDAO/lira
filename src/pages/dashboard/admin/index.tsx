@@ -67,15 +67,15 @@ export default function AdminDashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Total Users', value: stats.users.toLocaleString(), icon: FiUsers, color: 'neo-blue' },
-              { label: 'Active Agents', value: stats.activeAgents.toString(), icon: FiActivity, color: 'neo-purple' },
-              { label: 'Tokens Launched', value: stats.tokens.toString(), icon: FiBarChart2, color: 'neo-green' },
-              { label: 'Revenue', value: stats.revenue, icon: FiDatabase, color: 'yellow-400' },
+              { label: 'Total Users', value: stats.users.toLocaleString(), icon: FiUsers, cls: 'text-neo-blue' },
+              { label: 'Active Agents', value: stats.activeAgents.toString(), icon: FiActivity, cls: 'text-neo-purple' },
+              { label: 'Tokens Launched', value: stats.tokens.toString(), icon: FiBarChart2, cls: 'text-neo-green' },
+              { label: 'Revenue', value: stats.revenue, icon: FiDatabase, cls: 'text-yellow-400' },
             ].map(stat => {
               const Icon = stat.icon;
               return (
                 <div key={stat.label} className="bg-neo-dark border border-neo-blue/20 rounded-xl p-5">
-                  <div className={`text-2xl font-bold text-${stat.color}`}>{stat.value}</div>
+                  <div className={`text-2xl font-bold ${stat.cls}`}>{stat.value}</div>
                   <div className="flex items-center gap-2 mt-1 text-gray-400 text-sm">
                     <Icon className="text-base" /> {stat.label}
                   </div>
