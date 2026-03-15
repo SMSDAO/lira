@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { verifySiweSignature } from '@/wasm/crypto';
-import { validateWalletSession } from '@/auth/wallet';
+import { consumeNonce } from '@/auth/wallet';
 import { authLimiter } from '@/security/rateLimit';
 import { validateBody } from '@/security/requestValidation';
 import { auditLog } from '@/security/audit';
+import { config } from '@/config';
 
 const schema = {
   message: { type: 'string' as const, required: true },
@@ -12,12 +13,36 @@ const schema = {
 };
 
 /**
- * Sign a session payload using HMAC-SHA256 with SESSION_SECRET.
- * Returns a base64url-encoded token that can be verified server-side.
- * Only runs in Node.js environments (not Edge).
+ * Parse SIWE message text and extract key fields.
+ * Based on the EIP-4361 text format produced by buildSiweMessage().
+ */
+function parseSiweMessage(text: string): Record<string, string> {
+  const fields: Record<string, string> = {};
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const chainMatch = /^Chain ID: (.+)$/.exec(line);
+    if (chainMatch) { fields.chainId = chainMatch[1].trim(); continue; }
+    const nonceMatch = /^Nonce: (.+)$/.exec(line);
+    if (nonceMatch) { fields.nonce = nonceMatch[1].trim(); continue; }
+    const issuedAtMatch = /^Issued At: (.+)$/.exec(line);
+    if (issuedAtMatch) { fields.issuedAt = issuedAtMatch[1].trim(); continue; }
+    const expiryMatch = /^Expiration Time: (.+)$/.exec(line);
+    if (expiryMatch) { fields.expirationTime = expiryMatch[1].trim(); continue; }
+    const uriMatch = /^URI: (.+)$/.exec(line);
+    if (uriMatch) { fields.uri = uriMatch[1].trim(); continue; }
+  }
+  // The first line contains the domain
+  const domainMatch = /^(.+) wants you to sign in/.exec(lines[0] ?? '');
+  if (domainMatch) fields.domain = domainMatch[1].trim();
+  return fields;
+}
+
+/**
+ * Sign a session payload using HMAC-SHA256 with the platform SESSION_SECRET.
+ * Uses config.sessionSecret which already enforces fail-fast in production.
  */
 async function signSessionToken(payload: Record<string, unknown>): Promise<string> {
-  const secret = process.env.SESSION_SECRET ?? 'dev-secret-change-in-production';
+  const secret = config.sessionSecret;
   const data = JSON.stringify(payload);
 
   if (typeof crypto !== 'undefined' && crypto.subtle) {
@@ -42,6 +67,7 @@ async function signSessionToken(payload: Record<string, unknown>): Promise<strin
 
 /**
  * POST /api/auth/verify – verifies a SIWE signature and issues a signed session token.
+ * Validates: signature, nonce (one-time), expiration time, and chain ID.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!authLimiter(req, res)) return;
@@ -56,30 +82,55 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     address: string;
   };
 
-  const result = await verifySiweSignature(message, signature, address);
+  // --- 1. Parse SIWE message fields ---
+  const parsed = parseSiweMessage(message);
 
+  // --- 2. Validate expiration time ---
+  if (parsed.expirationTime) {
+    const expiry = new Date(parsed.expirationTime).getTime();
+    if (Number.isFinite(expiry) && Date.now() > expiry) {
+      return res.status(401).json({ error: 'SIWE message has expired' });
+    }
+  }
+
+  // --- 3. Validate chain ID matches expected chain (required field) ---
+  const expectedChainId = String(config.chainId);
+  if (!parsed.chainId) {
+    return res.status(401).json({ error: 'SIWE message is missing Chain ID' });
+  }
+  if (parsed.chainId !== expectedChainId) {
+    return res.status(401).json({
+      error: `Chain ID mismatch: expected ${expectedChainId}, got ${parsed.chainId}`,
+    });
+  }
+
+  // --- 4. Validate and consume nonce (one-time use) ---
+  if (!parsed.nonce) {
+    return res.status(401).json({ error: 'SIWE message is missing a nonce' });
+  }
+  if (!consumeNonce(parsed.nonce)) {
+    auditLog.record({ action: 'auth.failed', actor: address, ip: req.headers['x-forwarded-for'] as string });
+    return res.status(401).json({ error: 'Invalid or expired nonce' });
+  }
+
+  // --- 5. Verify cryptographic signature ---
+  const result = await verifySiweSignature(message, signature, address);
   if (!result.valid) {
     auditLog.record({ action: 'auth.failed', actor: address, ip: req.headers['x-forwarded-for'] as string });
     return res.status(401).json({ error: 'Invalid signature', detail: result.error });
   }
 
+  // --- 6. Issue signed session cookie ---
   const sessionPayload = {
     address,
-    chainId: 8453,
+    chainId: config.chainId,
     signedAt: Date.now(),
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    expiresAt: Date.now() + config.sessionMaxAgeMs,
   };
-
-  const validation = validateWalletSession({ ...sessionPayload, nonce: '' });
-  if (!validation.valid) {
-    return res.status(401).json({ error: validation.reason });
-  }
 
   auditLog.record({ action: 'auth.login', actor: address, ip: req.headers['x-forwarded-for'] as string });
 
   const token = await signSessionToken(sessionPayload);
-
-  // Issue the session token as an HttpOnly cookie so it cannot be read by JS
   const isProduction = process.env.NODE_ENV === 'production';
   res.setHeader(
     'Set-Cookie',
@@ -88,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'Path=/',
       'HttpOnly',
       'SameSite=Strict',
-      `Max-Age=${24 * 60 * 60}`,
+      `Max-Age=${Math.floor(config.sessionMaxAgeMs / 1000)}`,
       ...(isProduction ? ['Secure'] : []),
     ].join('; '),
   );

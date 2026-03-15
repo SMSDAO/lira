@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { metrics } from '@/observability/metrics';
+import { apiLimiter } from '@/security/rateLimit';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!apiLimiter(req, res)) return;
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

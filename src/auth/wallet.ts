@@ -73,6 +73,42 @@ export function generateNonce(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+// ---------------------------------------------------------------------------
+// Server-side nonce store (one-time use, 30-minute TTL)
+// ---------------------------------------------------------------------------
+
+const NONCE_TTL_MS = 30 * 60 * 1000; // 30 min
+const nonceStore = new Map<string, number>(); // nonce -> expiresAt (Unix ms)
+
+/** Maximum number of pending nonces tracked in memory. */
+const MAX_NONCE_STORE_SIZE = 1000;
+
+/** Register an issued nonce in the server-side store. */
+export function storeNonce(nonce: string): void {
+  const now = Date.now();
+  nonceStore.set(nonce, now + NONCE_TTL_MS);
+  // Opportunistic cleanup of expired entries
+  if (nonceStore.size > MAX_NONCE_STORE_SIZE) {
+    for (const [k, exp] of nonceStore) {
+      if (exp <= now) nonceStore.delete(k);
+    }
+  }
+}
+
+/**
+ * Consume a nonce – returns `true` and removes the entry on success,
+ * or `false` when the nonce is unknown or has expired.
+ */
+export function consumeNonce(nonce: string): boolean {
+  const exp = nonceStore.get(nonce);
+  if (exp === undefined || Date.now() > exp) {
+    nonceStore.delete(nonce); // clean up expired entry if present
+    return false;
+  }
+  nonceStore.delete(nonce); // one-time use
+  return true;
+}
+
 export interface WalletAuthSession {
   address: string;
   chainId: number;

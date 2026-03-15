@@ -20,15 +20,17 @@ In production, swap the in-memory store for a Redis client for multi-replica con
 
 ### 2. CSRF Protection (`src/security/csrf.ts`)
 
-Double-submit cookie pattern. Server sets `csrf_token` as an HttpOnly, SameSite=Strict cookie. Client must echo it in the `X-CSRF-Token` header on mutating requests.
+Double-submit cookie pattern. Server sets `csrf_token` as a readable (non-HttpOnly), SameSite=Strict cookie. Browser JS reads it and echoes the value in the `X-CSRF-Token` header on mutating requests. The cookie is not HttpOnly by design – the JS must be able to read it to populate the header.
 
 ### 3. Content-Security-Policy (`src/security/csp.ts`)
 
-Strict CSP applied on all API responses:
+`applyCsp(res)` is available as a response helper providing strict CSP headers:
 - `default-src 'self'`
 - `script-src 'self' 'nonce-…' 'strict-dynamic'`
 - `frame-ancestors 'none'`
 - `object-src 'none'`
+
+Call `applyCsp(res)` in individual API route handlers or in `_document.tsx` to enable it. It is not applied globally by default.
 
 ### 4. Request Validation (`src/security/requestValidation.ts`)
 

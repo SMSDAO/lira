@@ -20,8 +20,8 @@ See `.env.example` for all required variables. Key production variables:
 | `DATABASE_URL` | PostgreSQL connection string |
 | `NEXT_PUBLIC_LIRA_TOKEN` | LiraToken contract address |
 | `NEXT_PUBLIC_FACTORY` | TokenLaunchFactory address |
-| `NEXT_PUBLIC_REGISTRY_ADDRESS` | LiraTokenRegistry address |
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect Project ID |
+| `NEXT_PUBLIC_LIRA_REGISTRY` | LiraTokenRegistry address |
+| `NEXT_PUBLIC_WALLET_CONNECT_ID` | WalletConnect Project ID |
 | `OPENAI_API_KEY` | OpenAI API key (image generation) |
 | `REPLICATE_API_TOKEN` | Replicate API token |
 | `REDIS_URL` | Redis URL for BullMQ + rate limiting |

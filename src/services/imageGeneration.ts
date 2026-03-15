@@ -215,7 +215,10 @@ async function generateStableDiffusion(
   if (!res.ok) throw new Error(`Stable Diffusion API error: ${res.status}`);
 
   const data = (await res.json()) as { images?: string[] };
-  const b64 = data.images?.[0] ?? '';
+  const b64 = data.images?.[0];
+  if (!b64) {
+    throw new Error('Stable Diffusion returned no image data');
+  }
   return {
     id: `img_sd_${Date.now()}`,
     url: `data:image/png;base64,${b64}`,

@@ -20,7 +20,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const store = DexTokenStore.getInstance();
   const { chain, sort = 'volume', limit = '20' } = req.query;
-  const lim = Math.min(parseInt(limit as string, 10) || 20, 100);
+  const parsedLimit = parseInt(limit as string, 10);
+  const validLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
+  const lim = Math.min(Math.max(validLimit, 1), 100);
   const chainFilter = toChain(chain);
 
   const tokens =

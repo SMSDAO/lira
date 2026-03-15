@@ -1,8 +1,13 @@
 /**
- * Contract interfaces for all Lira smart contracts.
- * Derived from the actual ABI definitions in src/lib/contracts.ts.
+ * TypeScript interfaces for all Lira smart contracts.
  *
- * Keep these in sync with CONTRACT_ABIS in src/lib/contracts.ts.
+ * The first five interfaces (ILiraToken, ILiraTokenRegistry, ITokenLaunchFactory,
+ * ILiraProfile, ILiraSocialGraph) are derived from CONTRACT_ABIS in src/lib/contracts.ts
+ * and must be kept in sync with those ABIs.
+ *
+ * IAgentExecutor and ILiraAccessToken are planned contracts that have not yet been
+ * deployed; they are provided here for early type-safety and have no corresponding
+ * entries in CONTRACT_ABIS or scripts/validate-env.ts yet.
  */
 
 // ---------------------------------------------------------------------------
