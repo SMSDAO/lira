@@ -78,6 +78,30 @@ Open [http://localhost:3000](http://localhost:3000) and connect your wallet!
 - Health monitoring
 - Testing tools
 
+---
+
+## 🖥️ User Interface
+
+The Lira Protocol features a cutting-edge **Aura FX Neo Digital UI** — a high-contrast dark theme with neon glow effects, fluid animations powered by Framer Motion, and a modern neo-digital aesthetic inspired by Zora. Each role-based dashboard provides a purpose-built workspace for its audience.
+
+| User Dashboard | Admin Dashboard | Developer Dashboard |
+| :---: | :---: | :---: |
+| [![User Dashboard](https://via.placeholder.com/480x300/0a0a0f/00f5ff?text=User+Dashboard)](docs/screenshots/user-dashboard.png) | [![Admin Dashboard](https://via.placeholder.com/480x300/0a0a0f/a855f7?text=Admin+Dashboard)](docs/screenshots/admin-dashboard.png) | [![Developer Dashboard](https://via.placeholder.com/480x300/0a0a0f/f59e0b?text=Developer+Dashboard)](docs/screenshots/developer-dashboard.png) |
+| *Social Timeline & Smart Wallet* | *Billing, Fees & Contract Control* | *Token Launcher & Agent Executor* |
+
+> 📸 **To add real screenshots**: Capture your locally running app (`npm run dev`) and save the images to [`docs/screenshots/`](./docs/screenshots/). See [`docs/screenshots/README.md`](./docs/screenshots/README.md) for the expected file names and dimensions.
+
+### Dashboard Highlights
+
+**User Dashboard** — `/dashboard`  
+Neo-digital social timeline with Aura FX glow effects. Displays token portfolio, smart wallet balances, agent earnings, and a Zora-inspired activity feed.
+
+**Admin Dashboard** — `/admin`  
+Full protocol governance panel: manage billing, configure protocol fees, control smart contracts on BASE/Monad, and monitor system health in real time via `BillingSection`, `ContractController`, and `SecuritySection` components.
+
+**Developer Dashboard** — `/dev`  
+Token Launcher with one-click ERC20 deployment, Parallel Agent Executor with Quantum Oracle (`Q#`) visualization, live API logs, and testing tools.
+
 ### 🛠️ Tech Stack
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS, Framer Motion
