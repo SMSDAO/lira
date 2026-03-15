@@ -21,6 +21,19 @@ LIRA is a comprehensive Web3 platform for token launches, AI agents, and DAO man
 
 ---
 
+## 📸 Screenshots
+
+### 🌐 Landing Page
+![LIRA Landing Page](./public/screenshots/landing-page.svg)
+
+### 📊 User Dashboard
+![User Dashboard](./public/screenshots/user-dashboard.svg)
+
+### 👤 User Profile
+![User Profile](./public/screenshots/user-profile.svg)
+
+---
+
 ## Quick Start
 
 ```bash
