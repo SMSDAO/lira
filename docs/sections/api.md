@@ -1,0 +1,85 @@
+# API Reference
+
+## Authentication
+
+All mutating API routes require a valid SIWE session cookie or `Authorization: Bearer <token>` header.
+
+Rate limits are enforced per IP:
+- Standard API: 120 req/min
+- Auth endpoints: 10 req/min
+- Strict (image gen, scans): 30 req/min
+
+## Endpoints
+
+### Auth
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/auth/nonce` | Returns a one-time nonce for SIWE |
+| `POST` | `/api/auth/verify` | Verifies a SIWE signature, issues session |
+
+### DEX
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/dex/tokens` | List indexed DEX tokens |
+| `POST` | `/api/dex/scan` | Trigger a DEX scan across all protocols |
+
+### Images
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/images/generate` | Generate an AI image |
+
+### Timeline
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/timeline` | List timeline events |
+
+### Agents
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/agents` | List agents |
+| `POST` | `/api/agents/{id}` | Trigger agent task |
+
+### Jobs
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/jobs` | List background job definitions |
+
+### Observability
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/observability/metrics` | Prometheus metrics |
+
+### Web3
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/web3/farcaster-profile?fid=<fid>` | Fetch Farcaster profile |
+
+### Admin (requires admin role)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/admin/billing` | Billing analytics |
+| `GET` | `/api/admin/security` | Security configuration |
+| `GET` | `/api/admin/registry` | Token registry |
+| `GET/POST` | `/api/admin/moderation` | User moderation |
+
+## Error Responses
+
+All errors use the following shape:
+
+```json
+{
+  "error": "Human-readable message",
+  "details": { "field": "Validation error" }
+}
+```
+
+HTTP status codes follow REST conventions: `400` bad request, `401` unauthenticated, `403` forbidden, `404` not found, `429` rate limited, `500` server error.

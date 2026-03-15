@@ -1,0 +1,22 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { timeline } from '@/timeline';
+import type { TimelineEventType, TimelineEventSeverity } from '@/timeline';
+import { apiLimiter } from '@/security/rateLimit';
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!apiLimiter(req, res)) return;
+
+  if (req.method === 'GET') {
+    const { userId, type, severity, limit = '50', offset = '0' } = req.query;
+    const events = timeline.list({
+      userId: userId as string | undefined,
+      type: type as TimelineEventType | undefined,
+      severity: severity as TimelineEventSeverity | undefined,
+      limit: parseInt(limit as string, 10),
+      offset: parseInt(offset as string, 10),
+    });
+    return res.status(200).json({ events, total: timeline.total() });
+  }
+
+  return res.status(405).json({ error: 'Method not allowed' });
+}
