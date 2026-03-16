@@ -14,13 +14,17 @@ export function generateCsrfToken(): string {
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     const bytes = new Uint8Array(24);
     crypto.getRandomValues(bytes);
-    // Runtime-agnostic base64url (no Buffer dependency)
-    return btoa(String.fromCharCode(...bytes))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+    if (typeof Buffer !== 'undefined') {
+      // Node.js and most edge runtimes: fast Buffer-based base64url
+      return Buffer.from(bytes).toString('base64url');
+    }
+    // Pure-browser / edge runtimes without Buffer: encode bytes directly
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
-  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  // Last resort (no crypto API available – should not occur in supported runtimes)
+  throw new Error('Cryptographically secure random number generation is unavailable');
 }
 
 /**

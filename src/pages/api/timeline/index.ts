@@ -15,11 +15,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!apiLimiter(req, res)) return;
 
   if (req.method === 'GET') {
-    const { userId, type, severity, limit, offset } = req.query;
+    // Normalize string|string[] query params – pick first element of arrays
+    const rawUserId = Array.isArray(req.query.userId) ? req.query.userId[0] : req.query.userId;
+    const rawType = Array.isArray(req.query.type) ? req.query.type[0] : req.query.type;
+    const rawSeverity = Array.isArray(req.query.severity) ? req.query.severity[0] : req.query.severity;
+    const { limit, offset } = req.query;
+
     const filterOpts = {
-      userId: userId as string | undefined,
-      type: type as TimelineEventType | undefined,
-      severity: severity as TimelineEventSeverity | undefined,
+      userId: rawUserId as string | undefined,
+      type: rawType as TimelineEventType | undefined,
+      severity: rawSeverity as TimelineEventSeverity | undefined,
     };
     const events = timeline.list({
       ...filterOpts,

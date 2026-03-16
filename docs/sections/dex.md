@@ -22,7 +22,7 @@ The DEX scanner indexes liquidity pools and token analytics across major decentr
 
 Stores aggregated analytics per token:
 - Price in USD, 24h price change
-- 24h trading volume
+- `volumeTotalUsd` – cumulative all-time trading volume as reported by subgraph `volumeUSD` (not a 24h figure)
 - Total liquidity (TVL) across all indexed pools
 - Pool details (address, protocol, fees, reserves)
 - Historical price snapshots
@@ -33,7 +33,8 @@ Represents a single liquidity pool:
 - Address, protocol, chain
 - Token0 / Token1 addresses and symbols
 - Fee tier (basis points)
-- Liquidity USD, 24h volume
+- Liquidity USD
+- `volumeTotalUsd` – cumulative all-time volume from subgraph data (not 24h)
 
 ## API
 

@@ -47,10 +47,10 @@ Append-only in-memory audit trail (upgradeable to a SIEM/database). Records:
 
 ### 6. RBAC (`src/core/rbac/`)
 
-Seven-tier role hierarchy enforced on all routes:
+Seven-tier role hierarchy:
 `guest < user < creator < developer < moderator < admin < super-admin`
 
-Route guards are applied via `requirePermission()` and `requireRole()` middleware.
+`requirePermission()` and `requireRole()` middleware are available in `src/core/rbac/` but are not yet wired into API route handlers. They are intended for future server-side enforcement.
 
 ### 7. WASM Cryptography (`src/wasm/crypto.ts`)
 
@@ -63,7 +63,7 @@ SIWE signature verification runs in a WASM module for performance. Falls back to
 - [ ] Content-Security-Policy headers (`applyCsp(res)` available as per-route helper, not globally applied)
 - [x] Input validation with typed schemas
 - [x] Audit log for privileged actions
-- [x] RBAC guards on admin/dev routes
+- [ ] RBAC guards on admin/dev routes (UI-level gating only; server-side middleware available but not yet wired in)
 - [x] SIWE for wallet authentication
 - [ ] Database-backed audit log (requires Prisma migration)
 - [ ] Redis-backed rate limiter (requires `REDIS_URL`)

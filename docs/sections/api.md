@@ -66,7 +66,9 @@ Rate limits are enforced per IP:
 |--------|------|-------------|
 | `GET` | `/api/web3/farcaster-profile?fid=<fid>` | Fetch Farcaster profile |
 
-### Admin (requires admin role)
+### Admin (intended for admin role – no server-side auth guard currently enforced)
+
+> **Note:** These endpoints are currently convention-restricted (UI routing only). Server-side role enforcement via `requireRole(Role.ADMIN)` is available in `src/core/rbac/` but not yet wired into these handlers.
 
 | Method | Path | Description |
 |--------|------|-------------|

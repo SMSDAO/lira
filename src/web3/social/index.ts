@@ -31,24 +31,20 @@ export interface PublishedCast {
  * Publish a cast to Farcaster via the Warpcast / Hub REST API.
  * Requires a valid signer UUID from the Farcaster Auth Kit.
  *
- * NOTE: Production usage requires a signerUuid obtained through
- * Farcaster Auth Kit (client-side signing). This stub shows the
- * server-side pattern for future integration.
+ * NOTE: This is a stub. Production usage requires a signerUuid obtained through
+ * Farcaster Auth Kit (client-side signing). Call this function only when you
+ * have wired a real Hub endpoint and a valid signerUuid.
+ *
+ * @throws {Error} Always – the production integration is not yet implemented.
  */
 export async function publishFarcasterCast(
-  payload: FarcasterCastPayload,
-  signerUuid?: string,
+  _payload: FarcasterCastPayload,
+  _signerUuid?: string,
 ): Promise<PublishedCast | null> {
-  // Stub: in production call https://api.warpcast.com/v2/casts
-  // signerUuid will be used when the real API call is implemented
-  void signerUuid;
-  return {
-    hash: `0x${Math.random().toString(16).slice(2).padEnd(64, '0')}`,
-    fid: payload.fid,
-    text: payload.text,
-    timestamp: Date.now(),
-    url: `https://warpcast.com/${payload.fid}`,
-  };
+  throw new Error(
+    'publishFarcasterCast is not yet implemented. ' +
+    'Wire a real Farcaster Hub endpoint and a valid signerUuid to enable this feature.',
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -78,19 +74,18 @@ export interface MintReceipt {
 }
 
 /**
- * Mint a Zora NFT via the Zora Protocol API.
- * In production, use the Zora SDK with a wallet signer.
+ * Mint a Zora NFT via the Zora Protocol SDK.
+ *
+ * NOTE: This is a stub. Production usage requires the `@zoralabs/protocol-sdk`
+ * package and a wallet signer. This function will throw until implemented.
+ *
+ * @throws {Error} Always – the production integration is not yet implemented.
  */
-export async function mintZoraNft(params: ZoraMintParams): Promise<MintReceipt> {
-  // Stub: real implementation uses @zoralabs/protocol-sdk
-  return {
-    txHash: `0x${Math.random().toString(16).slice(2).padEnd(64, '0')}`,
-    contractAddress: params.contractAddress,
-    tokenId: params.tokenId,
-    quantity: params.quantity,
-    to: params.to,
-    mintedAt: Date.now(),
-  };
+export async function mintZoraNft(_params: ZoraMintParams): Promise<MintReceipt> {
+  throw new Error(
+    'mintZoraNft is not yet implemented. ' +
+    'Install @zoralabs/protocol-sdk and provide a wallet signer to enable this feature.',
+  );
 }
 
 // ---------------------------------------------------------------------------

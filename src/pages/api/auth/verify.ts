@@ -57,9 +57,9 @@ async function signSessionToken(payload: Record<string, unknown>): Promise<strin
       ['sign'],
     );
     const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return `${btoa(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}.${b64}`;
+    // Use Buffer for base64url encoding – safe in both Node.js and edge runtimes
+    const b64 = Buffer.from(sig).toString('base64url');
+    return `${Buffer.from(data).toString('base64url')}.${b64}`;
   }
 
   // Node.js fallback
