@@ -82,9 +82,9 @@ Error response shapes vary by endpoint and error type:
 | Scenario | Shape |
 |----------|-------|
 | General error | `{ "error": "message" }` |
-| Validation error | `{ "error": "message", "detail": { "field": "reason" } }` |
+| Validation error | `{ "error": "Validation failed", "details": { "field": "reason" } }` |
 | Signature/auth error | `{ "error": "message", "detail": "reason string" }` |
-| Rate limiting | `{ "error": "Too many requests", "retryAfter": <seconds> }` |
+| Rate limiting | `{ "error": "Too Many Requests", "retryAfter": <seconds> }` |
 | Method not allowed | `{ "error": "Method not allowed" }` |
 
 HTTP status codes follow REST conventions: `400` bad request, `401` unauthenticated, `403` forbidden, `404` not found, `429` rate limited, `500` server error.

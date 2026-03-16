@@ -19,7 +19,8 @@ export type DexChain = 'ethereum' | 'base' | 'polygon' | 'arbitrum' | 'bnb' | 'a
 export interface DexPricePoint {
   timestamp: number; // Unix ms
   priceUsd: number;
-  volume24h: number;
+  /** Cumulative all-time volume from subgraph data at this snapshot */
+  volumeTotalUsd: number;
 }
 
 export interface DexPool {
@@ -32,7 +33,11 @@ export interface DexPool {
   token1Symbol: string;
   feeTier?: number; // basis points (e.g. 3000 = 0.3%)
   liquidityUsd: number;
-  volume24h: number;
+  /**
+   * Cumulative all-time volume in USD as reported by the subgraph's `volumeUSD` field.
+   * This is NOT a 24-hour figure; it is the all-time cumulative value.
+   */
+  volumeTotalUsd: number;
   apr?: number;
   createdAt: number; // Unix ms
 }
@@ -57,8 +62,11 @@ export interface DexToken {
   totalSupply?: string;
   /** Circulating supply */
   circulatingSupply?: string;
-  /** Aggregated 24-h trading volume across all indexed pools */
-  volume24h: number;
+  /**
+   * Aggregated all-time cumulative trading volume across all indexed pools.
+   * Derived from the subgraph's `volumeUSD` field which is cumulative, not 24h.
+   */
+  volumeTotalUsd: number;
   /** Total value locked across all indexed pools */
   totalLiquidityUsd: number;
   /** All pools in which this token participates */
@@ -105,7 +113,7 @@ export class DexTokenStore {
 
   topByVolume(limit = 20, chain?: DexChain): DexToken[] {
     return this.list(chain)
-      .sort((a, b) => b.volume24h - a.volume24h)
+      .sort((a, b) => b.volumeTotalUsd - a.volumeTotalUsd)
       .slice(0, limit);
   }
 

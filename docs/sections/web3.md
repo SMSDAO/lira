@@ -4,15 +4,15 @@
 
 ### Deployed Contracts
 
-| Contract | Purpose |
-|----------|---------|
-| `LiraToken` | ERC-20 governance + utility token |
-| `LiraTokenRegistry` | On-chain registry of launched tokens |
-| `TokenLaunchFactory` | Factory for user token launches |
-| `LiraProfile` | On-chain identity (handle + metadata) |
-| `LiraSocialGraph` | Follow / unfollow social graph |
-| `AgentExecutor` | On-chain agent task execution |
-| `LiraAccessToken` | ERC-1155 access token |
+| Contract | Purpose | Status |
+|----------|---------|--------|
+| `LiraToken` | ERC-20 governance + utility token | Deployed |
+| `LiraTokenRegistry` | On-chain registry of launched tokens | Deployed |
+| `TokenLaunchFactory` | Factory for user token launches | Deployed |
+| `LiraProfile` | On-chain identity (handle + metadata) | Deployed |
+| `LiraSocialGraph` | Follow / unfollow social graph | Deployed |
+| `AgentExecutor` | On-chain agent task execution | Deployed (set `NEXT_PUBLIC_LIRA_AGENT_EXECUTOR` env var) |
+| `LiraAccessToken` | ERC-1155 access token | Planned – not yet deployed |
 
 ### Contract Interfaces
 

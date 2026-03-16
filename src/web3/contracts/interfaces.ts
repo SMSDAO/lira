@@ -5,9 +5,9 @@
  * ILiraProfile, ILiraSocialGraph) are derived from CONTRACT_ABIS in src/lib/contracts.ts
  * and must be kept in sync with those ABIs.
  *
- * IAgentExecutor and ILiraAccessToken are planned contracts that have not yet been
- * deployed; they are provided here for early type-safety and have no corresponding
- * entries in CONTRACT_ABIS or scripts/validate-env.ts yet.
+ * IAgentExecutor is deployed by scripts/deploy/deploy.js; set
+ * NEXT_PUBLIC_LIRA_AGENT_EXECUTOR to wire its address (not yet in scripts/validate-env.ts).
+ * ILiraAccessToken is a planned contract that has not yet been deployed.
  */
 
 // ---------------------------------------------------------------------------

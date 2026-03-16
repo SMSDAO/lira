@@ -59,8 +59,8 @@ SIWE signature verification runs in a WASM module for performance. Falls back to
 ## Security Checklist
 
 - [x] Rate limiting on all public API routes
-- [x] CSRF protection on mutating requests
-- [x] Content-Security-Policy headers
+- [ ] CSRF protection on mutating requests (`setCsrfCookie`/`validateCsrf` available but not yet wired into routes)
+- [ ] Content-Security-Policy headers (`applyCsp(res)` available as per-route helper, not globally applied)
 - [x] Input validation with typed schemas
 - [x] Audit log for privileged actions
 - [x] RBAC guards on admin/dev routes

@@ -31,9 +31,12 @@ function parseSiweMessage(text: string): Record<string, string> {
     const uriMatch = /^URI: (.+)$/.exec(line);
     if (uriMatch) { fields.uri = uriMatch[1].trim(); continue; }
   }
-  // The first line contains the domain
+  // EIP-4361 format: line 0 = "<domain> wants you to sign in with your Ethereum account:"
+  //                  line 1 = <address>
   const domainMatch = /^(.+) wants you to sign in/.exec(lines[0] ?? '');
   if (domainMatch) fields.domain = domainMatch[1].trim();
+  const addressLine = (lines[1] ?? '').trim();
+  if (addressLine) fields.address = addressLine;
   return fields;
 }
 
@@ -84,6 +87,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // --- 1. Parse SIWE message fields ---
   const parsed = parseSiweMessage(message);
+
+  // --- 1a. Validate message address matches the submitted address ---
+  // EIP-4361 requires line 2 to be the Ethereum address. If present, it must match.
+  if (!parsed.address) {
+    return res.status(401).json({ error: 'SIWE message is missing an address' });
+  }
+  if (parsed.address.toLowerCase() !== address.toLowerCase()) {
+    auditLog.record({ action: 'auth.failed', actor: address, ip: req.headers['x-forwarded-for'] as string });
+    return res.status(401).json({ error: 'Address in SIWE message does not match submitted address' });
+  }
 
   // --- 2. Validate expiration time ---
   if (parsed.expirationTime) {

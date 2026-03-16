@@ -113,6 +113,22 @@ export class TimelineStore {
     return filtered.slice(offset, offset + limit);
   }
 
+  /**
+   * Count matching events without applying limit/offset.
+   * Useful for returning accurate pagination totals.
+   */
+  count(options?: {
+    userId?: string;
+    type?: TimelineEventType;
+    severity?: TimelineEventSeverity;
+  }): number {
+    let filtered = this.events;
+    if (options?.userId) filtered = filtered.filter(e => e.userId === options.userId);
+    if (options?.type) filtered = filtered.filter(e => e.type === options.type);
+    if (options?.severity) filtered = filtered.filter(e => e.severity === options.severity);
+    return filtered.length;
+  }
+
   total(): number {
     return this.events.length;
   }

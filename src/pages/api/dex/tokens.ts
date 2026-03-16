@@ -19,21 +19,30 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const store = DexTokenStore.getInstance();
-  const { chain, sort = 'volume', limit = '20' } = req.query;
-  const parsedLimit = parseInt(limit as string, 10);
+
+  // Normalize query params – req.query values can be string | string[]
+  const rawChain = Array.isArray(req.query.chain) ? req.query.chain[0] : req.query.chain;
+  const rawSort = Array.isArray(req.query.sort)
+    ? (req.query.sort[0] ?? 'volume')
+    : (req.query.sort ?? 'volume');
+  const rawLimit = Array.isArray(req.query.limit)
+    ? (req.query.limit[0] ?? '20')
+    : (req.query.limit ?? '20');
+
+  const parsedLimit = parseInt(rawLimit as string, 10);
   const validLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
   const lim = Math.min(Math.max(validLimit, 1), 100);
-  const chainFilter = toChain(chain);
+  const chainFilter = toChain(rawChain);
 
   const tokens =
-    sort === 'liquidity'
+    rawSort === 'liquidity'
       ? store.topByLiquidity(lim, chainFilter)
       : store.topByVolume(lim, chainFilter);
 
   return res.status(200).json({
     tokens,
     total: store.size(),
-    chain: chain ?? 'all',
-    sort,
+    chain: chainFilter ?? 'all',
+    sort: rawSort,
   });
 }

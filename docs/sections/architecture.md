@@ -72,5 +72,5 @@ lira/
 
 1. **Non-destructive extension** – all new code is additive. Existing `src/lib/rbac.ts` is unchanged; the new `src/core/rbac/` extends it.
 2. **TypeScript strict** – all new modules use strict type checking.
-3. **Security-first** – every API route applies rate limiting, CSRF protection, and input validation via the `/security` module.
-4. **Observability by default** – every operation is traced and metrics are exported in Prometheus format.
+3. **Security-first** – every API route applies rate limiting. CSRF helpers and input validation schemas are available in `src/security/` and applied on routes where implemented. See `docs/sections/security.md` for current coverage.
+4. **Observability by default** – metrics are exported in Prometheus format; tracing helpers (`startSpan`/`traced`) are available but must be wired into individual operations.

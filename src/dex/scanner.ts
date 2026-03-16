@@ -134,7 +134,8 @@ async function scanEndpoint(
       token1Symbol: pool.token1.symbol,
       feeTier: pool.feeTier ? parseInt(pool.feeTier, 10) : undefined,
       liquidityUsd: liquidity,
-      volume24h: volume,
+      // volumeUSD from the subgraph is cumulative all-time, not 24h
+      volumeTotalUsd: volume,
       createdAt: now,
     };
 
@@ -148,7 +149,7 @@ async function scanEndpoint(
       decimals: parseInt(pool.token0.decimals, 10) || 18,
       priceUsd: 0,
       priceChange24h: 0,
-      volume24h: 0,
+      volumeTotalUsd: 0,
       totalLiquidityUsd: 0,
       pools: [],
       priceHistory: [],
@@ -160,7 +161,7 @@ async function scanEndpoint(
 
     existing0.pools = [...existing0.pools.filter(p => p.address !== dexPool.address), dexPool];
     existing0.totalLiquidityUsd = existing0.pools.reduce((s, p) => s + p.liquidityUsd, 0);
-    existing0.volume24h = existing0.pools.reduce((s, p) => s + p.volume24h, 0);
+    existing0.volumeTotalUsd = existing0.pools.reduce((s, p) => s + p.volumeTotalUsd, 0);
     tokenMap.set(t0key, existing0);
 
     // Update token1
@@ -173,7 +174,7 @@ async function scanEndpoint(
       decimals: parseInt(pool.token1.decimals, 10) || 18,
       priceUsd: 0,
       priceChange24h: 0,
-      volume24h: 0,
+      volumeTotalUsd: 0,
       totalLiquidityUsd: 0,
       pools: [],
       priceHistory: [],
@@ -185,7 +186,7 @@ async function scanEndpoint(
 
     existing1.pools = [...existing1.pools.filter(p => p.address !== dexPool.address), dexPool];
     existing1.totalLiquidityUsd = existing1.pools.reduce((s, p) => s + p.liquidityUsd, 0);
-    existing1.volume24h = existing1.pools.reduce((s, p) => s + p.volume24h, 0);
+    existing1.volumeTotalUsd = existing1.pools.reduce((s, p) => s + p.volumeTotalUsd, 0);
     tokenMap.set(t1key, existing1);
   }
 

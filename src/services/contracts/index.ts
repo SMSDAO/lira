@@ -65,10 +65,10 @@ export function parseRevertReason(error: unknown): string {
  * Env var names match the existing convention in src/lib/contracts.ts
  * and scripts/validate-env.ts.
  *
- * Note: AgentExecutor and LiraAccessToken are planned (not yet deployed) contracts.
- * Their env vars (NEXT_PUBLIC_LIRA_AGENT_EXECUTOR, NEXT_PUBLIC_LIRA_ACCESS_TOKEN) are
- * not in scripts/validate-env.ts and will return `undefined` from getContractAddress()
- * until the contracts are deployed and the env vars are set.
+ * AgentExecutor is deployed by scripts/deploy/deploy.js but its address env var
+ * (NEXT_PUBLIC_LIRA_AGENT_EXECUTOR) is not yet in scripts/validate-env.ts; set it
+ * manually to enable address lookups. LiraAccessToken is a planned contract that
+ * has not yet been deployed.
  */
 export const CONTRACT_ADDRESSES: Record<string, Record<ContractName, string>> = {
   base: {

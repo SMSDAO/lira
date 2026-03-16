@@ -16,14 +16,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if (req.method === 'GET') {
     const { userId, type, severity, limit, offset } = req.query;
-    const events = timeline.list({
+    const filterOpts = {
       userId: userId as string | undefined,
       type: type as TimelineEventType | undefined,
       severity: severity as TimelineEventSeverity | undefined,
+    };
+    const events = timeline.list({
+      ...filterOpts,
       limit: parsePositiveInt(limit, 50, MAX_LIMIT),
       offset: parsePositiveInt(offset, 0),
     });
-    return res.status(200).json({ events, total: timeline.total() });
+    return res.status(200).json({ events, total: timeline.count(filterOpts) });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
