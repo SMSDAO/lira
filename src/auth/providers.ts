@@ -3,6 +3,8 @@
  * Centralises all supported authentication methods for the Lira platform.
  */
 
+import { initSSOProvider } from './sso';
+
 export type AuthProviderType =
   | 'email'
   | 'oauth_google'
@@ -15,12 +17,13 @@ export type AuthProviderType =
   | 'wallet_rainbow'
   | 'wallet_ledger'
   | 'farcaster'
-  | 'social_farcaster';
+  | 'social_farcaster'
+  | 'enterprise_sso';
 
 export interface AuthProvider {
   id: AuthProviderType;
   name: string;
-  type: 'email' | 'oauth' | 'wallet' | 'decentralised';
+  type: 'email' | 'oauth' | 'wallet' | 'decentralised' | 'enterprise';
   enabled: boolean;
   iconUrl?: string;
 }
@@ -45,6 +48,17 @@ export const AUTH_PROVIDERS: AuthProvider[] = [
   // Decentralised identity
   { id: 'farcaster', name: 'Farcaster', type: 'decentralised', enabled: true },
 ];
+
+// Conditionally append the enterprise SSO provider when the feature flag is enabled
+const ssoProvider = initSSOProvider();
+if (ssoProvider) {
+  AUTH_PROVIDERS.push({
+    id: 'enterprise_sso',
+    name: ssoProvider.name,
+    type: 'enterprise',
+    enabled: ssoProvider.enabled,
+  });
+}
 
 export function getEnabledProviders(type?: AuthProvider['type']): AuthProvider[] {
   const enabled = AUTH_PROVIDERS.filter(p => p.enabled);

@@ -13,8 +13,17 @@ const schema = {
 
 const VALID_ENGINES: ImageEngine[] = ['openai', 'stable-diffusion', 'replicate'];
 
-/** Extract and do basic structural validation of the lira_session cookie. */
-function getValidatedSession(req: NextApiRequest): { address: string; expiresAt: number } | null {
+/**
+ * Extract and fully validate the lira_session cookie.
+ * Verification steps:
+ *   1. Structural parse – must be base64url(payload).base64url(HMAC)
+ *   2. HMAC-SHA256 recomputation over the raw payload string (constant-time compare)
+ *   3. Payload field presence (`address`, `expiresAt`)
+ *   4. Expiry check
+ */
+async function getValidatedSession(
+  req: NextApiRequest,
+): Promise<{ address: string; expiresAt: number } | null> {
   const cookieHeader = req.headers.cookie ?? '';
   const match = cookieHeader
     .split(';')
@@ -22,16 +31,55 @@ function getValidatedSession(req: NextApiRequest): { address: string; expiresAt:
     .find(c => c.startsWith('lira_session='));
   if (!match) return null;
 
-  // Cookie values may contain '=' (base64url padding/chars) – preserve all after the first '='
+  // Cookie values may contain '=' (base64url chars) – preserve all after the first '='
   const tokenRaw = match.split('=').slice(1).join('=');
   if (!tokenRaw) return null;
 
   // Session token format: base64url(JSON payload) . base64url(HMAC)
-  const parts = tokenRaw.split('.');
-  if (parts.length !== 2) return null;
+  const dotIdx = tokenRaw.indexOf('.');
+  if (dotIdx === -1) return null;
+  const payloadB64 = tokenRaw.slice(0, dotIdx);
+  const sigB64 = tokenRaw.slice(dotIdx + 1);
+  if (!payloadB64 || !sigB64) return null;
+
+  // Recompute expected HMAC and compare in constant time
+  const secret = config.sessionSecret;
+  const payloadStr = Buffer.from(payloadB64, 'base64url').toString('utf8');
+  let expectedSig: Buffer;
+  try {
+    if (typeof crypto !== 'undefined' && crypto.subtle) {
+      const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(secret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign'],
+      );
+      const sigBytes = await crypto.subtle.sign(
+        'HMAC',
+        key,
+        new TextEncoder().encode(payloadStr),
+      );
+      expectedSig = Buffer.from(sigBytes);
+    } else {
+      const { createHmac } = await import('crypto');
+      expectedSig = createHmac('sha256', secret).update(payloadStr).digest();
+    }
+  } catch {
+    return null;
+  }
+
+  const providedSig = Buffer.from(sigB64, 'base64url');
+  // Constant-time comparison to prevent timing attacks
+  if (
+    providedSig.length !== expectedSig.length ||
+    !providedSig.equals(expectedSig)
+  ) {
+    return null;
+  }
 
   try {
-    const payload = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8')) as {
+    const payload = JSON.parse(payloadStr) as {
       address?: string;
       expiresAt?: number;
     };
@@ -52,8 +100,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ error: 'Image generation is disabled' });
   }
 
-  // Guard 2: require a valid (structurally correct + non-expired) session
-  if (!getValidatedSession(req)) {
+  // Guard 2: require a valid (HMAC-verified + non-expired) session
+  if (!await getValidatedSession(req)) {
     return res.status(401).json({ error: 'Authentication required for image generation' });
   }
 

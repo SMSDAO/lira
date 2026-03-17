@@ -43,6 +43,7 @@ export const config = {
     farcasterLogin: process.env.FEATURE_FARCASTER_LOGIN !== 'false',
     governanceVoting: process.env.FEATURE_GOVERNANCE_VOTING === 'true',
     creatorMinting: process.env.FEATURE_CREATOR_MINTING !== 'false',
+    sso: process.env.FEATURE_SSO === 'true',
   },
 
   // Admin

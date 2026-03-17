@@ -123,13 +123,19 @@ async function generateOpenAi(
   };
 }
 
-/** Replicate poll timeout (ms) */
-const REPLICATE_POLL_TIMEOUT = 120_000;
+/** Replicate poll timeout (ms) – reduced to stay within common serverless function limits */
+const REPLICATE_POLL_TIMEOUT = 25_000;
 const REPLICATE_POLL_INTERVAL = 2_000;
 
 /**
  * Replicate predictions are asynchronous. This helper polls the prediction
  * URL until the job succeeds or fails (or times out).
+ *
+ * **Serverless note**: The 25-second timeout is intentionally below the typical
+ * 30-second serverless function limit. For long-running models, callers should
+ * instead use the async-poll pattern: return the `prediction.id` immediately
+ * (202 Accepted) and let the client poll `/api/images/status/:id`. The current
+ * synchronous implementation is provided for convenience in short-running models.
  */
 async function pollReplicatePrediction(
   predictionUrl: string,
@@ -206,11 +212,14 @@ async function generateStableDiffusion(
   height: number,
 ): Promise<GeneratedImage> {
   const sdUrl = process.env.SD_API_URL ?? 'http://localhost:7860';
+  // SD timeout is capped at 25s to stay within serverless function limits.
+  // For large/complex prompts that routinely exceed this, consider offloading to
+  // a background worker and returning a job ID (202 Accepted pattern).
   const res = await fetch(`${sdUrl}/sdapi/v1/txt2img`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt, width, height, steps: 20 }),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(25_000),
   });
   if (!res.ok) throw new Error(`Stable Diffusion API error: ${res.status}`);
 

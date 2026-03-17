@@ -56,6 +56,13 @@ Seven-tier role hierarchy:
 
 SIWE signature verification runs in a WASM module for performance. Falls back to `viem.verifyMessage` when the WASM binary is unavailable.
 
+### 8. Enterprise SSO (`src/auth/sso/index.ts`)
+
+SAML/OIDC integration surface for enterprise identity providers (Okta, Azure AD, etc.).
+Disabled by default; enable with `FEATURE_SSO=true`. When enabled, the SSO provider is
+automatically appended to `AUTH_PROVIDERS` and available at `/api/auth/sso/login`.
+Configure via `SSO_PROVIDER_NAME`, `SSO_PROTOCOL`, and `SSO_LOGIN_URL` environment variables.
+
 ## Security Checklist
 
 - [x] Rate limiting on all public API routes

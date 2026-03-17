@@ -4,12 +4,21 @@ import type { DexChain } from '@/models/DexToken';
 import { apiLimiter } from '@/security/rateLimit';
 
 const VALID_CHAINS: DexChain[] = ['ethereum', 'base', 'polygon', 'arbitrum', 'bnb', 'avalanche'];
+const VALID_SORT = ['volume', 'liquidity'] as const;
+type SortField = (typeof VALID_SORT)[number];
 
 function toChain(val: unknown): DexChain | undefined {
   if (typeof val === 'string' && (VALID_CHAINS as string[]).includes(val)) {
     return val as DexChain;
   }
   return undefined;
+}
+
+function toSort(val: unknown): SortField {
+  if (typeof val === 'string' && (VALID_SORT as readonly string[]).includes(val)) {
+    return val as SortField;
+  }
+  return 'volume';
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -22,9 +31,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // Normalize query params – req.query values can be string | string[]
   const rawChain = Array.isArray(req.query.chain) ? req.query.chain[0] : req.query.chain;
-  const rawSort = Array.isArray(req.query.sort)
-    ? (req.query.sort[0] ?? 'volume')
-    : (req.query.sort ?? 'volume');
+  const rawSortInput = Array.isArray(req.query.sort)
+    ? (req.query.sort[0] ?? '')
+    : (req.query.sort ?? '');
   const rawLimit = Array.isArray(req.query.limit)
     ? (req.query.limit[0] ?? '20')
     : (req.query.limit ?? '20');
@@ -33,9 +42,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const validLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
   const lim = Math.min(Math.max(validLimit, 1), 100);
   const chainFilter = toChain(rawChain);
+  const sortField = toSort(rawSortInput);
 
   const tokens =
-    rawSort === 'liquidity'
+    sortField === 'liquidity'
       ? store.topByLiquidity(lim, chainFilter)
       : store.topByVolume(lim, chainFilter);
 
@@ -43,6 +53,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     tokens,
     total: store.size(),
     chain: chainFilter ?? 'all',
-    sort: rawSort,
+    sort: sortField,
   });
 }
