@@ -1,12 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { timingSafeEqual, createHmac } from 'crypto';
 import { runDexScan } from '@/dex/scanner';
 import { strictLimiter } from '@/security/rateLimit';
 import { config } from '@/config';
+import { serverConfig } from '@/config/server';
 
 /**
- * Extract and HMAC-verify the lira_session cookie, returning the role if valid.
- * Full signature verification is required because we make authorization decisions
- * based on the role field.
+ * Extract, HMAC-verify the lira_session cookie, and derive the role from the
+ * session address using the admin/dev allow-lists.
+ *
+ * The session token payload includes `address` but not a `role` claim (role is
+ * derived server-side to prevent privilege escalation via a forged cookie).
  */
 async function getVerifiedSessionRole(req: NextApiRequest): Promise<string | null> {
   const cookieHeader = req.headers.cookie ?? '';
@@ -25,8 +29,7 @@ async function getVerifiedSessionRole(req: NextApiRequest): Promise<string | nul
   const sigB64 = tokenRaw.slice(dotIdx + 1);
   if (!payloadB64 || !sigB64) return null;
 
-  // Recompute HMAC over the raw payload string and compare in constant time
-  const secret = config.sessionSecret;
+  const secret = serverConfig.sessionSecret;
   const payloadStr = Buffer.from(payloadB64, 'base64url').toString('utf8');
   let expectedSig: Buffer;
   try {
@@ -45,7 +48,6 @@ async function getVerifiedSessionRole(req: NextApiRequest): Promise<string | nul
       );
       expectedSig = Buffer.from(sigBytes);
     } else {
-      const { createHmac } = await import('crypto');
       expectedSig = createHmac('sha256', secret).update(payloadStr).digest();
     }
   } catch {
@@ -53,14 +55,21 @@ async function getVerifiedSessionRole(req: NextApiRequest): Promise<string | nul
   }
 
   const providedSig = Buffer.from(sigB64, 'base64url');
-  if (providedSig.length !== expectedSig.length || !providedSig.equals(expectedSig)) {
-    return null;
-  }
+  // Use timingSafeEqual to prevent timing-based HMAC forgery attacks
+  if (providedSig.length !== expectedSig.length) return null;
+  if (!timingSafeEqual(providedSig, expectedSig)) return null;
 
   try {
-    const payload = JSON.parse(payloadStr) as { role?: string; expiresAt?: number };
+    const payload = JSON.parse(payloadStr) as { address?: string; expiresAt?: number };
     if (typeof payload.expiresAt !== 'number' || Date.now() > payload.expiresAt) return null;
-    return payload.role ?? 'user';
+    if (!payload.address) return null;
+
+    // Derive role from address – the session payload does not include a role claim
+    // to prevent privilege escalation via a crafted cookie.
+    const addr = payload.address.toLowerCase();
+    if (config.adminAddresses.includes(addr)) return 'admin';
+    if (config.devAddresses.includes(addr)) return 'developer';
+    return 'user';
   } catch {
     return null;
   }

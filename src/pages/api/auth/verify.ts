@@ -1,10 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { createHmac } from 'crypto';
 import { verifySiweSignature } from '@/wasm/crypto';
 import { consumeNonce } from '@/auth/wallet';
 import { authLimiter } from '@/security/rateLimit';
 import { validateBody } from '@/security/requestValidation';
 import { auditLog } from '@/security/audit';
 import { config } from '@/config';
+import { serverConfig } from '@/config/server';
 
 const schema = {
   message: { type: 'string' as const, required: true },
@@ -42,10 +44,10 @@ function parseSiweMessage(text: string): Record<string, string> {
 
 /**
  * Sign a session payload using HMAC-SHA256 with the platform SESSION_SECRET.
- * Uses config.sessionSecret which already enforces fail-fast in production.
+ * Uses serverConfig.sessionSecret which already enforces fail-fast in production.
  */
 async function signSessionToken(payload: Record<string, unknown>): Promise<string> {
-  const secret = config.sessionSecret;
+  const secret = serverConfig.sessionSecret;
   const data = JSON.stringify(payload);
 
   if (typeof crypto !== 'undefined' && crypto.subtle) {
@@ -63,7 +65,6 @@ async function signSessionToken(payload: Record<string, unknown>): Promise<strin
   }
 
   // Node.js fallback
-  const { createHmac } = await import('crypto');
   const mac = createHmac('sha256', secret).update(data).digest('base64url');
   return `${Buffer.from(data).toString('base64url')}.${mac}`;
 }
@@ -138,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     address,
     chainId: config.chainId,
     signedAt: Date.now(),
-    expiresAt: Date.now() + config.sessionMaxAgeMs,
+    expiresAt: Date.now() + serverConfig.sessionMaxAgeMs,
   };
 
   auditLog.record({ action: 'auth.login', actor: address, ip: req.headers['x-forwarded-for'] as string });
@@ -152,7 +153,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'Path=/',
       'HttpOnly',
       'SameSite=Strict',
-      `Max-Age=${Math.floor(config.sessionMaxAgeMs / 1000)}`,
+      `Max-Age=${Math.floor(serverConfig.sessionMaxAgeMs / 1000)}`,
       ...(isProduction ? ['Secure'] : []),
     ].join('; '),
   );

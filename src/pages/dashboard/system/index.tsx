@@ -52,8 +52,13 @@ export default function SystemDashboardPage() {
 
   useEffect(() => { loadHealth(); }, []);
 
+  useEffect(() => {
+    if (isConnected && userRole !== UserRole.ADMIN) {
+      void router.push('/dashboard');
+    }
+  }, [isConnected, userRole, router]);
+
   if (isConnected && userRole !== UserRole.ADMIN) {
-    void router.push('/dashboard');
     return null;
   }
 

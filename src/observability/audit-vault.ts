@@ -52,7 +52,10 @@ async function hashEvent(event: EnterpriseAuditEvent, recordedAt: number): Promi
       'SHA-256',
       new TextEncoder().encode(canonical),
     );
-    return Buffer.from(bytes).toString('hex');
+    // Use Uint8Array for runtime-agnostic hex encoding (no Buffer dependency)
+    return Array.from(new Uint8Array(bytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   }
 
   // Node.js fallback

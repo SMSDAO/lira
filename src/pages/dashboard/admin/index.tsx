@@ -34,8 +34,13 @@ export default function AdminDashboardPage() {
     setStats({ users: 1_247, activeAgents: 12, tokens: 384, revenue: '$284,392' });
   }, []);
 
+  useEffect(() => {
+    if (isConnected && userRole !== UserRole.ADMIN) {
+      void router.push('/dashboard');
+    }
+  }, [isConnected, userRole, router]);
+
   if (isConnected && userRole !== UserRole.ADMIN) {
-    void router.push('/dashboard');
     return null;
   }
 

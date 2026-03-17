@@ -1,9 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { timingSafeEqual, createHmac } from 'crypto';
 import { generateImage, VALID_IMAGE_CATEGORIES } from '@/services/imageGeneration';
 import type { ImageEngine, ImageCategory } from '@/services/imageGeneration';
 import { strictLimiter } from '@/security/rateLimit';
 import { validateBody } from '@/security/requestValidation';
 import { config } from '@/config';
+import { serverConfig } from '@/config/server';
 
 const schema = {
   prompt: { type: 'string' as const, required: true, minLength: 3, maxLength: 500 },
@@ -42,8 +44,8 @@ async function getValidatedSession(
   const sigB64 = tokenRaw.slice(dotIdx + 1);
   if (!payloadB64 || !sigB64) return null;
 
-  // Recompute expected HMAC and compare in constant time
-  const secret = config.sessionSecret;
+  // Recompute expected HMAC and compare using timingSafeEqual to prevent timing attacks
+  const secret = serverConfig.sessionSecret;
   const payloadStr = Buffer.from(payloadB64, 'base64url').toString('utf8');
   let expectedSig: Buffer;
   try {
@@ -62,7 +64,6 @@ async function getValidatedSession(
       );
       expectedSig = Buffer.from(sigBytes);
     } else {
-      const { createHmac } = await import('crypto');
       expectedSig = createHmac('sha256', secret).update(payloadStr).digest();
     }
   } catch {
@@ -70,13 +71,8 @@ async function getValidatedSession(
   }
 
   const providedSig = Buffer.from(sigB64, 'base64url');
-  // Constant-time comparison to prevent timing attacks
-  if (
-    providedSig.length !== expectedSig.length ||
-    !providedSig.equals(expectedSig)
-  ) {
-    return null;
-  }
+  if (providedSig.length !== expectedSig.length) return null;
+  if (!timingSafeEqual(providedSig, expectedSig)) return null;
 
   try {
     const payload = JSON.parse(payloadStr) as {

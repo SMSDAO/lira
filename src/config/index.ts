@@ -1,6 +1,12 @@
 /**
- * Centralised platform configuration.
- * All environment-dependent values are read here and exported as typed constants.
+ * Public platform configuration.
+ *
+ * This module is safe to import from both client and server code.
+ * It only contains values derived from NEXT_PUBLIC_* env vars, feature flags,
+ * and address allow-lists that are intentionally exposed to the browser.
+ *
+ * Server-only secrets (SESSION_SECRET, API keys, Redis URL, etc.) live in
+ * `src/config/server.ts` and must never be imported by client-side code.
  */
 
 export const config = {
@@ -17,25 +23,6 @@ export const config = {
   // WalletConnect - matches existing convention in src/pages/_app.tsx and scripts/validate-env.ts
   walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? '',
 
-  // Auth
-  sessionSecret:
-    process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET
-      ? (() => { throw new Error('SESSION_SECRET must be set in production'); })()
-      : (process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'),
-  sessionMaxAgeMs: 24 * 60 * 60 * 1000, // 24 h
-
-  // AI / Image generation
-  openAiApiKey: process.env.OPENAI_API_KEY ?? '',
-  replicateApiToken: process.env.REPLICATE_API_TOKEN ?? '',
-  stableDiffusionUrl: process.env.SD_API_URL ?? 'http://localhost:7860',
-
-  // Redis
-  redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
-
-  // Observability
-  otelServiceName: process.env.OTEL_SERVICE_NAME ?? 'lira',
-  otelExporterEndpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? '',
-
   // Feature flags
   features: {
     imageGeneration: process.env.FEATURE_IMAGE_GENERATION !== 'false',
@@ -46,7 +33,7 @@ export const config = {
     sso: process.env.FEATURE_SSO === 'true',
   },
 
-  // Admin
+  // Admin / dev address allow-lists (intentionally public – used for UI gating too)
   adminAddresses: (process.env.NEXT_PUBLIC_ADMIN_ADDRESSES ?? process.env.ADMIN_ADDRESSES ?? '')
     .split(',')
     .map(a => a.trim().toLowerCase())

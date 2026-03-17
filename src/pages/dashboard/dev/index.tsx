@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/common/DashboardLayout';
@@ -27,8 +27,13 @@ export default function DevDashboardPage() {
   const userRole = useUserRole();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
+  useEffect(() => {
+    if (isConnected && userRole !== UserRole.DEV && userRole !== UserRole.ADMIN) {
+      void router.push('/dashboard');
+    }
+  }, [isConnected, userRole, router]);
+
   if (isConnected && userRole !== UserRole.DEV && userRole !== UserRole.ADMIN) {
-    void router.push('/dashboard');
     return null;
   }
 
