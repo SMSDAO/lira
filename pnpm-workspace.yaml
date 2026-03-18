@@ -1,8 +1,0 @@
-onlyBuiltDependencies:
-  - '@swc/core'
-  - bufferutil
-  - keccak
-  - secp256k1
-  - sharp
-  - unrs-resolver
-  - utf-8-validate
