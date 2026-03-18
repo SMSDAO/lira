@@ -24,13 +24,18 @@ export const config = {
   walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? '',
 
   // Feature flags
+  // Use NEXT_PUBLIC_FEATURE_* so flags are available in browser bundles too.
+  // FEATURE_* (non-public) vars remain supported as a server-side fallback for
+  // backward compatibility, but they will be `undefined` in client bundles and
+  // therefore treated as "enabled" – always prefer NEXT_PUBLIC_FEATURE_* in new
+  // deployments to get consistent behaviour on both client and server.
   features: {
-    imageGeneration: process.env.FEATURE_IMAGE_GENERATION !== 'false',
-    dexScanner: process.env.FEATURE_DEX_SCANNER !== 'false',
-    farcasterLogin: process.env.FEATURE_FARCASTER_LOGIN !== 'false',
-    governanceVoting: process.env.FEATURE_GOVERNANCE_VOTING === 'true',
-    creatorMinting: process.env.FEATURE_CREATOR_MINTING !== 'false',
-    sso: process.env.FEATURE_SSO === 'true',
+    imageGeneration: (process.env.NEXT_PUBLIC_FEATURE_IMAGE_GENERATION ?? process.env.FEATURE_IMAGE_GENERATION ?? 'true') !== 'false',
+    dexScanner: (process.env.NEXT_PUBLIC_FEATURE_DEX_SCANNER ?? process.env.FEATURE_DEX_SCANNER ?? 'true') !== 'false',
+    farcasterLogin: (process.env.NEXT_PUBLIC_FEATURE_FARCASTER_LOGIN ?? process.env.FEATURE_FARCASTER_LOGIN ?? 'true') !== 'false',
+    governanceVoting: (process.env.NEXT_PUBLIC_FEATURE_GOVERNANCE_VOTING ?? process.env.FEATURE_GOVERNANCE_VOTING ?? 'false') === 'true',
+    creatorMinting: (process.env.NEXT_PUBLIC_FEATURE_CREATOR_MINTING ?? process.env.FEATURE_CREATOR_MINTING ?? 'true') !== 'false',
+    sso: (process.env.NEXT_PUBLIC_FEATURE_SSO ?? process.env.FEATURE_SSO ?? 'false') === 'true',
   },
 
   // Admin / dev address allow-lists (intentionally public – used for UI gating too)

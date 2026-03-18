@@ -109,11 +109,13 @@ async function generateOpenAi(
   });
   if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
 
-  const data = (await res.json()) as { data: Array<{ url: string }> };
+  const data = (await res.json()) as { data?: Array<{ url?: string }> };
+  const imageUrl = data.data?.[0]?.url;
+  if (!imageUrl) throw new Error('OpenAI API returned no image URL');
   const [outW, outH] = size.split('x').map(Number);
   return {
     id: `img_openai_${Date.now()}`,
-    url: data.data[0].url,
+    url: imageUrl,
     engine: 'openai',
     category: params.category,
     prompt,

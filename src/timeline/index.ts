@@ -3,10 +3,12 @@
  * convenience helpers used by API routes and dashboard components.
  */
 
-export { TimelineStore } from '@/models/TimelineEvent';
-export type { TimelineEvent, TimelineEventType, TimelineEventSeverity } from '@/models/TimelineEvent';
+// Single import – used locally and re-exported below
 import { TimelineStore } from '@/models/TimelineEvent';
-import type { TimelineEvent, TimelineEventType } from '@/models/TimelineEvent';
+import type { TimelineEvent, TimelineEventType, TimelineEventSeverity } from '@/models/TimelineEvent';
+
+export { TimelineStore };
+export type { TimelineEvent, TimelineEventType, TimelineEventSeverity };
 
 /** Singleton timeline store for the current process. */
 export const timeline = TimelineStore.getInstance();

@@ -8,6 +8,22 @@ import { auditLog } from '@/security/audit';
 import { config } from '@/config';
 import { serverConfig } from '@/config/server';
 
+/**
+ * Extract the client IP from the request.
+ * `x-forwarded-for` may contain a comma-separated list of IPs (added by each
+ * proxy hop) and can be spoofed unless your reverse proxy strips/sets it.
+ * We always take the first entry (original client), falling back to the
+ * socket remote address.
+ */
+function getClientIp(req: NextApiRequest): string {
+  const xff = req.headers['x-forwarded-for'];
+  if (xff) {
+    const first = Array.isArray(xff) ? xff[0] : xff.split(',')[0];
+    return first.trim();
+  }
+  return req.socket?.remoteAddress ?? 'unknown';
+}
+
 const schema = {
   message: { type: 'string' as const, required: true },
   signature: { type: 'string' as const, required: true },
@@ -95,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'SIWE message is missing an address' });
   }
   if (parsed.address.toLowerCase() !== address.toLowerCase()) {
-    auditLog.record({ action: 'auth.failed', actor: address, ip: req.headers['x-forwarded-for'] as string });
+    auditLog.record({ action: 'auth.failed', actor: address, ip: getClientIp(req) });
     return res.status(401).json({ error: 'Address in SIWE message does not match submitted address' });
   }
 
@@ -123,14 +139,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'SIWE message is missing a nonce' });
   }
   if (!consumeNonce(parsed.nonce)) {
-    auditLog.record({ action: 'auth.failed', actor: address, ip: req.headers['x-forwarded-for'] as string });
+    auditLog.record({ action: 'auth.failed', actor: address, ip: getClientIp(req) });
     return res.status(401).json({ error: 'Invalid or expired nonce' });
   }
 
   // --- 5. Verify cryptographic signature ---
   const result = await verifySiweSignature(message, signature, address);
   if (!result.valid) {
-    auditLog.record({ action: 'auth.failed', actor: address, ip: req.headers['x-forwarded-for'] as string });
+    auditLog.record({ action: 'auth.failed', actor: address, ip: getClientIp(req) });
     return res.status(401).json({ error: 'Invalid signature', detail: result.error });
   }
 
@@ -142,7 +158,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     expiresAt: Date.now() + serverConfig.sessionMaxAgeMs,
   };
 
-  auditLog.record({ action: 'auth.login', actor: address, ip: req.headers['x-forwarded-for'] as string });
+  auditLog.record({ action: 'auth.login', actor: address, ip: getClientIp(req) });
 
   const token = await signSessionToken(sessionPayload);
   const isProduction = process.env.NODE_ENV === 'production';
