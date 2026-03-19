@@ -4,7 +4,7 @@ import { strictLimiter } from '@/security/rateLimit';
 import { config } from '@/config';
 import { verifySession } from '@/auth/session';
 
-const SCAN_ALLOWED_ROLES = new Set(['admin', 'super-admin', 'developer']);
+const SCAN_ALLOWED_ROLES = new Set(['admin', 'developer']);
 
 /**
  * In-memory scan dedup guard.

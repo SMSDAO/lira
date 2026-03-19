@@ -24,6 +24,9 @@ type OpenAiSize = '1024x1024' | '1792x1024' | '1024x1792';
 const OPENAI_SUPPORTED_SIZES: OpenAiSize[] = ['1024x1024', '1792x1024', '1024x1792'];
 
 function resolveOpenAiSize(width: number, height: number): OpenAiSize {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return '1024x1024'; // safe default
+  }
   const ratio = width / height;
   if (ratio > 1.2) return '1792x1024';  // landscape
   if (ratio < 0.8) return '1024x1792';  // portrait
@@ -73,6 +76,10 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
   const enhancedPrompt = buildEnhancedPrompt(params);
   const w = params.width ?? 1024;
   const h = params.height ?? 1024;
+
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
+    throw new Error(`Invalid image dimensions: width=${w}, height=${h}. Both must be positive finite numbers.`);
+  }
 
   switch (params.engine) {
     case 'openai':

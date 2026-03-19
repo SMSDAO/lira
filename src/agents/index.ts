@@ -4,7 +4,7 @@
  * are designed to plug into Redis + BullMQ in production deployments.
  */
 
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 
 // ---------------------------------------------------------------------------
 // Types

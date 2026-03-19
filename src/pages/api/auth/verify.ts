@@ -106,7 +106,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const parsed = parseSiweMessage(message);
 
   // --- 1a. Validate message address matches the submitted address ---
-  // EIP-4361 requires line 2 to be the Ethereum address. If present, it must match.
+  // EIP-4361 format: lines[1] (second line, 0-indexed) contains the Ethereum address.
+  // If present in the parsed message, it must match the submitted address.
   if (!parsed.address) {
     return res.status(401).json({ error: 'SIWE message is missing an address' });
   }

@@ -86,8 +86,11 @@ export function sqrtPriceX96ToPrice(sqrtPriceX96: bigint, decimals0 = 18, decima
     : priceScaledNum / 10 ** (-decimalAdjust);
 }
 
-/** Calculate the tick from a given price. */
+/** Calculate the tick from a given price. Throws for non-positive prices. */
 export function priceToTick(price: number): number {
+  if (!Number.isFinite(price) || price <= 0) {
+    throw new Error(`priceToTick: price must be a positive finite number, got ${price}`);
+  }
   return Math.floor(Math.log(price) / Math.log(1.0001));
 }
 

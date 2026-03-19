@@ -35,17 +35,35 @@ export interface VaultEntry {
 const vault: VaultEntry[] = [];
 
 /**
+ * Recursively sort object keys so that `JSON.stringify` produces a
+ * deterministic / canonical string regardless of insertion order.
+ */
+function sortedKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortedKeys);
+  if (value !== null && typeof value === 'object') {
+    return Object.keys(value as Record<string, unknown>)
+      .sort()
+      .reduce<Record<string, unknown>>((acc, k) => {
+        acc[k] = sortedKeys((value as Record<string, unknown>)[k]);
+        return acc;
+      }, {});
+  }
+  return value;
+}
+
+/**
  * Compute SHA-256 of a canonical JSON serialisation of the event.
- * The same serialisation is used for both in-memory and on-chain storage,
- * ensuring the hash is deterministic across environments.
+ * Keys are recursively sorted before stringification so the hash is
+ * deterministic across callers/environments regardless of object-key
+ * insertion order in `metadata`.
  */
 async function hashEvent(event: EnterpriseAuditEvent, recordedAt: number): Promise<string> {
-  const canonical = JSON.stringify({
+  const canonical = JSON.stringify(sortedKeys({
     action: event.action,
     userId: event.userId,
     metadata: event.metadata,
     recordedAt,
-  });
+  }));
 
   if (typeof crypto !== 'undefined' && crypto.subtle) {
     const bytes = await crypto.subtle.digest(
