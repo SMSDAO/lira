@@ -7,9 +7,12 @@
  * hash bytes are the same ones you would submit to an on-chain audit trail smart
  * contract (e.g. via `AuditVault.logEvent(bytes32 eventHash)`).
  *
- * In-memory store is used for development. For production, wire
- * `persistVaultEntry()` to your database or on-chain contract.
+ * In-memory store is kept for fast reads within a single process. Each event is
+ * also persisted to the `audit_vault_entries` database table via Prisma so the
+ * audit log survives restarts.
  */
+
+import prisma from '@/lib/prisma';
 
 export interface EnterpriseAuditEvent {
   /** Short action identifier, e.g. "USER_LOGIN", "TOKEN_MINT" */
@@ -125,24 +128,22 @@ export function getRecentVaultEntries(limit = 100): VaultEntry[] {
 }
 
 /**
- * Persist a vault entry to durable storage.
- * Replace this stub with a Prisma write or on-chain contract call in production.
- *
- * A warning is emitted in production when no real persistence is configured,
- * so audit events are not silently lost.
+ * Persist a vault entry to durable storage via Prisma.
+ * Falls back to an in-memory-only warning if the database is unavailable.
  */
-async function persistVaultEntry(_entry: VaultEntry): Promise<void> {
-  if (process.env.NODE_ENV === 'production') {
-    // Warn operators that the in-memory vault is not production-safe.
-    // Remove this warning once a real persistence layer is wired in.
-    console.warn(
-      '[audit-vault] WARN: persistVaultEntry is a no-op. ' +
-      'Audit events are stored in memory only and will be lost on restart. ' +
-      'Wire a database or on-chain contract to suppress this warning.',
-    );
+async function persistVaultEntry(entry: VaultEntry): Promise<void> {
+  try {
+    await prisma.auditVaultEntry.create({
+      data: {
+        hash: entry.hash,
+        action: entry.action,
+        userId: entry.userId,
+        recordedAt: new Date(entry.recordedAt),
+      },
+    });
+  } catch (err) {
+    // Log but do not throw – a DB write failure should not prevent the
+    // in-memory vault from capturing the event for the current process.
+    console.error('[audit-vault] Failed to persist vault entry to database:', err);
   }
-  // No-op stub. In production replace with:
-  //   await prisma.auditVaultEntry.create({ data: { hash: _entry.hash, recordedAt: new Date(_entry.recordedAt), action: _entry.action, userId: _entry.userId } });
-  // or:
-  //   await auditContract.logEvent(`0x${_entry.hash}`);
 }
