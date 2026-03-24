@@ -4,6 +4,8 @@
  * creator analytics without modifying any existing social API routes.
  */
 
+import prisma from '@/lib/prisma';
+
 // ---------------------------------------------------------------------------
 // Farcaster
 // ---------------------------------------------------------------------------
@@ -102,18 +104,95 @@ export interface CreatorAnalytics {
   revenueEth: number;
 }
 
-/** Aggregate creator analytics from on-chain and social data. */
+/**
+ * Aggregate creator analytics from on-chain indexed data (Prisma) and social
+ * data (SocialEdge). Off-chain Farcaster cast counts are not yet wired to a
+ * Hub endpoint and always return 0 until an external integration is added.
+ */
 export async function getCreatorAnalytics(
   address: string,
 ): Promise<CreatorAnalytics> {
-  // Stub: in production query Zora subgraph + Farcaster Hub
+  const normalised = address.toLowerCase();
+
+  // ── On-chain: tokens created by this address ───────────────────────────
+  const createdTokenAddresses = await prisma.token.findMany({
+    where: { creatorAddress: normalised },
+    select: { contractAddress: true },
+  });
+  const tokenAddrs = createdTokenAddresses.map(t => t.contractAddress);
+
+  // Total mints: count of Mint events on the creator's tokens
+  const totalMints = tokenAddrs.length
+    ? await prisma.tokenEvent.count({
+        where: { tokenAddress: { in: tokenAddrs }, eventType: 'Mint' },
+      })
+    : 0;
+
+  // Total volume (raw token units, summed across all creator tokens)
+  const volumeAgg = tokenAddrs.length
+    ? await prisma.tokenStat.aggregate({
+        where: { tokenAddress: { in: tokenAddrs } },
+        _sum: { volumeTotal: true },
+      })
+    : { _sum: { volumeTotal: null } };
+  const rawVolume = volumeAgg._sum.volumeTotal;
+  // Prisma Decimal.toFixed(0) gives exact integer string — safe for BigInt
+  const totalVolume: bigint =
+    rawVolume != null ? BigInt(rawVolume.toFixed(0)) : 0n;
+
+  // Top collectors: wallets that received the most mints on creator's tokens
+  const mintRecipients = tokenAddrs.length
+    ? await prisma.tokenEvent.groupBy({
+        by: ['toAddress'],
+        where: {
+          tokenAddress: { in: tokenAddrs },
+          eventType: 'Mint',
+          toAddress: { not: null },
+        },
+        _count: { toAddress: true },
+        orderBy: { _count: { toAddress: 'desc' } },
+        take: 10,
+      })
+    : [];
+  // toAddress is guaranteed non-null by the `not: null` filter above
+  const topCollectors = mintRecipients.map(r => ({
+    address: r.toAddress!,
+    mintCount: r._count.toAddress,
+  }));
+
+  // Revenue (ETH-denominated): sum of fee collections for this address
+  const feeAgg = await prisma.feeCollection.aggregate({
+    where: { collectorAddress: normalised },
+    _sum: { amount: true },
+  });
+  const rawFee = feeAgg._sum.amount;
+  // Number conversion loses precision beyond 53-bit mantissa; acceptable for
+  // display-only revenue figures at normal ETH scales (< 9 quadrillion ETH).
+  const revenueEth =
+    rawFee != null
+      ? Number(rawFee.toFixed(0)) / 1e18
+      : 0;
+
+  // ── Social: follower count from Prisma SocialEdge ──────────────────────
+  // Look up the user record by wallet address to get the Integer PK
+  const user = await prisma.user.findUnique({
+    where: { walletAddress: normalised },
+    select: { id: true },
+  });
+  const followerCount = user
+    ? await prisma.socialEdge.count({
+        where: { followingId: user.id, edgeType: 'follow' },
+      })
+    : 0;
+
   return {
     address,
-    totalMints: 0,
-    totalVolume: 0n,
-    topCollectors: [],
+    totalMints,
+    totalVolume,
+    topCollectors,
+    // recentCasts requires an external Farcaster Hub – not yet wired
     recentCasts: 0,
-    followerCount: 0,
-    revenueEth: 0,
+    followerCount,
+    revenueEth,
   };
 }
