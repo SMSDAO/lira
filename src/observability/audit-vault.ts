@@ -54,7 +54,10 @@ function safeCanonicalJson(value: unknown): string {
       if (v !== null && typeof v === 'object') {
         if (seen.has(v)) return '[Circular]';
         seen.add(v);
-        // Sort keys for canonical output
+        // Preserve arrays as-is; JSON.stringify will call the replacer for each
+        // element so nested BigInts/circulars are still handled correctly.
+        if (Array.isArray(v)) return v;
+        // Sort keys for canonical output (plain objects only)
         return Object.keys(v as Record<string, unknown>)
           .sort()
           .reduce<Record<string, unknown>>((acc, k) => {
