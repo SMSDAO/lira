@@ -116,6 +116,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'Address in SIWE message does not match submitted address' });
   }
 
+  // --- 1b. Validate domain matches this server's host (prevents cross-domain replay) ---
+  const expectedHost = (req.headers.host ?? '').toLowerCase();
+  if (!parsed.domain) {
+    return res.status(401).json({ error: 'SIWE message is missing a domain' });
+  }
+  if (parsed.domain.toLowerCase() !== expectedHost) {
+    auditLog.record({ action: 'auth.failed', actor: address, ip: getClientIp(req) });
+    return res.status(401).json({
+      error: `Domain mismatch: expected ${expectedHost}, got ${parsed.domain}`,
+    });
+  }
+
+  // --- 1c. Validate URI origin matches this server's host (prevents phishing via external URIs) ---
+  if (parsed.uri) {
+    try {
+      const parsedUri = new URL(parsed.uri);
+      if (parsedUri.host.toLowerCase() !== expectedHost) {
+        auditLog.record({ action: 'auth.failed', actor: address, ip: getClientIp(req) });
+        return res.status(401).json({
+          error: `URI host mismatch: expected ${expectedHost}, got ${parsedUri.host}`,
+        });
+      }
+      if (process.env.NODE_ENV === 'production' && parsedUri.protocol !== 'https:') {
+        return res.status(401).json({ error: 'SIWE message URI must use https in production' });
+      }
+    } catch {
+      return res.status(401).json({ error: 'SIWE message contains an invalid URI' });
+    }
+  }
+
   // --- 2. Validate expiration time ---
   if (parsed.expirationTime) {
     const expiry = new Date(parsed.expirationTime).getTime();

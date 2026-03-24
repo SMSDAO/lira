@@ -38,35 +38,53 @@ export interface VaultEntry {
 const vault: VaultEntry[] = [];
 
 /**
- * Recursively sort object keys so that `JSON.stringify` produces a
- * deterministic / canonical string regardless of insertion order.
+ * Safely serialize `value` to a canonical JSON string.
+ *
+ * - Object keys are sorted recursively (deterministic output).
+ * - `BigInt` values are converted to `"<n>n"` strings (e.g. `123n` → `"123n"`).
+ * - Circular references are replaced with the string `"[Circular]"`.
+ * - If serialization fails for any other reason, a descriptive fallback string
+ *   is returned so that the hash can still be computed.
  */
-function sortedKeys(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(sortedKeys);
-  if (value !== null && typeof value === 'object') {
-    return Object.keys(value as Record<string, unknown>)
-      .sort()
-      .reduce<Record<string, unknown>>((acc, k) => {
-        acc[k] = sortedKeys((value as Record<string, unknown>)[k]);
-        return acc;
-      }, {});
+function safeCanonicalJson(value: unknown): string {
+  const seen = new WeakSet<object>();
+  try {
+    return JSON.stringify(value, function replacer(_key, v) {
+      if (typeof v === 'bigint') return `${v.toString()}n`;
+      if (v !== null && typeof v === 'object') {
+        if (seen.has(v)) return '[Circular]';
+        seen.add(v);
+        // Sort keys for canonical output
+        return Object.keys(v as Record<string, unknown>)
+          .sort()
+          .reduce<Record<string, unknown>>((acc, k) => {
+            acc[k] = (v as Record<string, unknown>)[k];
+            return acc;
+          }, {});
+      }
+      return v;
+    });
+  } catch (err) {
+    // Last-resort fallback: describe the serialization failure so the hash
+    // remains computable even if metadata is not fully representable.
+    return JSON.stringify({ _serializationError: String(err) });
   }
-  return value;
 }
 
 /**
  * Compute SHA-256 of a canonical JSON serialisation of the event.
- * Keys are recursively sorted before stringification so the hash is
- * deterministic across callers/environments regardless of object-key
- * insertion order in `metadata`.
+ * Uses `safeCanonicalJson` which:
+ *  - sorts object keys recursively (deterministic across environments),
+ *  - converts `BigInt` values to `"<n>n"` strings (safe for web3 payloads),
+ *  - replaces circular references with `"[Circular]"` instead of throwing.
  */
 async function hashEvent(event: EnterpriseAuditEvent, recordedAt: number): Promise<string> {
-  const canonical = JSON.stringify(sortedKeys({
+  const canonical = safeCanonicalJson({
     action: event.action,
     userId: event.userId,
     metadata: event.metadata,
     recordedAt,
-  }));
+  });
 
   if (typeof crypto !== 'undefined' && crypto.subtle) {
     const bytes = await crypto.subtle.digest(

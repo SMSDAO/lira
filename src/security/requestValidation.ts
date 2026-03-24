@@ -53,16 +53,16 @@ export function validateSchema(
     switch (rule.type) {
       case 'string':
         if (typeof value !== 'string') { errors[field] = `${field} must be a string`; break; }
-        if (rule.minLength && value.length < rule.minLength)
+        if (rule.minLength !== undefined && value.length < rule.minLength)
           errors[field] = `${field} must be at least ${rule.minLength} characters`;
-        if (rule.maxLength && value.length > rule.maxLength)
+        if (rule.maxLength !== undefined && value.length > rule.maxLength)
           errors[field] = `${field} must be at most ${rule.maxLength} characters`;
         if (rule.pattern && !rule.pattern.test(value))
           errors[field] = `${field} has an invalid format`;
         break;
       case 'number': {
         const n = Number(value);
-        if (Number.isNaN(n)) { errors[field] = `${field} must be a number`; break; }
+        if (Number.isNaN(n) || !Number.isFinite(n)) { errors[field] = `${field} must be a finite number`; break; }
         if (rule.min !== undefined && n < rule.min)
           errors[field] = `${field} must be >= ${rule.min}`;
         if (rule.max !== undefined && n > rule.max)

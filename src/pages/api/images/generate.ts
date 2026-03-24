@@ -49,11 +49,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  if (width !== undefined && (typeof width !== 'number' || width < 64 || width > 2048)) {
-    return res.status(400).json({ error: 'width must be a number between 64 and 2048' });
+  if (width !== undefined && (!Number.isFinite(width) || width < 64 || width > 2048)) {
+    return res.status(400).json({ error: 'width must be a finite number between 64 and 2048' });
   }
-  if (height !== undefined && (typeof height !== 'number' || height < 64 || height > 2048)) {
-    return res.status(400).json({ error: 'height must be a number between 64 and 2048' });
+  if (height !== undefined && (!Number.isFinite(height) || height < 64 || height > 2048)) {
+    return res.status(400).json({ error: 'height must be a finite number between 64 and 2048' });
   }
 
   try {

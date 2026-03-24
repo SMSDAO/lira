@@ -4,6 +4,7 @@
  * creator analytics without modifying any existing social API routes.
  */
 
+import { Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
 
 // ---------------------------------------------------------------------------
@@ -101,7 +102,8 @@ export interface CreatorAnalytics {
   topCollectors: Array<{ address: string; mintCount: number }>;
   recentCasts: number;
   followerCount: number;
-  revenueEth: number;
+  /** ETH-denominated revenue, formatted as a decimal string (e.g. "1.234567"). */
+  revenueEth: string;
 }
 
 /**
@@ -166,12 +168,14 @@ export async function getCreatorAnalytics(
     _sum: { amount: true },
   });
   const rawFee = feeAgg._sum.amount;
-  // Number conversion loses precision beyond 53-bit mantissa; acceptable for
-  // display-only revenue figures at normal ETH scales (< 9 quadrillion ETH).
-  const revenueEth =
+  // Use exact Decimal division (avoids Number overflow/Infinity for large wei values).
+  // Result is a fixed-point string with 6 decimal places (e.g. "1.234567").
+  const ETHER_WEI = new Prisma.Decimal('1e18');
+  const REVENUE_DECIMAL_PLACES = 6;
+  const revenueEth: string =
     rawFee != null
-      ? Number(rawFee.toFixed(0)) / 1e18
-      : 0;
+      ? rawFee.div(ETHER_WEI).toDecimalPlaces(REVENUE_DECIMAL_PLACES).toFixed(REVENUE_DECIMAL_PLACES)
+      : '0.000000';
 
   // ── Social: follower count from Prisma SocialEdge ──────────────────────
   // Look up the user record by wallet address to get the Integer PK

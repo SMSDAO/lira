@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/common/DashboardLayout';
@@ -34,10 +34,15 @@ export default function SystemDashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>('cluster');
   const [serviceHealth, setServiceHealth] = useState<ServiceHealth[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const healthTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const loadHealth = () => {
+  const loadHealth = useCallback(() => {
+    if (healthTimerRef.current !== null) {
+      clearTimeout(healthTimerRef.current);
+    }
     setRefreshing(true);
-    setTimeout(() => {
+    healthTimerRef.current = setTimeout(() => {
+      healthTimerRef.current = null;
       setServiceHealth([
         { name: 'Wallet RPC (Base)', status: 'ok', latencyMs: 42, lastChecked: Date.now() },
         { name: 'Uniswap v3 Subgraph', status: 'ok', latencyMs: 210, lastChecked: Date.now() },
@@ -48,9 +53,16 @@ export default function SystemDashboardPage() {
       ]);
       setRefreshing(false);
     }, 600);
-  };
+  }, []);
 
-  useEffect(() => { loadHealth(); }, []);
+  useEffect(() => {
+    loadHealth();
+    return () => {
+      if (healthTimerRef.current !== null) {
+        clearTimeout(healthTimerRef.current);
+      }
+    };
+  }, [loadHealth]);
 
   useEffect(() => {
     if (isConnected && userRole !== UserRole.ADMIN) {
