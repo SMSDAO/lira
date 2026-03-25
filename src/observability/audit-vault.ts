@@ -134,7 +134,7 @@ export async function logEnterpriseEvent(event: EnterpriseAuditEvent): Promise<V
 
   vault.push(entry);
 
-  // Hook for production persistence (no-op stub)
+  // Persist to DB; failures are non-fatal (logged, not thrown) so the in-memory vault is always populated.
   await persistVaultEntry(entry);
 
   return entry;

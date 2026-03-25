@@ -55,7 +55,8 @@ function mockSsoProvider(): SSOProvider {
     name: process.env.SSO_PROVIDER_NAME ?? 'Enterprise SSO',
     protocol: (process.env.SSO_PROTOCOL as 'SAML' | 'OIDC') ?? 'SAML',
     enabled: true,
-    loginUrl: process.env.SSO_LOGIN_URL ?? '/api/auth/sso/login',
+    // Default to a clearly non-functional placeholder so it can't be mistaken for a real endpoint.
+    loginUrl: process.env.SSO_LOGIN_URL ?? '#sso-login-not-configured',
   };
 }
 

@@ -60,7 +60,8 @@ SIWE signature verification runs in a WASM module for performance. Falls back to
 
 SAML/OIDC integration surface for enterprise identity providers (Okta, Azure AD, etc.).
 Disabled by default; enable with `FEATURE_SSO=true`. When enabled, the SSO provider is
-automatically appended to `AUTH_PROVIDERS` and available at `/api/auth/sso/login`.
+automatically appended to `AUTH_PROVIDERS`. The `/api/auth/sso/login` endpoint is planned for a future
+release and is not implemented in this version; set `SSO_LOGIN_URL` to override the placeholder URL.
 Configure via `SSO_PROVIDER_NAME`, `SSO_PROTOCOL`, and `SSO_LOGIN_URL` environment variables.
 
 ## Security Checklist
