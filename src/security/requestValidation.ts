@@ -48,8 +48,6 @@ export function validateSchema(
     }
     if (value === undefined || value === null) continue;
 
-    const strVal = String(value);
-
     switch (rule.type) {
       case 'string':
         if (typeof value !== 'string') { errors[field] = `${field} must be a string`; break; }
@@ -74,11 +72,13 @@ export function validateSchema(
           errors[field] = `${field} must be a boolean`;
         break;
       case 'email':
-        if (!validateEmail(strVal))
+        if (typeof value !== 'string') { errors[field] = `${field} must be a string`; break; }
+        if (!validateEmail(value))
           errors[field] = `${field} must be a valid email address`;
         break;
       case 'address':
-        if (!validateAddress(strVal))
+        if (typeof value !== 'string') { errors[field] = `${field} must be a string`; break; }
+        if (!validateAddress(value))
           errors[field] = `${field} must be a valid Ethereum address`;
         break;
     }

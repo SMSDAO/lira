@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import type { ComponentType } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/common/DashboardLayout';
@@ -11,7 +12,7 @@ import {
 
 type Tab = 'cluster' | 'agents' | 'queues' | 'dex' | 'wallets' | 'health';
 
-const TABS: Array<{ id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const TABS: Array<{ id: Tab; label: string; icon: ComponentType<{ className?: string }> }> = [
   { id: 'cluster', label: 'Cluster', icon: FiServer },
   { id: 'agents', label: 'Agent Activity', icon: FiCpu },
   { id: 'queues', label: 'Queues', icon: FiActivity },

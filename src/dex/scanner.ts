@@ -139,9 +139,12 @@ async function scanEndpoint(
       createdAt: now,
     };
 
-    // Update token0
+    // Update token0 — clone the store entry so concurrent readers see a
+    // consistent snapshot; we only write back via store.upsert once the token
+    // is fully computed.
     const t0key = `${chain}:${pool.token0.id.toLowerCase()}`;
-    const existing0 = tokenMap.get(t0key) ?? store.get(chain, pool.token0.id) ?? {
+    const storeToken0 = store.get(chain, pool.token0.id);
+    const existing0: DexToken = tokenMap.get(t0key) ?? (storeToken0 ? { ...storeToken0 } : {
       address: pool.token0.id,
       chain,
       symbol: pool.token0.symbol,
@@ -157,16 +160,17 @@ async function scanEndpoint(
       tags: [],
       firstSeenAt: now,
       lastUpdatedAt: now,
-    } as DexToken;
+    } as DexToken);
 
     existing0.pools = [...existing0.pools.filter(p => p.address !== dexPool.address), dexPool];
     existing0.totalLiquidityUsd = existing0.pools.reduce((s, p) => s + p.liquidityUsd, 0);
     existing0.volumeTotalUsd = existing0.pools.reduce((s, p) => s + p.volumeTotalUsd, 0);
     tokenMap.set(t0key, existing0);
 
-    // Update token1
+    // Update token1 — same clone pattern as token0.
     const t1key = `${chain}:${pool.token1.id.toLowerCase()}`;
-    const existing1 = tokenMap.get(t1key) ?? store.get(chain, pool.token1.id) ?? {
+    const storeToken1 = store.get(chain, pool.token1.id);
+    const existing1: DexToken = tokenMap.get(t1key) ?? (storeToken1 ? { ...storeToken1 } : {
       address: pool.token1.id,
       chain,
       symbol: pool.token1.symbol,
@@ -182,7 +186,7 @@ async function scanEndpoint(
       tags: [],
       firstSeenAt: now,
       lastUpdatedAt: now,
-    } as DexToken;
+    } as DexToken);
 
     existing1.pools = [...existing1.pools.filter(p => p.address !== dexPool.address), dexPool];
     existing1.totalLiquidityUsd = existing1.pools.reduce((s, p) => s + p.liquidityUsd, 0);

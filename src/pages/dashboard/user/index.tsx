@@ -1,12 +1,13 @@
 import Head from 'next/head';
 import { useState } from 'react';
+import type { ComponentType } from 'react';
 import { useAccount } from 'wagmi';
 import DashboardLayout from '@/components/common/DashboardLayout';
 import { FiUser, FiCreditCard, FiKey, FiShield, FiActivity, FiBell, FiSettings } from 'react-icons/fi';
 
 type Tab = 'profile' | 'wallets' | 'api-keys' | 'security' | 'activity' | 'notifications' | 'settings';
 
-const TABS: Array<{ id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const TABS: Array<{ id: Tab; label: string; icon: ComponentType<{ className?: string }> }> = [
   { id: 'profile', label: 'Profile', icon: FiUser },
   { id: 'wallets', label: 'Wallets', icon: FiCreditCard },
   { id: 'api-keys', label: 'API Keys', icon: FiKey },

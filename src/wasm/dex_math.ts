@@ -20,6 +20,9 @@ export function calcAmountOut(
   reserveOut: bigint,
   feeBps = 30,
 ): bigint {
+  if (feeBps < 0 || feeBps > 10_000) {
+    throw new RangeError(`calcAmountOut: feeBps must be in [0, 10_000], got ${feeBps}`);
+  }
   if (amountIn === 0n || reserveIn === 0n || reserveOut === 0n) return 0n;
   const feeMultiplier = BigInt(10_000 - feeBps);
   const amountInWithFee = amountIn * feeMultiplier;

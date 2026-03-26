@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { useState, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/common/DashboardLayout';
@@ -12,7 +13,7 @@ import {
 
 type Tab = 'overview' | 'users' | 'permissions' | 'wallets' | 'feature-flags' | 'audit' | 'alerts';
 
-const TABS: Array<{ id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const TABS: Array<{ id: Tab; label: string; icon: ComponentType<{ className?: string }> }> = [
   { id: 'overview', label: 'Overview', icon: FiBarChart2 },
   { id: 'users', label: 'Users', icon: FiUsers },
   { id: 'permissions', label: 'Permissions', icon: FiShield },
