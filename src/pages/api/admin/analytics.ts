@@ -47,12 +47,12 @@ export default async function handler(
         ]);
 
         // Group events by day
-        const eventsByDay = events.reduce((acc, event) => {
+        const eventsByDay = events.reduce<Record<string, { date: string; count: number }>>((acc, event) => {
           const day = event.createdAt.toISOString().split('T')[0];
           if (!acc[day]) acc[day] = { date: day, count: 0 };
           acc[day].count += 1;
           return acc;
-        }, {} as Record<string, { date: string; count: number }>);
+        }, {});
 
         res.status(200).json({
           token,

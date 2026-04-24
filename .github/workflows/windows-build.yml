@@ -23,11 +23,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test
+        env:
+          CI: true
+
       - name: Install pkg globally
         run: npm install -g pkg
 
       - name: Build Next.js
         run: npm run build
+        env:
+          NODE_ENV: production
+          # 84532 = Base Sepolia testnet chain ID
+          NEXT_PUBLIC_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_CHAIN_ID || '84532' }}
+          NEXT_PUBLIC_CHAIN_NAME: ${{ secrets.NEXT_PUBLIC_CHAIN_NAME || 'Base Sepolia' }}
+          NEXT_PUBLIC_WALLET_CONNECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_ID || '' }}
+          NEXT_PUBLIC_LIRA_TOKEN: ${{ secrets.NEXT_PUBLIC_LIRA_TOKEN || '' }}
+          NEXT_PUBLIC_FACTORY: ${{ secrets.NEXT_PUBLIC_FACTORY || '' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/lira' }}
 
       - name: Create admin executable
         run: |
