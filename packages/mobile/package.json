@@ -1,0 +1,40 @@
+{
+  "name": "@lira/mobile",
+  "version": "0.1.0",
+  "description": "Lira Protocol mobile app (React Native + Expo)",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "expo": "~52.0.0",
+    "expo-router": "~4.0.0",
+    "expo-local-authentication": "~14.0.0",
+    "expo-notifications": "~0.29.0",
+    "expo-secure-store": "~14.0.0",
+    "react": "18.3.2",
+    "react-native": "0.76.5",
+    "react-native-reanimated": "~3.16.0",
+    "react-native-gesture-handler": "~2.20.0",
+    "@ethersproject/wallet": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@types/react": "~18.3.0",
+    "@types/react-native": "~0.76.0",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "jest-expo": "~52.0.0"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "private": true
+}
