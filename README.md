@@ -369,6 +369,74 @@ Special thanks to:
 
 ---
 
+## 🏗️ Enterprise Platform Architecture
+
+Lira Protocol has been expanded into a fully autonomous enterprise Web3 AI platform. The new platform layers are:
+
+```
+lira/
+├── src/
+│   ├── agents/          # Agent swarm (9 specialised agents)
+│   ├── auth/            # Enterprise auth: email, OAuth, wallet (RainbowKit), Farcaster
+│   ├── config/          # Centralised environment configuration
+│   ├── core/rbac/       # Extended RBAC – 7-tier role hierarchy
+│   ├── dex/             # DEX scanner (Uniswap, Sushi, Pancake, Curve, Balancer, GMX)
+│   ├── jobs/            # Background jobs (BullMQ-compatible)
+│   ├── models/          # Typed data models (Permission, DexToken, TimelineEvent)
+│   ├── observability/   # Logging, Prometheus metrics, OpenTelemetry tracing
+│   ├── security/        # Rate limiting, CSRF, CSP, request validation, audit log
+│   ├── services/        # Contract wrappers, AI image generation
+│   ├── timeline/        # Platform-wide event timeline
+│   ├── wasm/            # WASM bindings (crypto verify, DEX math)
+│   └── web3/
+│       ├── contracts/   # Auto-generated contract interfaces
+│       └── social/      # Farcaster + Zora integration
+├── wasm/                # WASM build instructions
+└── docs/sections/       # Architecture, API, agents, security, dex, web3, deployment
+```
+
+### Dashboards
+
+| Dashboard | Path | Access |
+|-----------|------|--------|
+| User Dashboard | `/dashboard/user` | All authenticated users |
+| Admin Dashboard | `/dashboard/admin` | Admin role |
+| Developer Portal | `/dashboard/dev` | Developer + Admin |
+| System Control | `/dashboard/system` | Admin role |
+
+### RBAC Roles
+
+`guest` → `user` → `creator` → `developer` → `moderator` → `admin` → `super-admin`
+
+All permissions are defined in [`src/models/Permission.ts`](./src/models/Permission.ts).
+
+### Agent Swarm
+
+| Agent | Purpose |
+|-------|---------|
+| `AgentCoordinator` | Task dispatching and health monitoring |
+| `DexScannerAgent` | Indexes DEX liquidity pools |
+| `WalletAgent` | Monitors wallet RPC events |
+| `ImageGenerationAgent` | AI image generation (OpenAI / Stable Diffusion / Replicate) |
+| `SocialAgent` | Farcaster + Zora publishing |
+| `AnalyticsAgent` | Protocol analytics aggregation |
+| `MonitoringAgent` | Service health monitoring |
+| `NotificationAgent` | User notification delivery |
+| `GovernanceAgent` | On-chain governance processing |
+
+### Documentation
+
+Full platform documentation is in [`docs/sections/`](./docs/sections/):
+- [Architecture](./docs/sections/architecture.md)
+- [Agents](./docs/sections/agents.md)
+- [API Reference](./docs/sections/api.md)
+- [DEX Integration](./docs/sections/dex.md)
+- [Web3 Integration](./docs/sections/web3.md)
+- [Security](./docs/sections/security.md)
+- [Deployment](./docs/sections/deployment.md)
+
+---
+
 ## 📞 Support & Resources
 
 - **Documentation**: [docs/README.md](./docs/README.md)

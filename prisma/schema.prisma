@@ -222,6 +222,25 @@ model Notification {
 }
 
 // ====================
+// Observability
+// ====================
+
+model AuditVaultEntry {
+  id          Int      @id @default(autoincrement())
+  /// Hex-encoded SHA-256 hash of the canonical event JSON (64 characters)
+  hash        String   @unique @db.VarChar(64)
+  action      String   @db.VarChar(100)
+  userId      String   @map("user_id") @db.VarChar(255)
+  recordedAt  DateTime @map("recorded_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([action])
+  @@index([recordedAt])
+  @@map("audit_vault_entries")
+}
+
+// ====================
 // Admin & Configuration
 // ====================
 

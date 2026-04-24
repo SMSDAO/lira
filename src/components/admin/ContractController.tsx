@@ -4,7 +4,7 @@
  * Syncs with blockchain and updates local state in real-time
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
 import { ethers } from 'ethers';
 import { AdminContractController, CONTRACT_ADDRESSES } from '@/lib/contracts';
@@ -65,7 +65,7 @@ export default function ContractController() {
   const [syncing, setSyncing] = useState(false);
 
   // Fetch all contract data
-  const fetchContractData = async () => {
+  const fetchContractData = useCallback(async () => {
     setLoading(true);
     try {
       const [network, lira, registry, tokens, treasury] = await Promise.all([
@@ -86,7 +86,7 @@ export default function ContractController() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [controller]);
 
   // Sync with blockchain (refresh all data)
   const syncWithBlockchain = async () => {
@@ -100,7 +100,7 @@ export default function ContractController() {
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchContractData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchContractData]);
 
   // Admin operations
   const handleSetDAOOperator = async (operatorAddress: string, status: boolean) => {

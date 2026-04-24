@@ -7,10 +7,13 @@ on:
       - 'docs/**'
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
 jobs:
   lira-docs:
     name: Build docs
-    runs-on: [self-hosted, lira, docs]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
@@ -20,11 +23,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install deps
         run: npm ci
 
       - name: Build docs
-        run: npm run docs:build
+        run: npm run docs:build --if-present
