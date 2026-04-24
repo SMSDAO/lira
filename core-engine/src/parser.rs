@@ -16,7 +16,6 @@
 /// state_decl     ::= IDENT ("initial")? ("terminal")?
 /// transition_decl::= IDENT "->" IDENT ("guard" ":" expr)?
 /// ```
-
 use crate::ast::*;
 use crate::error::LiraError;
 use crate::lexer::Token;
@@ -39,7 +38,9 @@ impl Parser {
 
     fn advance(&mut self) -> &Token {
         let tok = self.tokens.get(self.pos).unwrap_or(&Token::Eof);
-        if self.pos < self.tokens.len() { self.pos += 1; }
+        if self.pos < self.tokens.len() {
+            self.pos += 1;
+        }
         tok
     }
 
@@ -74,11 +75,13 @@ impl Parser {
         self.expect(&Token::Version)?;
         let version = match self.advance().clone() {
             Token::StringLit(s) => s,
-            other => return Err(LiraError::UnexpectedToken {
-                expected: "version string".into(),
-                got: format!("{other:?}"),
-                line: 0,
-            }),
+            other => {
+                return Err(LiraError::UnexpectedToken {
+                    expected: "version string".into(),
+                    got: format!("{other:?}"),
+                    line: 0,
+                })
+            }
         };
 
         // contract <Name> { … }
@@ -94,21 +97,49 @@ impl Parser {
 
         loop {
             match self.peek().clone() {
-                Token::RBrace | Token::Eof => { self.advance(); break; }
-                Token::States       => { self.advance(); states = self.parse_states()?; }
-                Token::Transitions  => { self.advance(); transitions = self.parse_transitions()?; }
-                Token::Triggers     => { self.advance(); triggers = self.parse_triggers()?; }
-                Token::Actions      => { self.advance(); actions = self.parse_actions()?; }
-                Token::SafetyChecks => { self.advance(); safety_checks = self.parse_safety_checks()?; }
-                other => return Err(LiraError::UnexpectedToken {
-                    expected: "states|transitions|triggers|actions|safety_checks|'}'".into(),
-                    got: format!("{other:?}"),
-                    line: 0,
-                }),
+                Token::RBrace | Token::Eof => {
+                    self.advance();
+                    break;
+                }
+                Token::States => {
+                    self.advance();
+                    states = self.parse_states()?;
+                }
+                Token::Transitions => {
+                    self.advance();
+                    transitions = self.parse_transitions()?;
+                }
+                Token::Triggers => {
+                    self.advance();
+                    triggers = self.parse_triggers()?;
+                }
+                Token::Actions => {
+                    self.advance();
+                    actions = self.parse_actions()?;
+                }
+                Token::SafetyChecks => {
+                    self.advance();
+                    safety_checks = self.parse_safety_checks()?;
+                }
+                other => {
+                    return Err(LiraError::UnexpectedToken {
+                        expected: "states|transitions|triggers|actions|safety_checks|'}'".into(),
+                        got: format!("{other:?}"),
+                        line: 0,
+                    })
+                }
             }
         }
 
-        Ok(LiraContract { version, name, states, transitions, triggers, actions, safety_checks })
+        Ok(LiraContract {
+            version,
+            name,
+            states,
+            transitions,
+            triggers,
+            actions,
+            safety_checks,
+        })
     }
 
     // ── States ────────────────────────────────────────────────────────────────
@@ -118,25 +149,40 @@ impl Parser {
         let mut states = Vec::new();
         loop {
             match self.peek().clone() {
-                Token::RBrace | Token::Eof => { self.advance(); break; }
+                Token::RBrace | Token::Eof => {
+                    self.advance();
+                    break;
+                }
                 Token::Ident(name) => {
                     self.advance();
                     let mut initial = false;
                     let mut terminal = false;
                     loop {
                         match self.peek() {
-                            Token::Initial  => { self.advance(); initial = true; }
-                            Token::Terminal => { self.advance(); terminal = true; }
+                            Token::Initial => {
+                                self.advance();
+                                initial = true;
+                            }
+                            Token::Terminal => {
+                                self.advance();
+                                terminal = true;
+                            }
                             _ => break,
                         }
                     }
-                    states.push(State { name, initial, terminal });
+                    states.push(State {
+                        name,
+                        initial,
+                        terminal,
+                    });
                 }
-                other => return Err(LiraError::UnexpectedToken {
-                    expected: "state name or '}'".into(),
-                    got: format!("{other:?}"),
-                    line: 0,
-                }),
+                other => {
+                    return Err(LiraError::UnexpectedToken {
+                        expected: "state name or '}'".into(),
+                        got: format!("{other:?}"),
+                        line: 0,
+                    })
+                }
             }
         }
         Ok(states)
@@ -149,7 +195,10 @@ impl Parser {
         let mut transitions = Vec::new();
         loop {
             match self.peek().clone() {
-                Token::RBrace | Token::Eof => { self.advance(); break; }
+                Token::RBrace | Token::Eof => {
+                    self.advance();
+                    break;
+                }
                 Token::Ident(from) => {
                     self.advance();
                     self.expect(&Token::Arrow)?;
@@ -163,11 +212,13 @@ impl Parser {
                     };
                     transitions.push(Transition { from, to, guard });
                 }
-                other => return Err(LiraError::UnexpectedToken {
-                    expected: "transition (IDENT -> IDENT) or '}'".into(),
-                    got: format!("{other:?}"),
-                    line: 0,
-                }),
+                other => {
+                    return Err(LiraError::UnexpectedToken {
+                        expected: "transition (IDENT -> IDENT) or '}'".into(),
+                        got: format!("{other:?}"),
+                        line: 0,
+                    })
+                }
             }
         }
         Ok(transitions)
@@ -180,7 +231,10 @@ impl Parser {
         let mut triggers = Vec::new();
         loop {
             match self.peek().clone() {
-                Token::RBrace | Token::Eof => { self.advance(); break; }
+                Token::RBrace | Token::Eof => {
+                    self.advance();
+                    break;
+                }
                 Token::On => {
                     self.advance();
                     let contract = self.expect_ident()?;
@@ -194,9 +248,13 @@ impl Parser {
                     self.expect(&Token::Colon)?;
                     let cron = match self.advance().clone() {
                         Token::StringLit(s) => s,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "cron string".into(), got: format!("{other:?}"), line: 0,
-                        }),
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "cron string".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
                     triggers.push(Trigger::Schedule { cron });
                 }
@@ -207,12 +265,17 @@ impl Parser {
                     let ratio = match self.advance().clone() {
                         Token::FloatLit(f) => f,
                         Token::IntLit(i) => i as f64,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "collateral ratio (number)".into(),
-                            got: format!("{other:?}"), line: 0,
-                        }),
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "collateral ratio (number)".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
-                    triggers.push(Trigger::MarginCall { collateral_ratio: ratio });
+                    triggers.push(Trigger::MarginCall {
+                        collateral_ratio: ratio,
+                    });
                 }
                 Token::PriceThreshold => {
                     self.advance();
@@ -220,30 +283,44 @@ impl Parser {
                     self.expect(&Token::Colon)?;
                     let pair = match self.advance().clone() {
                         Token::StringLit(s) | Token::Ident(s) => s,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "pair string".into(), got: format!("{other:?}"), line: 0,
-                        }),
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "pair string".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
                     let operator = match self.advance().clone() {
-                        Token::Gt  => CompareOp::Gt,
+                        Token::Gt => CompareOp::Gt,
                         Token::Gte => CompareOp::Gte,
-                        Token::Lt  => CompareOp::Lt,
+                        Token::Lt => CompareOp::Lt,
                         Token::Lte => CompareOp::Lte,
-                        Token::Eq  => CompareOp::Eq,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "comparison operator".into(),
-                            got: format!("{other:?}"), line: 0,
-                        }),
+                        Token::Eq => CompareOp::Eq,
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "comparison operator".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
                     let value = match self.advance().clone() {
                         Token::FloatLit(f) => f,
                         Token::IntLit(i) => i as f64,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "price value (number)".into(),
-                            got: format!("{other:?}"), line: 0,
-                        }),
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "price value (number)".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
-                    triggers.push(Trigger::PriceThreshold { pair, operator, value });
+                    triggers.push(Trigger::PriceThreshold {
+                        pair,
+                        operator,
+                        value,
+                    });
                 }
                 Token::OracleCallback => {
                     self.advance();
@@ -255,11 +332,13 @@ impl Parser {
                     let condition = self.parse_expr()?;
                     triggers.push(Trigger::OracleCallback { source, condition });
                 }
-                other => return Err(LiraError::UnexpectedToken {
-                    expected: "trigger declaration or '}'".into(),
-                    got: format!("{other:?}"),
-                    line: 0,
-                }),
+                other => {
+                    return Err(LiraError::UnexpectedToken {
+                        expected: "trigger declaration or '}'".into(),
+                        got: format!("{other:?}"),
+                        line: 0,
+                    })
+                }
             }
         }
         Ok(triggers)
@@ -272,18 +351,30 @@ impl Parser {
         let mut actions = Vec::new();
         loop {
             match self.peek().clone() {
-                Token::RBrace | Token::Eof => { self.advance(); break; }
+                Token::RBrace | Token::Eof => {
+                    self.advance();
+                    break;
+                }
                 Token::Transfer => {
                     self.advance();
-                    self.expect(&Token::From)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::From)?;
+                    self.expect(&Token::Colon)?;
                     let from = self.expect_ident()?;
-                    self.expect(&Token::To)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::To)?;
+                    self.expect(&Token::Colon)?;
                     let to = self.expect_ident()?;
-                    self.expect(&Token::Token_)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::Token_)?;
+                    self.expect(&Token::Colon)?;
                     let token = self.expect_ident()?;
-                    self.expect(&Token::Amount)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::Amount)?;
+                    self.expect(&Token::Colon)?;
                     let amount = self.parse_expr()?;
-                    actions.push(Action::Transfer { from, to, token, amount });
+                    actions.push(Action::Transfer {
+                        from,
+                        to,
+                        token,
+                        amount,
+                    });
                 }
                 Token::State => {
                     self.advance();
@@ -293,21 +384,30 @@ impl Parser {
                 }
                 Token::Emit => {
                     self.advance();
-                    self.expect(&Token::Event)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::Event)?;
+                    self.expect(&Token::Colon)?;
                     let event = self.expect_ident()?;
-                    actions.push(Action::Emit { event, payload: Vec::new() });
+                    actions.push(Action::Emit {
+                        event,
+                        payload: Vec::new(),
+                    });
                 }
                 Token::Notify => {
                     self.advance();
-                    self.expect(&Token::Recipient)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::Recipient)?;
+                    self.expect(&Token::Colon)?;
                     let recipient = self.expect_ident()?;
-                    self.expect(&Token::Message)?; self.expect(&Token::Colon)?;
+                    self.expect(&Token::Message)?;
+                    self.expect(&Token::Colon)?;
                     let message = match self.advance().clone() {
                         Token::StringLit(s) => s,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "notification message string".into(),
-                            got: format!("{other:?}"), line: 0,
-                        }),
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "notification message string".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
                     actions.push(Action::Notify { recipient, message });
                 }
@@ -319,17 +419,28 @@ impl Parser {
                     self.expect(&Token::LParen)?;
                     let mut args = Vec::new();
                     loop {
-                        if self.peek() == &Token::RParen { self.advance(); break; }
+                        if self.peek() == &Token::RParen {
+                            self.advance();
+                            break;
+                        }
                         args.push(self.parse_expr()?);
-                        if self.peek() == &Token::Comma { self.advance(); }
+                        if self.peek() == &Token::Comma {
+                            self.advance();
+                        }
                     }
-                    actions.push(Action::ContractCall { contract, function, args });
+                    actions.push(Action::ContractCall {
+                        contract,
+                        function,
+                        args,
+                    });
                 }
-                other => return Err(LiraError::UnexpectedToken {
-                    expected: "action declaration or '}'".into(),
-                    got: format!("{other:?}"),
-                    line: 0,
-                }),
+                other => {
+                    return Err(LiraError::UnexpectedToken {
+                        expected: "action declaration or '}'".into(),
+                        got: format!("{other:?}"),
+                        line: 0,
+                    })
+                }
             }
         }
         Ok(actions)
@@ -342,7 +453,10 @@ impl Parser {
         let mut checks = Vec::new();
         loop {
             match self.peek().clone() {
-                Token::RBrace | Token::Eof => { self.advance(); break; }
+                Token::RBrace | Token::Eof => {
+                    self.advance();
+                    break;
+                }
                 Token::Check => {
                     self.advance();
                     let id = self.expect_ident()?;
@@ -352,18 +466,27 @@ impl Parser {
                     self.expect(&Token::Colon)?;
                     let message = match self.advance().clone() {
                         Token::StringLit(s) => s,
-                        other => return Err(LiraError::UnexpectedToken {
-                            expected: "check message string".into(),
-                            got: format!("{other:?}"), line: 0,
-                        }),
+                        other => {
+                            return Err(LiraError::UnexpectedToken {
+                                expected: "check message string".into(),
+                                got: format!("{other:?}"),
+                                line: 0,
+                            })
+                        }
                     };
-                    checks.push(SafetyCheck { id, condition, message });
+                    checks.push(SafetyCheck {
+                        id,
+                        condition,
+                        message,
+                    });
                 }
-                other => return Err(LiraError::UnexpectedToken {
-                    expected: "check declaration or '}'".into(),
-                    got: format!("{other:?}"),
-                    line: 0,
-                }),
+                other => {
+                    return Err(LiraError::UnexpectedToken {
+                        expected: "check declaration or '}'".into(),
+                        got: format!("{other:?}"),
+                        line: 0,
+                    })
+                }
             }
         }
         Ok(checks)
@@ -406,30 +529,38 @@ impl Parser {
     fn parse_cmp(&mut self) -> Result<Expression, LiraError> {
         let left = self.parse_add()?;
         let op = match self.peek() {
-            Token::Gt  => BinOpKind::Gt,
+            Token::Gt => BinOpKind::Gt,
             Token::Gte => BinOpKind::Gte,
-            Token::Lt  => BinOpKind::Lt,
+            Token::Lt => BinOpKind::Lt,
             Token::Lte => BinOpKind::Lte,
-            Token::Eq  => BinOpKind::Eq,
+            Token::Eq => BinOpKind::Eq,
             Token::Neq => BinOpKind::Neq,
             _ => return Ok(left),
         };
         self.advance();
         let right = self.parse_add()?;
-        Ok(Expression::BinOp { op, left: Box::new(left), right: Box::new(right) })
+        Ok(Expression::BinOp {
+            op,
+            left: Box::new(left),
+            right: Box::new(right),
+        })
     }
 
     fn parse_add(&mut self) -> Result<Expression, LiraError> {
         let mut left = self.parse_mul()?;
         loop {
             let op = match self.peek() {
-                Token::Plus  => BinOpKind::Add,
+                Token::Plus => BinOpKind::Add,
                 Token::Minus => BinOpKind::Sub,
                 _ => break,
             };
             self.advance();
             let right = self.parse_mul()?;
-            left = Expression::BinOp { op, left: Box::new(left), right: Box::new(right) };
+            left = Expression::BinOp {
+                op,
+                left: Box::new(left),
+                right: Box::new(right),
+            };
         }
         Ok(left)
     }
@@ -438,13 +569,17 @@ impl Parser {
         let mut left = self.parse_unary()?;
         loop {
             let op = match self.peek() {
-                Token::Star  => BinOpKind::Mul,
+                Token::Star => BinOpKind::Mul,
                 Token::Slash => BinOpKind::Div,
                 _ => break,
             };
             self.advance();
             let right = self.parse_unary()?;
-            left = Expression::BinOp { op, left: Box::new(left), right: Box::new(right) };
+            left = Expression::BinOp {
+                op,
+                left: Box::new(left),
+                right: Box::new(right),
+            };
         }
         Ok(left)
     }
@@ -453,11 +588,17 @@ impl Parser {
         match self.peek().clone() {
             Token::Not => {
                 self.advance();
-                Ok(Expression::UnaryOp { op: UnaryOpKind::Not, expr: Box::new(self.parse_primary()?) })
+                Ok(Expression::UnaryOp {
+                    op: UnaryOpKind::Not,
+                    expr: Box::new(self.parse_primary()?),
+                })
             }
             Token::Minus => {
                 self.advance();
-                Ok(Expression::UnaryOp { op: UnaryOpKind::Neg, expr: Box::new(self.parse_primary()?) })
+                Ok(Expression::UnaryOp {
+                    op: UnaryOpKind::Neg,
+                    expr: Box::new(self.parse_primary()?),
+                })
             }
             _ => self.parse_primary(),
         }
@@ -465,16 +606,61 @@ impl Parser {
 
     fn parse_primary(&mut self) -> Result<Expression, LiraError> {
         match self.advance().clone() {
-            Token::IntLit(v)    => Ok(Expression::IntLit { value: v }),
-            Token::FloatLit(v)  => Ok(Expression::FloatLit { value: v }),
+            Token::IntLit(v) => Ok(Expression::IntLit { value: v }),
+            Token::FloatLit(v) => Ok(Expression::FloatLit { value: v }),
             Token::StringLit(v) => Ok(Expression::StrLit { value: v }),
-            Token::BoolLit(v)   => Ok(Expression::BoolLit { value: v }),
-            Token::Ident(name)  => Ok(Expression::Ident { name }),
+            Token::BoolLit(v) => Ok(Expression::BoolLit { value: v }),
+            Token::Ident(name) => Ok(Expression::Ident { name }),
             Token::LParen => {
                 let expr = self.parse_expr()?;
                 self.expect(&Token::RParen)?;
                 Ok(expr)
             }
+            // Allow DSL field-name keywords to be used as identifiers in expressions.
+            // e.g. `amount > 0`, `from == recipient`, `pair != "ETH/USD"` etc.
+            Token::Amount => Ok(Expression::Ident {
+                name: "amount".into(),
+            }),
+            Token::From => Ok(Expression::Ident {
+                name: "from".into(),
+            }),
+            Token::To => Ok(Expression::Ident { name: "to".into() }),
+            Token::Token_ => Ok(Expression::Ident {
+                name: "token".into(),
+            }),
+            Token::Message => Ok(Expression::Ident {
+                name: "message".into(),
+            }),
+            Token::Recipient => Ok(Expression::Ident {
+                name: "recipient".into(),
+            }),
+            Token::Pair => Ok(Expression::Ident {
+                name: "pair".into(),
+            }),
+            Token::Source => Ok(Expression::Ident {
+                name: "source".into(),
+            }),
+            Token::State => Ok(Expression::Ident {
+                name: "state".into(),
+            }),
+            Token::Condition => Ok(Expression::Ident {
+                name: "condition".into(),
+            }),
+            Token::Event => Ok(Expression::Ident {
+                name: "event".into(),
+            }),
+            Token::Payload => Ok(Expression::Ident {
+                name: "payload".into(),
+            }),
+            Token::Function => Ok(Expression::Ident {
+                name: "function".into(),
+            }),
+            Token::Args => Ok(Expression::Ident {
+                name: "args".into(),
+            }),
+            Token::CollatRatio => Ok(Expression::Ident {
+                name: "collateral_ratio".into(),
+            }),
             other => Err(LiraError::UnexpectedToken {
                 expected: "expression".into(),
                 got: format!("{other:?}"),

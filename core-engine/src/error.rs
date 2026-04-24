@@ -1,5 +1,4 @@
 /// Error types for the Lira core engine.
-
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq, Clone)]
@@ -23,7 +22,6 @@ pub enum LiraError {
     UnexpectedEof,
 
     // ── Validation errors ─────────────────────────────────────────────────────
-
     /// Safety-First: a transition references a state that was never declared.
     #[error(
         "Safety violation: undefined state '{state}' referenced in transition \
@@ -40,9 +38,7 @@ pub enum LiraError {
     NoStates { name: String },
 
     /// Exactly one initial state must be declared.
-    #[error(
-        "Contract '{name}' must have exactly one initial state, found {count}"
-    )]
+    #[error("Contract '{name}' must have exactly one initial state, found {count}")]
     InitialStateCount { name: String, count: usize },
 
     /// An action references an undeclared transition target.

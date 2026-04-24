@@ -9,7 +9,6 @@
 ///
 /// The `CompileResult` contains the AST, a JSON serialisation, and any
 /// validation warnings.
-
 use serde::{Deserialize, Serialize};
 
 use crate::ast::LiraContract;
@@ -80,7 +79,11 @@ pub fn compile(source: &str, options: CompileOptions) -> Result<CompileResult, C
     // 5. Collect warnings (non-fatal checks)
     let warnings = collect_warnings(&contract);
 
-    Ok(CompileResult { contract, json, warnings })
+    Ok(CompileResult {
+        contract,
+        json,
+        warnings,
+    })
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -171,12 +174,19 @@ contract Bad {
         let result = compile(UNDEFINED_STATE_SRC, CompileOptions { safety_first: true });
         assert!(result.is_err());
         let errs = result.unwrap_err();
-        assert!(errs.errors.iter().any(|e| e.contains("undefined state") || e.contains("NonExistent") || e.contains("Safety")));
+        assert!(errs.errors.iter().any(|e| e.contains("undefined state")
+            || e.contains("NonExistent")
+            || e.contains("Safety")));
     }
 
     #[test]
     fn non_strict_accepts_undefined_state() {
-        let result = compile(UNDEFINED_STATE_SRC, CompileOptions { safety_first: false });
+        let result = compile(
+            UNDEFINED_STATE_SRC,
+            CompileOptions {
+                safety_first: false,
+            },
+        );
         assert!(result.is_ok());
     }
 

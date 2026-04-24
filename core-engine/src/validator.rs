@@ -2,7 +2,6 @@
 ///
 /// The validator performs semantic checks that are too expensive or awkward to
 /// integrate into the parser, including the *Safety-First* undefined-state check.
-
 use std::collections::HashSet;
 
 use crate::ast::{Action, Expression, LiraContract};
@@ -18,7 +17,9 @@ pub fn validate(contract: &LiraContract, safety_first: bool) -> Result<(), Vec<L
 
     // ── Pass 1: At least one state declared ───────────────────────────────────
     if contract.states.is_empty() {
-        errors.push(LiraError::NoStates { name: contract.name.clone() });
+        errors.push(LiraError::NoStates {
+            name: contract.name.clone(),
+        });
     }
 
     // ── Pass 2: Exactly one initial state ─────────────────────────────────────
@@ -55,7 +56,9 @@ pub fn validate(contract: &LiraContract, safety_first: bool) -> Result<(), Vec<L
         for action in &contract.actions {
             if let Action::Transition { state } = action {
                 if !declared.contains(state.as_str()) {
-                    errors.push(LiraError::UndefinedTransitionTarget { state: state.clone() });
+                    errors.push(LiraError::UndefinedTransitionTarget {
+                        state: state.clone(),
+                    });
                 }
             }
         }
@@ -64,11 +67,17 @@ pub fn validate(contract: &LiraContract, safety_first: bool) -> Result<(), Vec<L
     // ── Pass 4: Trivially-false safety checks ─────────────────────────────────
     for check in &contract.safety_checks {
         if let Expression::BoolLit { value: false } = &check.condition {
-            errors.push(LiraError::TriviallyFalseCheck { id: check.id.clone() });
+            errors.push(LiraError::TriviallyFalseCheck {
+                id: check.id.clone(),
+            });
         }
     }
 
-    if errors.is_empty() { Ok(()) } else { Err(errors) }
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
 }
 
 #[cfg(test)]
@@ -92,10 +101,22 @@ mod tests {
     fn valid_contract_passes() {
         let c = make_contract(
             vec![
-                State { name: "A".into(), initial: true, terminal: false },
-                State { name: "B".into(), initial: false, terminal: true },
+                State {
+                    name: "A".into(),
+                    initial: true,
+                    terminal: false,
+                },
+                State {
+                    name: "B".into(),
+                    initial: false,
+                    terminal: true,
+                },
             ],
-            vec![Transition { from: "A".into(), to: "B".into(), guard: None }],
+            vec![Transition {
+                from: "A".into(),
+                to: "B".into(),
+                guard: None,
+            }],
         );
         assert!(validate(&c, true).is_ok());
     }
@@ -103,18 +124,36 @@ mod tests {
     #[test]
     fn safety_first_rejects_undefined_state() {
         let c = make_contract(
-            vec![State { name: "A".into(), initial: true, terminal: false }],
-            vec![Transition { from: "A".into(), to: "GHOST".into(), guard: None }],
+            vec![State {
+                name: "A".into(),
+                initial: true,
+                terminal: false,
+            }],
+            vec![Transition {
+                from: "A".into(),
+                to: "GHOST".into(),
+                guard: None,
+            }],
         );
         let errs = validate(&c, true).unwrap_err();
-        assert!(errs.iter().any(|e| matches!(e, LiraError::UndefinedState { .. })));
+        assert!(errs
+            .iter()
+            .any(|e| matches!(e, LiraError::UndefinedState { .. })));
     }
 
     #[test]
     fn non_strict_allows_undefined_state() {
         let c = make_contract(
-            vec![State { name: "A".into(), initial: true, terminal: false }],
-            vec![Transition { from: "A".into(), to: "GHOST".into(), guard: None }],
+            vec![State {
+                name: "A".into(),
+                initial: true,
+                terminal: false,
+            }],
+            vec![Transition {
+                from: "A".into(),
+                to: "GHOST".into(),
+                guard: None,
+            }],
         );
         // With safety_first = false, undefined states are not checked.
         assert!(validate(&c, false).is_ok());
@@ -131,19 +170,33 @@ mod tests {
     fn multiple_initial_states_error() {
         let c = make_contract(
             vec![
-                State { name: "A".into(), initial: true, terminal: false },
-                State { name: "B".into(), initial: true, terminal: false },
+                State {
+                    name: "A".into(),
+                    initial: true,
+                    terminal: false,
+                },
+                State {
+                    name: "B".into(),
+                    initial: true,
+                    terminal: false,
+                },
             ],
             vec![],
         );
         let errs = validate(&c, true).unwrap_err();
-        assert!(errs.iter().any(|e| matches!(e, LiraError::InitialStateCount { .. })));
+        assert!(errs
+            .iter()
+            .any(|e| matches!(e, LiraError::InitialStateCount { .. })));
     }
 
     #[test]
     fn trivially_false_check_error() {
         let mut c = make_contract(
-            vec![State { name: "A".into(), initial: true, terminal: false }],
+            vec![State {
+                name: "A".into(),
+                initial: true,
+                terminal: false,
+            }],
             vec![],
         );
         c.safety_checks.push(SafetyCheck {
@@ -152,6 +205,8 @@ mod tests {
             message: "will always revert".into(),
         });
         let errs = validate(&c, true).unwrap_err();
-        assert!(errs.iter().any(|e| matches!(e, LiraError::TriviallyFalseCheck { .. })));
+        assert!(errs
+            .iter()
+            .any(|e| matches!(e, LiraError::TriviallyFalseCheck { .. })));
     }
 }

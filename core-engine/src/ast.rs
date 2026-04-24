@@ -1,7 +1,6 @@
 /// Abstract Syntax Tree types for the Lira DSL.
 ///
 /// A `LiraContract` is the top-level node produced by the parser.
-
 use serde::{Deserialize, Serialize};
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -68,7 +67,10 @@ pub enum Trigger {
     /// A cron-style schedule (`"every 1h"`, `"daily"`, …).
     Schedule { cron: String },
     /// A callback from an oracle or off-chain data source.
-    OracleCallback { source: String, condition: Expression },
+    OracleCallback {
+        source: String,
+        condition: Expression,
+    },
     /// A price threshold crossing (e.g. ETH/USD > 3000).
     PriceThreshold {
         pair: String,
@@ -101,7 +103,10 @@ pub enum Action {
         args: Vec<Expression>,
     },
     /// Emit a structured event (persisted to indexer).
-    Emit { event: String, payload: Vec<(String, Expression)> },
+    Emit {
+        event: String,
+        payload: Vec<(String, Expression)>,
+    },
     /// Transition to `state` unconditionally.
     Transition { state: String },
     /// Send a notification to `recipient`.
