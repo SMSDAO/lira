@@ -753,4 +753,651 @@ contract PriceFeed {
         assert_eq!(c.triggers.len(), 1);
         assert!(matches!(c.triggers[0], Trigger::PriceThreshold { .. }));
     }
+
+    #[test]
+    fn parses_on_chain_event_trigger() {
+        let src = r#"
+version "1.0"
+contract EventWatch {
+  states { Idle initial Done terminal }
+  triggers {
+    on DEX.Swap
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.triggers.len(), 1);
+        assert!(matches!(
+            c.triggers[0],
+            Trigger::OnChainEvent {
+                ref contract,
+                ref event,
+                ..
+            } if contract == "DEX" && event == "Swap"
+        ));
+    }
+
+    #[test]
+    fn parses_schedule_trigger() {
+        let src = r#"
+version "1.0"
+contract Scheduler {
+  states { Active initial Done terminal }
+  triggers {
+    schedule cron: "0 * * * *"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.triggers.len(), 1);
+        assert!(matches!(c.triggers[0], Trigger::Schedule { .. }));
+    }
+
+    #[test]
+    fn parses_margin_call_trigger() {
+        let src = r#"
+version "1.0"
+contract MarginGuard {
+  states { Safe initial Liquidating terminal }
+  triggers {
+    margin_call collateral_ratio: 1.5
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.triggers.len(), 1);
+        assert!(matches!(c.triggers[0], Trigger::MarginCall { .. }));
+    }
+
+    #[test]
+    fn parses_oracle_callback_trigger() {
+        let src = r#"
+version "1.0"
+contract OracleWatch {
+  states { Waiting initial Triggered terminal }
+  triggers {
+    oracle_callback source: ChainlinkOracle condition: price > 100
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.triggers.len(), 1);
+        assert!(matches!(c.triggers[0], Trigger::OracleCallback { .. }));
+    }
+
+    #[test]
+    fn parses_price_threshold_gte() {
+        let src = r#"
+version "1.0"
+contract PriceFeed {
+  states { Waiting initial Fired terminal }
+  triggers {
+    price_threshold pair: "BTC/USD" >= 50000
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert!(matches!(
+            c.triggers[0],
+            Trigger::PriceThreshold {
+                operator: CompareOp::Gte,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn parses_price_threshold_lte() {
+        let src = r#"
+version "1.0"
+contract PriceFeed2 {
+  states { Waiting initial Fired terminal }
+  triggers {
+    price_threshold pair: "ETH/USD" <= 1500.5
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert!(matches!(
+            c.triggers[0],
+            Trigger::PriceThreshold {
+                operator: CompareOp::Lte,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn parses_price_threshold_lt_eq() {
+        let src = r#"
+version "1.0"
+contract PriceExact {
+  states { Waiting initial Fired terminal }
+  triggers {
+    price_threshold pair: "ETH/USD" < 2000
+    price_threshold pair: "SOL/USD" == 50
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.triggers.len(), 2);
+        assert!(matches!(
+            c.triggers[0],
+            Trigger::PriceThreshold {
+                operator: CompareOp::Lt,
+                ..
+            }
+        ));
+        assert!(matches!(
+            c.triggers[1],
+            Trigger::PriceThreshold {
+                operator: CompareOp::Eq,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn parses_emit_action() {
+        let src = r#"
+version "1.0"
+contract Emitter {
+  states { Active initial Done terminal }
+  actions {
+    emit event: TradeExecuted
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.actions.len(), 1);
+        assert!(matches!(c.actions[0], Action::Emit { .. }));
+    }
+
+    #[test]
+    fn parses_state_transition_action() {
+        let src = r#"
+version "1.0"
+contract StateChanger {
+  states { Open initial Closed terminal }
+  actions {
+    state: Closed
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.actions.len(), 1);
+        assert!(matches!(c.actions[0], Action::Transition { .. }));
+    }
+
+    #[test]
+    fn parses_notify_action() {
+        let src = r#"
+version "1.0"
+contract Notifier {
+  states { Active initial Done terminal }
+  actions {
+    notify recipient: admin message: "Contract executed"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.actions.len(), 1);
+        assert!(matches!(c.actions[0], Action::Notify { .. }));
+    }
+
+    #[test]
+    fn parses_call_action() {
+        let src = r#"
+version "1.0"
+contract Caller {
+  states { Ready initial Done terminal }
+  actions {
+    call Router.execute(amount, 100)
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.actions.len(), 1);
+        assert!(matches!(c.actions[0], Action::ContractCall { .. }));
+    }
+
+    #[test]
+    fn parses_guard_on_transition() {
+        let src = r#"
+version "1.0"
+contract Guarded {
+  states { Pending initial Approved terminal }
+  transitions {
+    Pending -> Approved guard: amount > 0
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.transitions.len(), 1);
+        assert!(c.transitions[0].guard.is_some());
+    }
+
+    #[test]
+    fn parses_complex_expression_in_check() {
+        let src = r#"
+version "1.0"
+contract ComplexCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check bounded: amount >= 0 message: "Non-negative"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_logical_and_or_expr() {
+        let src = r#"
+version "1.0"
+contract LogicCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check combo: amount > 0 message: "ok"
+  }
+  triggers {
+    oracle_callback source: Src condition: amount > 0
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+        assert_eq!(c.triggers.len(), 1);
+    }
+
+    #[test]
+    fn parses_not_expression_in_check() {
+        let src = r#"
+version "1.0"
+contract NotCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check not_zero: not false message: "must be true"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_negation_expression() {
+        let src = r#"
+version "1.0"
+contract NegCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check neg: -1 < 0 message: "negative"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_arithmetic_expressions() {
+        let src = r#"
+version "1.0"
+contract Math {
+  states { A initial B terminal }
+  safety_checks {
+    check arith: amount * 2 > 10 message: "doubled ok"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_string_literal_in_check() {
+        let src = r#"
+version "1.0"
+contract StrCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check str_match: pair == "ETH/USD" message: "wrong pair"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_parenthesized_expression() {
+        let src = r#"
+version "1.0"
+contract ParenExpr {
+  states { A initial B terminal }
+  safety_checks {
+    check paren: (amount > 0) message: "ok"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_multiple_safety_checks() {
+        let src = r#"
+version "1.0"
+contract MultiCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check c1: amount > 0 message: "positive"
+    check c2: amount < 1000 message: "bounded"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 2);
+        assert_eq!(c.safety_checks[0].id, "c1");
+        assert_eq!(c.safety_checks[1].id, "c2");
+    }
+
+    #[test]
+    fn parses_margin_call_trigger_int_ratio() {
+        // margin_call with integer collateral ratio (e.g. 2 not 2.0)
+        let src = r#"
+version "1.0"
+contract IntMargin {
+  states { Safe initial Liquidating terminal }
+  triggers {
+    margin_call collateral_ratio: 2
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert!(matches!(
+            c.triggers[0],
+            Trigger::MarginCall {
+                collateral_ratio,
+                ..
+            } if collateral_ratio == 2.0
+        ));
+    }
+
+    #[test]
+    fn error_on_invalid_version() {
+        let result = parse("contract Bad {}");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_missing_contract_keyword() {
+        let result = parse(r#"version "1.0" Bad {}"#);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_unknown_section() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  unknown { }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_invalid_state_token() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  states { 123 }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_invalid_transition() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  transitions { 123 }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_bad_primary_expression() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  safety_checks {
+    check c: { message: "bad"
+  }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_unknown_trigger() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  triggers { unknown_trigger }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_unknown_action() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  actions { unknown_action }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn parses_float_literal_in_check() {
+        let src = r#"
+version "1.0"
+contract FloatCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check ratio: 1.5 > 1.0 message: "ok"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_add_sub_expression() {
+        let src = r#"
+version "1.0"
+contract AddSub {
+  states { A initial B terminal }
+  safety_checks {
+    check calc: amount + 10 - 2 > 0 message: "ok"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_div_expression() {
+        let src = r#"
+version "1.0"
+contract DivExpr {
+  states { A initial B terminal }
+  safety_checks {
+    check div: amount / 2 > 0 message: "ok"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_neq_expression() {
+        let src = r#"
+version "1.0"
+contract NeqCheck {
+  states { A initial B terminal }
+  safety_checks {
+    check neq: amount != 0 message: "not zero"
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.safety_checks.len(), 1);
+    }
+
+    #[test]
+    fn parses_and_expression_in_guard() {
+        let src = r#"
+version "1.0"
+contract AndGuard {
+  states { A initial B terminal }
+  transitions {
+    A -> B guard: amount > 0 and amount < 1000
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert!(c.transitions[0].guard.is_some());
+        assert!(matches!(
+            c.transitions[0].guard.as_ref().unwrap(),
+            Expression::BinOp {
+                op: BinOpKind::And,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn parses_or_expression_in_guard() {
+        let src = r#"
+version "1.0"
+contract OrGuard {
+  states { A initial B terminal }
+  transitions {
+    A -> B guard: amount == 0 or amount > 100
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert!(c.transitions[0].guard.is_some());
+        assert!(matches!(
+            c.transitions[0].guard.as_ref().unwrap(),
+            Expression::BinOp {
+                op: BinOpKind::Or,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn parses_call_with_no_args() {
+        let src = r#"
+version "1.0"
+contract NoArgCall {
+  states { Ready initial Done terminal }
+  actions {
+    call Vault.lock()
+  }
+}
+"#;
+        let c = parse(src).unwrap();
+        assert_eq!(c.actions.len(), 1);
+        if let Action::ContractCall { args, .. } = &c.actions[0] {
+            assert_eq!(args.len(), 0);
+        } else {
+            panic!("expected ContractCall");
+        }
+    }
+
+    #[test]
+    fn error_on_bad_trigger_cron_type() {
+        // schedule cron: requires a string literal, not an ident
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  states { A initial }
+  triggers {
+    schedule cron: not_a_string
+  }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_bad_margin_call_ratio_type() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  states { A initial }
+  triggers {
+    margin_call collateral_ratio: "not a number"
+  }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_bad_price_threshold_pair() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  states { A initial }
+  triggers {
+    price_threshold pair: 123 > 0
+  }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_bad_price_threshold_operator() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  states { A initial }
+  triggers {
+    price_threshold pair: "ETH/USD" and 0
+  }
+}"#,
+        );
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn error_on_bad_price_threshold_value() {
+        let result = parse(
+            r#"version "1.0"
+contract Bad {
+  states { A initial }
+  triggers {
+    price_threshold pair: "ETH/USD" > "not a number"
+  }
+}"#,
+        );
+        assert!(result.is_err());
+    }
 }

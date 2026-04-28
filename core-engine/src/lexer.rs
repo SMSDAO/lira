@@ -416,4 +416,178 @@ mod tests {
         let result = Lexer::new("\"oops").tokenize();
         assert!(matches!(result, Err(LiraError::UnterminatedString { .. })));
     }
+
+    #[test]
+    fn tokenizes_booleans() {
+        let tokens = Lexer::new("true false").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::BoolLit(true));
+        assert_eq!(tokens[1], Token::BoolLit(false));
+    }
+
+    #[test]
+    fn tokenizes_keywords() {
+        let src =
+            "version contract states initial terminal transitions triggers actions safety_checks";
+        let tokens = Lexer::new(src).tokenize().unwrap();
+        assert_eq!(tokens[0], Token::Version);
+        assert_eq!(tokens[1], Token::Contract);
+        assert_eq!(tokens[2], Token::States);
+        assert_eq!(tokens[3], Token::Initial);
+        assert_eq!(tokens[4], Token::Terminal);
+        assert_eq!(tokens[5], Token::Transitions);
+        assert_eq!(tokens[6], Token::Triggers);
+        assert_eq!(tokens[7], Token::Actions);
+        assert_eq!(tokens[8], Token::SafetyChecks);
+    }
+
+    #[test]
+    fn tokenizes_action_keywords() {
+        let src = "transfer emit notify call";
+        let tokens = Lexer::new(src).tokenize().unwrap();
+        assert_eq!(tokens[0], Token::Transfer);
+        assert_eq!(tokens[1], Token::Emit);
+        assert_eq!(tokens[2], Token::Notify);
+        assert_eq!(tokens[3], Token::Call);
+    }
+
+    #[test]
+    fn tokenizes_field_keywords() {
+        let src = "from to token amount state pair source condition cron collateral_ratio function args event payload recipient";
+        let tokens = Lexer::new(src).tokenize().unwrap();
+        assert_eq!(tokens[0], Token::From);
+        assert_eq!(tokens[1], Token::To);
+        assert_eq!(tokens[2], Token::Token_);
+        assert_eq!(tokens[3], Token::Amount);
+        assert_eq!(tokens[4], Token::State);
+        assert_eq!(tokens[5], Token::Pair);
+        assert_eq!(tokens[6], Token::Source);
+        assert_eq!(tokens[7], Token::Condition);
+        assert_eq!(tokens[8], Token::Cron);
+        assert_eq!(tokens[9], Token::CollatRatio);
+        assert_eq!(tokens[10], Token::Function);
+        assert_eq!(tokens[11], Token::Args);
+        assert_eq!(tokens[12], Token::Event);
+        assert_eq!(tokens[13], Token::Payload);
+        assert_eq!(tokens[14], Token::Recipient);
+    }
+
+    #[test]
+    fn tokenizes_trigger_keywords() {
+        let src = "on schedule margin_call price_threshold oracle_callback";
+        let tokens = Lexer::new(src).tokenize().unwrap();
+        assert_eq!(tokens[0], Token::On);
+        assert_eq!(tokens[1], Token::Schedule);
+        assert_eq!(tokens[2], Token::MarginCall);
+        assert_eq!(tokens[3], Token::PriceThreshold);
+        assert_eq!(tokens[4], Token::OracleCallback);
+    }
+
+    #[test]
+    fn tokenizes_comparison_operators() {
+        let tokens = Lexer::new("> >= < <= == !=").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::Gt);
+        assert_eq!(tokens[1], Token::Gte);
+        assert_eq!(tokens[2], Token::Lt);
+        assert_eq!(tokens[3], Token::Lte);
+        assert_eq!(tokens[4], Token::Eq);
+        assert_eq!(tokens[5], Token::Neq);
+    }
+
+    #[test]
+    fn tokenizes_arithmetic_operators() {
+        let tokens = Lexer::new("+ - * /").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::Plus);
+        assert_eq!(tokens[1], Token::Minus);
+        assert_eq!(tokens[2], Token::Star);
+        assert_eq!(tokens[3], Token::Slash);
+    }
+
+    #[test]
+    fn tokenizes_brackets_and_delimiters() {
+        let tokens = Lexer::new("{ } ( ) [ ] . : ,").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::LBrace);
+        assert_eq!(tokens[1], Token::RBrace);
+        assert_eq!(tokens[2], Token::LParen);
+        assert_eq!(tokens[3], Token::RParen);
+        assert_eq!(tokens[4], Token::LBracket);
+        assert_eq!(tokens[5], Token::RBracket);
+        assert_eq!(tokens[6], Token::Dot);
+        assert_eq!(tokens[7], Token::Colon);
+        assert_eq!(tokens[8], Token::Comma);
+    }
+
+    #[test]
+    fn tokenizes_assignment_and_logic() {
+        let tokens = Lexer::new("= and or not guard check message")
+            .tokenize()
+            .unwrap();
+        assert_eq!(tokens[0], Token::Assign);
+        assert_eq!(tokens[1], Token::And);
+        assert_eq!(tokens[2], Token::Or);
+        assert_eq!(tokens[3], Token::Not);
+        assert_eq!(tokens[4], Token::Guard);
+        assert_eq!(tokens[5], Token::Check);
+        assert_eq!(tokens[6], Token::Message);
+    }
+
+    #[test]
+    fn tokenizes_float_with_underscore() {
+        let tokens = Lexer::new("1_000_000").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::IntLit(1_000_000));
+    }
+
+    #[test]
+    fn tokenizes_escape_sequences_in_string() {
+        let tokens = Lexer::new("\"hello\\nworld\"").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::StringLit("hello\nworld".into()));
+    }
+
+    #[test]
+    fn unterminated_string_after_escape() {
+        let result = Lexer::new("\"oops\\").tokenize();
+        assert!(matches!(result, Err(LiraError::UnterminatedString { .. })));
+    }
+
+    #[test]
+    fn unexpected_char_error() {
+        let result = Lexer::new("@").tokenize();
+        assert!(matches!(result, Err(LiraError::UnexpectedChar { .. })));
+    }
+
+    #[test]
+    fn tokenizes_ident() {
+        let tokens = Lexer::new("MyContract").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::Ident("MyContract".into()));
+    }
+
+    #[test]
+    fn tokenizes_tab_escape_in_string() {
+        let tokens = Lexer::new("\"col1\\tcol2\"").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::StringLit("col1\tcol2".into()));
+    }
+
+    #[test]
+    fn tokenizes_quote_escape_in_string() {
+        let tokens = Lexer::new("\"say \\\"hi\\\"\"").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::StringLit("say \"hi\"".into()));
+    }
+
+    #[test]
+    fn tokenizes_backslash_escape_in_string() {
+        let tokens = Lexer::new("\"path\\\\file\"").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::StringLit("path\\file".into()));
+    }
+
+    #[test]
+    fn tokenizes_unknown_escape_as_char() {
+        let tokens = Lexer::new("\"\\x\"").tokenize().unwrap();
+        assert_eq!(tokens[0], Token::StringLit("x".into()));
+    }
+
+    #[test]
+    fn tokenizes_minus_standalone() {
+        // A lone `-` that is NOT followed by `>` should be Token::Minus
+        let tokens = Lexer::new("a - b").tokenize().unwrap();
+        assert_eq!(tokens[1], Token::Minus);
+    }
 }
