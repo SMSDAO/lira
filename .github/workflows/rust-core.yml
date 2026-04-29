@@ -1,0 +1,119 @@
+name: Core Engine (Rust)
+
+on:
+  pull_request:
+    paths:
+      - 'core-engine/**'
+  push:
+    branches: [main]
+    paths:
+      - 'core-engine/**'
+  workflow_dispatch:
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Rust Tests & Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: core-engine
+
+      - name: Format check
+        working-directory: core-engine
+        run: cargo fmt --check
+
+      - name: Clippy (deny warnings)
+        working-directory: core-engine
+        run: cargo clippy -- -D warnings
+
+      - name: Run unit tests
+        working-directory: core-engine
+        run: cargo test --verbose
+
+      - name: Install cargo-tarpaulin
+        run: cargo install cargo-tarpaulin --locked
+
+      - name: Coverage (target 100% for DSL core)
+        working-directory: core-engine
+        run: |
+          cargo tarpaulin --out Xml --output-dir coverage/ \
+            --exclude-files 'src/wasm_bindings.rs' \
+            --fail-under 80
+        continue-on-error: false
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-coverage
+          path: core-engine/coverage/
+          retention-days: 14
+
+  wasm-build:
+    name: WASM Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable + wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: core-engine
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM package
+        working-directory: core-engine
+        run: wasm-pack build --target web --out-dir ../wasm/pkg --features wasm
+
+      - name: Upload WASM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-pkg
+          path: wasm/pkg/
+          retention-days: 14
+
+  security-audit:
+    name: Rust Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - name: Generate Cargo.lock
+        working-directory: core-engine
+        run: cargo generate-lockfile
+
+      - name: Audit dependencies
+        working-directory: core-engine
+        run: cargo audit

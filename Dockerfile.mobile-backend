@@ -1,0 +1,25 @@
+# Mobile backend — Express.js + WebSocket server
+# Provides REST and WebSocket APIs consumed by the React Native Expo app.
+
+# ── Stage 1: Dependencies ────────────────────────────────────────────────────
+FROM node:24-alpine AS deps
+WORKDIR /app
+
+# Copy only the files needed to install deps
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+# ── Stage 2: Runtime ─────────────────────────────────────────────────────────
+FROM node:24-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+EXPOSE 4001
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
+    CMD wget -qO- http://localhost:4001/health || exit 1
+
+# Start the mobile backend entry point
+CMD ["node", "backend/mobile/server.js"]

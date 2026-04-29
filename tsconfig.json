@@ -38,6 +38,9 @@
       ],
       "@contracts/*": [
         "./contracts/*"
+      ],
+      "@lira/types": [
+        "./packages/types/index.ts"
       ]
     },
     "plugins": [
@@ -56,6 +59,7 @@
   "exclude": [
     "node_modules",
     "prisma",
-    "src/__tests__"
+    "src/__tests__",
+    "packages/mobile"
   ]
 }

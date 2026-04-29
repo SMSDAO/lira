@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { FiHome, FiUser, FiZap, FiCpu, FiSettings, FiBarChart2, FiCode } from 'react-icons/fi';
+import { FiHome, FiUser, FiZap, FiCpu, FiSettings, FiBarChart2, FiCode, FiEdit3, FiList } from 'react-icons/fi';
 import { useUserRole } from '@/hooks/useUserRole';
 import { UserRole, ROLE_CONFIGS } from '@/lib/rbac';
 import { useAccount } from 'wagmi';
@@ -22,6 +22,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Dashboard', href: '/dashboard', icon: FiBarChart2 },
     { name: 'Launch Token', href: '/launch', icon: FiZap },
     { name: 'Agents', href: '/agents', icon: FiCpu },
+    { name: 'DSL Editor', href: '/editor', icon: FiEdit3 },
+    { name: 'Registry', href: '/registry', icon: FiList },
     { name: 'Profile', href: '/profile', icon: FiUser },
   ];
 
