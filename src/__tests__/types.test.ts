@@ -16,7 +16,7 @@ import type {
   EditorBlock,
   EditorGraph,
   LiraNotification,
-} from '../../../packages/types';
+} from '@lira/types';
 
 describe('@lira/types — type conformance', () => {
   it('LiraContract shape is correct', () => {

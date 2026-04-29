@@ -71,7 +71,8 @@ function formatTvl(tvl: bigint): string {
   }
   if (tvl >= 1_000n) {
     const whole = tvl / 1_000n;
-    const frac = String((tvl % 1_000n) / 100n).padStart(1, '0');
+    // 1 decimal place: e.g. 1_234n → $1.2K
+    const frac = String((tvl % 1_000n) / 100n);
     return `$${whole}.${frac}K`;
   }
   return `$${tvl.toString()}`;
@@ -198,11 +199,13 @@ export default function RegistryDashboard() {
       ws.onmessage = (ev: MessageEvent) => {
         try {
           const raw = JSON.parse(ev.data as string) as Record<string, unknown>;
-          // Normalise JSON payload: convert lastExecution string → Date,
-          // tvl string/number → bigint to avoid runtime errors.
+          // Normalise JSON payload: convert lastExecution string → Date (fall back to
+          // current time on invalid/missing), tvl string/number → bigint.
+          const rawDate = new Date(raw.lastExecution as string);
+          const lastExecution = isNaN(rawDate.getTime()) ? new Date() : rawDate;
           const update: ContractMetrics = {
             ...(raw as Omit<ContractMetrics, 'lastExecution' | 'tvl'>),
-            lastExecution: new Date(raw.lastExecution as string),
+            lastExecution,
             tvl: BigInt(String(raw.tvl ?? 0)),
           };
           setContracts(prev => prev.map(c => (c.address === update.address ? update : c)));

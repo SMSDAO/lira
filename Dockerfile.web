@@ -5,7 +5,8 @@
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Install all deps (including devDependencies) so ts-node is available for build
+RUN npm ci
 
 # ── Stage 2: Build ───────────────────────────────────────────────────────────
 FROM node:24-alpine AS builder

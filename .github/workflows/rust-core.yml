@@ -110,6 +110,10 @@ jobs:
       - name: Install cargo-audit
         run: cargo install cargo-audit --locked
 
+      - name: Generate Cargo.lock
+        working-directory: core-engine
+        run: cargo generate-lockfile
+
       - name: Audit dependencies
         working-directory: core-engine
         run: cargo audit

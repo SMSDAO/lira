@@ -25,7 +25,7 @@ pub enum LiraError {
     /// Safety-First: a transition references a state that was never declared.
     #[error(
         "Safety violation: undefined state '{state}' referenced in transition \
-         '{from}' → '{to}' (enable safety_first to reject such contracts)"
+         '{from}' → '{to}' — declare the state in the states block"
     )]
     UndefinedState {
         state: String,

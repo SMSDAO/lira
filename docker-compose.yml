@@ -128,7 +128,7 @@ services:
     networks:
       - lira-internal
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:4001/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:4001/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
