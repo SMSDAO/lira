@@ -64,10 +64,17 @@ const SEED_CONTRACTS: ContractMetrics[] = [
 // ──────────────────────────────────────────────────────────────────────────────
 
 function formatTvl(tvl: bigint): string {
-  const n = Number(tvl);
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
-  return `$${n}`;
+  if (tvl >= 1_000_000n) {
+    const whole = tvl / 1_000_000n;
+    const frac = String((tvl % 1_000_000n) / 10_000n).padStart(2, '0');
+    return `$${whole}.${frac}M`;
+  }
+  if (tvl >= 1_000n) {
+    const whole = tvl / 1_000n;
+    const frac = String((tvl % 1_000n) / 100n).padStart(1, '0');
+    return `$${whole}.${frac}K`;
+  }
+  return `$${tvl.toString()}`;
 }
 
 function formatDate(d: Date): string {
@@ -179,9 +186,10 @@ export default function RegistryDashboard() {
     return () => clearInterval(interval);
   }, [live]);
 
-  // In production, connect to real WebSocket
+  // In production, connect to real WebSocket only when live=true
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!live) return;
     const url = process.env.NEXT_PUBLIC_WS_URL;
     if (!url) return;
     try {
@@ -189,7 +197,14 @@ export default function RegistryDashboard() {
       wsRef.current = ws;
       ws.onmessage = (ev: MessageEvent) => {
         try {
-          const update: ContractMetrics = JSON.parse(ev.data as string);
+          const raw = JSON.parse(ev.data as string) as Record<string, unknown>;
+          // Normalise JSON payload: convert lastExecution string → Date,
+          // tvl string/number → bigint to avoid runtime errors.
+          const update: ContractMetrics = {
+            ...(raw as Omit<ContractMetrics, 'lastExecution' | 'tvl'>),
+            lastExecution: new Date(raw.lastExecution as string),
+            tvl: BigInt(String(raw.tvl ?? 0)),
+          };
           setContracts(prev => prev.map(c => (c.address === update.address ? update : c)));
         } catch {
           // ignore malformed messages
@@ -199,7 +214,7 @@ export default function RegistryDashboard() {
     } catch {
       // WebSocket not available in this environment
     }
-  }, []);
+  }, [live]);
 
   const filtered = contracts.filter(c => {
     const matchSearch =

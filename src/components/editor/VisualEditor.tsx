@@ -60,15 +60,27 @@ const INITIAL_GRAPH: EditorGraph = { blocks: [], connections: [] };
 // DSL code generation
 // ──────────────────────────────────────────────────────────────────────────────
 
+/** Sanitize a user-entered label to a valid DSL identifier [A-Za-z0-9_]+. */
+function sanitizeIdent(label: string): string {
+  // Replace spaces/hyphens with underscores, then strip non-alphanumeric/underscore chars
+  const sanitized = label.replace(/[\s-]+/g, '_').replace(/[^A-Za-z0-9_]/g, '');
+  // Must not start with a digit
+  return sanitized.match(/^[0-9]/) ? `_${sanitized}` : sanitized || 'Unnamed_Block';
+}
+
 function graphToDsl(graph: EditorGraph): string {
   const stateBlocks = graph.blocks.filter((b: EditorBlock) => b.kind === 'state');
-  const transitionEdges = graph.connections;
+  // Only generate transitions between state blocks
+  const stateIds = new Set(stateBlocks.map((b: EditorBlock) => b.id));
+  const transitionEdges = graph.connections.filter(
+    ([fromId, toId]: [string, string]) => stateIds.has(fromId) && stateIds.has(toId),
+  );
 
   const stateLines = stateBlocks
     .map((b: EditorBlock) => {
       const initial = b.props.initial ? ' initial' : '';
       const terminal = b.props.terminal ? ' terminal' : '';
-      return `    ${b.label}${initial}${terminal}`;
+      return `    ${sanitizeIdent(b.label)}${initial}${terminal}`;
     })
     .join('\n');
 
@@ -77,7 +89,7 @@ function graphToDsl(graph: EditorGraph): string {
       const fromBlock = graph.blocks.find((b: EditorBlock) => b.id === fromId);
       const toBlock = graph.blocks.find((b: EditorBlock) => b.id === toId);
       if (!fromBlock || !toBlock) return null;
-      return `    ${fromBlock.label} -> ${toBlock.label}`;
+      return `    ${sanitizeIdent(fromBlock.label)} -> ${sanitizeIdent(toBlock.label)}`;
     })
     .filter(Boolean)
     .join('\n');
@@ -202,6 +214,8 @@ export default function VisualEditor() {
   const [showDsl, setShowDsl] = useState(false);
   const [contractName, setContractName] = useState('');
   const counter = useRef(0);
+  // Track whether a `state` block has been added so the first one gets initial=true
+  const hasStateBlock = useRef(false);
 
   const addBlock = (kind: EditorBlockKind) => {
     const id = `block-${++counter.current}`;
@@ -209,6 +223,8 @@ export default function VisualEditor() {
       kind === 'state' && contractName.trim()
         ? contractName.trim()
         : `${kind.charAt(0).toUpperCase() + kind.slice(1)}${counter.current}`;
+    const isFirstState = kind === 'state' && !hasStateBlock.current;
+    if (kind === 'state') hasStateBlock.current = true;
     dispatch({
       type: 'ADD_BLOCK',
       block: {
@@ -216,7 +232,7 @@ export default function VisualEditor() {
         kind,
         label,
         props: kind === 'state'
-          ? { initial: counter.current === 1, terminal: false }
+          ? { initial: isFirstState, terminal: false }
           : {},
         position: { x: 60 + (counter.current % 5) * 160, y: 80 + Math.floor(counter.current / 5) * 100 },
       },

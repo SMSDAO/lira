@@ -49,6 +49,11 @@ pub enum LiraError {
     #[error("Safety check '{id}' has a trivially-false condition — this will always revert")]
     TriviallyFalseCheck { id: String },
 
+    /// An invalid numeric literal was encountered (e.g. multiple decimal points,
+    /// empty buffer, or an integer overflow).
+    #[error("Invalid numeric literal '{literal}' at line {line}")]
+    InvalidNumericLiteral { literal: String, line: usize },
+
     // ── Compiler / codegen errors ─────────────────────────────────────────────
     #[error("Serialisation error: {0}")]
     Serialisation(String),

@@ -5,6 +5,10 @@ import RegistryDashboard from '@/components/registry/RegistryDashboard';
 jest.useFakeTimers();
 
 describe('RegistryDashboard', () => {
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
   });

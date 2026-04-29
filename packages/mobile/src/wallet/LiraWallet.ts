@@ -8,8 +8,8 @@
 
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { ethers } from '@ethersproject/wallet';
-import type { WalletState, Transaction, HexAddress } from '../../../packages/types';
+import { Wallet } from 'ethers';
+import type { WalletState, Transaction, HexAddress } from '@lira/types';
 
 const WALLET_KEY = 'lira_wallet_pk';
 
@@ -39,7 +39,7 @@ export async function authenticateBiometric(): Promise<boolean> {
 
 /** Generate a new wallet and persist the private key in SecureStore. */
 export async function createWallet(): Promise<{ address: HexAddress; mnemonic: string }> {
-  const wallet = ethers.Wallet.createRandom();
+  const wallet = Wallet.createRandom();
   await SecureStore.setItemAsync(WALLET_KEY, wallet.privateKey);
   return {
     address: wallet.address as HexAddress,
@@ -49,7 +49,7 @@ export async function createWallet(): Promise<{ address: HexAddress; mnemonic: s
 
 /** Import an existing wallet by mnemonic phrase. */
 export async function importWalletFromMnemonic(mnemonic: string): Promise<HexAddress> {
-  const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+  const wallet = Wallet.fromPhrase(mnemonic);
   await SecureStore.setItemAsync(WALLET_KEY, wallet.privateKey);
   return wallet.address as HexAddress;
 }
@@ -58,13 +58,13 @@ export async function importWalletFromMnemonic(mnemonic: string): Promise<HexAdd
  * Load the wallet — requires biometric authentication.
  * Returns `null` if the user cancels or authentication fails.
  */
-export async function loadWallet(): Promise<ethers.Wallet | null> {
+export async function loadWallet(): Promise<Wallet | null> {
   const authenticated = await authenticateBiometric();
   if (!authenticated) return null;
 
   const pk = await SecureStore.getItemAsync(WALLET_KEY);
   if (!pk) return null;
-  return new ethers.Wallet(pk);
+  return new Wallet(pk);
 }
 
 /** Delete the persisted private key (logout / factory reset). */
@@ -124,7 +124,7 @@ export const EMPTY_WALLET_STATE: WalletState = {
 
 /** Build a WalletState from an ethers wallet and on-chain data. */
 export function buildWalletState(
-  wallet: ethers.Wallet,
+  wallet: Wallet,
   balance: bigint,
   balanceUsd: number,
   pendingTx: Transaction[],

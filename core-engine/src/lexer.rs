@@ -183,13 +183,14 @@ impl<'a> Lexer<'a> {
         Ok(s)
     }
 
-    fn read_number(&mut self) -> Token {
+    fn read_number(&mut self) -> Result<Token, LiraError> {
+        let line = self.line;
         let mut buf = String::new();
-        let mut is_float = false;
+        let mut dot_count = 0usize;
         while let Some(b) = self.peek() {
             if b.is_ascii_digit() || b == b'.' || b == b'_' {
                 if b == b'.' {
-                    is_float = true;
+                    dot_count += 1;
                 }
                 if b != b'_' {
                     buf.push(b as char);
@@ -199,10 +200,20 @@ impl<'a> Lexer<'a> {
                 break;
             }
         }
-        if is_float {
-            Token::FloatLit(buf.parse().unwrap_or(0.0))
+        // Guard against underscore-only inputs (e.g. `1_` produces buf="1", never truly
+        // empty since the caller ensures the first byte is ascii_digit, but kept as a
+        // safety net) and multiple-dot floats (e.g. `1.2.3`).
+        if buf.is_empty() || dot_count > 1 {
+            return Err(LiraError::InvalidNumericLiteral { literal: buf, line });
+        }
+        if dot_count == 1 {
+            buf.parse::<f64>()
+                .map(Token::FloatLit)
+                .map_err(|_| LiraError::InvalidNumericLiteral { literal: buf, line })
         } else {
-            Token::IntLit(buf.parse().unwrap_or(0))
+            buf.parse::<i64>()
+                .map(Token::IntLit)
+                .map_err(|_| LiraError::InvalidNumericLiteral { literal: buf, line })
         }
     }
 
@@ -274,7 +285,7 @@ impl<'a> Lexer<'a> {
                 let s = self.read_string()?;
                 Ok(Token::StringLit(s))
             }
-            Some(b) if b.is_ascii_digit() => Ok(self.read_number()),
+            Some(b) if b.is_ascii_digit() => self.read_number(),
             Some(b'-') if self.peek2() == Some(b'>') => {
                 self.advance();
                 self.advance();

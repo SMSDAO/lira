@@ -2,12 +2,14 @@
 #
 # Services
 # ─────────────────────────────────────────────────────────────────────────────
-# core-engine-api   Rust HTTP API wrapping the Lira DSL compiler
 # web               Next.js 15 front-end (admin hub)
 # mobile-backend    Express.js API for the React Native mobile app
 # postgres          PostgreSQL 16 persistent storage
 # redis             Redis 7 for WebSocket pub/sub and caching
 # indexer           Lira blockchain event indexer (Node.js)
+#
+# Note: core-engine is a Rust library crate (no HTTP binary yet).
+#       CORE_ENGINE_URL will be wired in once an HTTP wrapper is added.
 #
 # Usage
 # ─────────────────────────────────────────────────────────────────────────────
@@ -71,26 +73,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── Core Engine API ─────────────────────────────────────────────────────────
-  # Thin Actix-web HTTP wrapper around the Rust core engine.
-  # POST /compile  { source: string, options: CompileOptions } → CompileResult
-  core-engine-api:
-    build:
-      context: ./core-engine
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      RUST_LOG: ${RUST_LOG:-info}
-      PORT: 4000
-    ports:
-      - "4000:4000"
-    networks:
-      - lira-internal
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:4000/health || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
 
   # ── Web Front-end ───────────────────────────────────────────────────────────
   web:
@@ -101,8 +83,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      core-engine-api:
-        condition: service_healthy
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-lira}:${POSTGRES_PASSWORD:?err}@postgres:5432/lira
@@ -112,14 +92,13 @@ services:
       NEXT_PUBLIC_LIRA_TOKEN: ${NEXT_PUBLIC_LIRA_TOKEN:-}
       NEXT_PUBLIC_FACTORY: ${NEXT_PUBLIC_FACTORY:-}
       NEXT_PUBLIC_WS_URL: ws://mobile-backend:4001/ws
-      CORE_ENGINE_URL: http://core-engine-api:4000
       REDIS_URL: redis://redis:6379
     ports:
       - "3000:3000"
     networks:
       - lira-internal
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:3000/api/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -143,7 +122,6 @@ services:
       PORT: 4001
       DATABASE_URL: postgresql://${POSTGRES_USER:-lira}:${POSTGRES_PASSWORD:?err}@postgres:5432/lira
       REDIS_URL: redis://redis:6379
-      CORE_ENGINE_URL: http://core-engine-api:4000
       JWT_SECRET: ${JWT_SECRET:?err}
     ports:
       - "4001:4001"
