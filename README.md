@@ -84,14 +84,46 @@ Open [http://localhost:3000](http://localhost:3000) and connect your wallet!
 
 The Lira Protocol features a cutting-edge **Aura FX Neo Digital UI** — a high-contrast dark theme with neon glow effects, fluid animations powered by Framer Motion, and a modern neo-digital aesthetic inspired by Zora. Each role-based dashboard provides a purpose-built workspace for its audience.
 
-| User Dashboard | Admin Dashboard | Developer Dashboard |
-| :---: | :---: | :---: |
-| [![User Dashboard](docs/screenshots/user-dashboard.svg)](docs/screenshots/user-dashboard.svg) | [![Admin Dashboard](docs/screenshots/admin-dashboard.svg)](docs/screenshots/admin-dashboard.svg) | [![Developer Dashboard](docs/screenshots/developer-portal.svg)](docs/screenshots/developer-portal.svg) |
-| *Social Timeline & Smart Wallet* | *Billing, Fees & Contract Control* | *Token Launcher & API Logs* |
+---
 
-| Landing Page | Token Launch | Wallet Connect | Mobile View |
-| :---: | :---: | :---: | :---: |
-| [![Landing](docs/screenshots/landing-page.svg)](docs/screenshots/landing-page.svg) | [![Token Launch](docs/screenshots/token-launch-flow.svg)](docs/screenshots/token-launch-flow.svg) | [![Wallet Modal](docs/screenshots/wallet-connect-modal.svg)](docs/screenshots/wallet-connect-modal.svg) | [![Mobile](docs/screenshots/mobile-responsive.svg)](docs/screenshots/mobile-responsive.svg) |
+## 📸 Screenshots
+
+### Role-Based Dashboards
+
+<div align="center">
+
+| User Dashboard | Admin Dashboard | Developer Portal |
+| :---: | :---: | :---: |
+| <a href="docs/screenshots/user-dashboard.svg"><img src="docs/screenshots/user-dashboard.svg" alt="User Dashboard" width="420"/></a> | <a href="docs/screenshots/admin-dashboard.svg"><img src="docs/screenshots/admin-dashboard.svg" alt="Admin Dashboard" width="420"/></a> | <a href="docs/screenshots/developer-portal.svg"><img src="docs/screenshots/developer-portal.svg" alt="Developer Portal" width="420"/></a> |
+| *Social Timeline & Smart Wallet* | *Billing, Fees & Contract Control* | *API Docs, Sandbox & Request Logs* |
+
+</div>
+
+### Core Flows
+
+<div align="center">
+
+| Landing Page | Token Launch Flow | Wallet Connect Modal |
+| :---: | :---: | :---: |
+| <a href="docs/screenshots/landing-page.svg"><img src="docs/screenshots/landing-page.svg" alt="Landing Page" width="420"/></a> | <a href="docs/screenshots/token-launch-flow.svg"><img src="docs/screenshots/token-launch-flow.svg" alt="Token Launch Flow" width="420"/></a> | <a href="docs/screenshots/wallet-connect-modal.svg"><img src="docs/screenshots/wallet-connect-modal.svg" alt="Wallet Connect Modal" width="420"/></a> |
+| *Hero & Feature Highlights* | *One-Click ERC20 Deployment* | *RainbowKit Multi-Wallet Picker* |
+
+</div>
+
+### AI Agents & Mobile
+
+<div align="center">
+
+| AI Agent Executor | Mobile Responsive View |
+| :---: | :---: |
+| <a href="docs/screenshots/agent-executor.svg"><img src="docs/screenshots/agent-executor.svg" alt="AI Agent Executor" width="560"/></a> | <a href="docs/screenshots/mobile-responsive.svg"><img src="docs/screenshots/mobile-responsive.svg" alt="Mobile Responsive" width="280"/></a> |
+| *Parallel Agents & Quantum Oracle Chart* | *390 px — Full Mobile Parity* |
+
+</div>
+
+> All screenshots showcase the **Aura FX Neo Digital** theme: `#00d4ff` neo-blue (User), `#a855f7` neo-purple (Admin), `#f59e0b` neo-amber (Developer).
+
+---
 
 ### Dashboard Highlights
 
@@ -281,16 +313,18 @@ Security is our top priority. See [docs/SECURITY_AUDIT.md](./docs/SECURITY_AUDIT
 ✅ **Tests**: Unit + contract tests included  
 ✅ **Deployment**: Vercel ready  
 ✅ **Documentation**: Complete  
-✅ **Screenshots**: Available in `docs/screenshots/`  
-⚠️ **Production Audit**: Recommended before mainnet deployment  
+✅ **Screenshots**: Full gallery in `docs/screenshots/` (8 SVGs)  
+✅ **Rust Core**: Production Beta — `core-engine/` crate with ≥ 80 % test coverage  
+🔄 **Production Beta**: Stabilized for audit — mainnet deployment pending final review  
 
 ### Recent Updates
-- ✨ Role-based dashboard system (User / Admin / Developer)
+- 🦀 Rust core engine (`core-engine/`) — parser, lexer, WASM bindings, 80 % coverage gate
+- ✨ Production Beta milestone — role-based dashboard system fully operational
+- ✨ Complete UI gallery — 8 Aura FX Neo Digital screenshots added to `docs/screenshots/`
 - ✨ Developer portal with API docs, sandbox, and request logs
 - ✨ Vercel deployment configuration
-- ✨ SmartWallet authentication guide
-- ✨ Comprehensive documentation rewrite
-- ✨ UI screenshots added to `docs/screenshots/`
+- ✨ SmartWallet (Coinbase) as primary authentication method
+- ✨ Comprehensive documentation rewrite across `docs/sections/`
 
 ---
 
@@ -428,6 +462,6 @@ Start with `npm run dev` and explore the platform!
 
 ---
 
-*Last Updated: 2026-01-20*  
+*Last Updated: 2026-05-02*  
 *Version: 1.0.0*  
-*Status: Production Ready*
+*Status: Production Beta*
