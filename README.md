@@ -314,11 +314,11 @@ Security is our top priority. See [docs/SECURITY_AUDIT.md](./docs/SECURITY_AUDIT
 ✅ **Deployment**: Vercel ready  
 ✅ **Documentation**: Complete  
 ✅ **Screenshots**: Full gallery in `docs/screenshots/` (8 SVGs)  
-✅ **Rust Core**: Production Beta — `core-engine/` crate with ≥ 80 % test coverage  
+✅ **Rust Core**: Production Beta — `core-engine/` crate with ≥ 80% test coverage  
 🔄 **Production Beta**: Stabilized for audit — mainnet deployment pending final review  
 
 ### Recent Updates
-- 🦀 Rust core engine (`core-engine/`) — parser, lexer, WASM bindings, 80 % coverage gate
+- 🦀 Rust core engine (`core-engine/`) — parser, lexer, WASM bindings, 80% coverage gate
 - ✨ Production Beta milestone — role-based dashboard system fully operational
 - ✨ Complete UI gallery — 8 Aura FX Neo Digital screenshots added to `docs/screenshots/`
 - ✨ Developer portal with API docs, sandbox, and request logs
