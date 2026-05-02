@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+<defs>
+<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="50%" style="stop-color:#a855f7"/>
+  <stop offset="100%" style="stop-color:#f472b6"/>
+</linearGradient>
+<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="100%" style="stop-color:#a855f7"/>
+</linearGradient>
+</defs>
+<rect width="1440" height="900" fill="#0a0a0f"/>
+<rect x="0" y="0" width="240" height="900" fill="#0a0e1a"/>
+<rect x="240" y="0" width="1" height="900" fill="#f59e0b" opacity="0.3"/>
+<rect x="18" y="18" width="38" height="38" rx="8" fill="url(#logoGrad)"/>
+<text x="37" y="43" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">L</text>
+<text x="66" y="44" font-family="monospace" font-size="22" font-weight="bold" fill="#f59e0b">LIRA</text>
+<text x="22" y="102" font-family="monospace" font-size="13">&#x1F3E0;</text>
+<text x="46" y="102" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Home</text>
+<text x="22" y="146" font-family="monospace" font-size="13">&#x1F4CA;</text>
+<text x="46" y="146" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Dashboard</text>
+<text x="22" y="190" font-family="monospace" font-size="13">&#x26A1;</text>
+<text x="46" y="190" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Launch Token</text>
+<text x="22" y="234" font-family="monospace" font-size="13">&#x1F916;</text>
+<text x="46" y="234" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Agents</text>
+<text x="22" y="278" font-family="monospace" font-size="13">&#x2699;</text>
+<text x="46" y="278" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Admin</text>
+<rect x="8" y="294" width="224" height="38" rx="6" fill="#f59e0b" opacity="0.15" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.5"/>
+<text x="22" y="322" font-family="monospace" font-size="13">&#x1F4BB;</text>
+<text x="46" y="322" font-family="monospace" font-size="13" font-weight="bold" fill="#f59e0b">Dev Portal</text>
+<text x="20" y="870" font-family="monospace" font-size="11" fill="#6b7280">Role: Developer</text>
+<rect x="240" y="0" width="1200" height="60" fill="#0a0e1a" opacity="0.9"/>
+<rect x="240" y="60" width="1200" height="1" fill="#f59e0b" opacity="0.2"/>
+<rect x="258" y="14" width="240" height="32" rx="6" fill="#0a0a0f" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="273" y="35" font-family="monospace" font-size="12" fill="#6b7280">Search...</text>
+<rect x="1328" y="13" width="94" height="34" rx="8" fill="#f59e0b" opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+<text x="1375" y="35" font-family="monospace" font-size="12" font-weight="bold" fill="#f59e0b" text-anchor="middle">Connect</text>
+<text x="278" y="100" font-family="monospace" font-size="24" font-weight="bold" fill="#f59e0b">Developer Portal</text>
+<rect x="260" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="278" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#00d4ff">24</text>
+<text x="278" y="168" font-family="monospace" font-size="12" fill="#9ca3af">API Endpoints</text>
+<rect x="555" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#10b981" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="573" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#10b981">3/3</text>
+<text x="573" y="168" font-family="monospace" font-size="12" fill="#9ca3af">Active Services</text>
+<rect x="850" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="868" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#a855f7">14</text>
+<text x="868" y="168" font-family="monospace" font-size="12" fill="#9ca3af">DB Tables</text>
+<rect x="1145" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#f472b6" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1163" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#f472b6">12.4K</text>
+<text x="1163" y="168" font-family="monospace" font-size="12" fill="#9ca3af">Logs (24h)</text>
+<rect x="260" y="208" width="94" height="28" rx="4" fill="#f59e0b" opacity="0.15" stroke="#f59e0b" stroke-width="0.8"/>
+<text x="307" y="227" font-family="monospace" font-size="12" font-weight="bold" fill="#f59e0b" text-anchor="middle">Overview</text>
+<text x="370" y="227" font-family="monospace" font-size="12" fill="#9ca3af">API Keys</text>
+<text x="472" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Webhooks</text>
+<text x="574" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Sandbox</text>
+<text x="667" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Request Logs</text>
+<text x="805" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Metrics</text>
+<text x="898" y="227" font-family="monospace" font-size="12" fill="#9ca3af">SDK</text>
+<rect x="260" y="248" width="1148" height="586" rx="12" fill="#0a0e1a" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.25"/>
+<rect x="280" y="266" width="520" height="540" rx="10" fill="#0a0e1a" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="296" y="294" font-family="monospace" font-size="14" font-weight="bold" fill="#f59e0b">API Reference</text>
+<line x1="280" y1="306" x2="800" y2="306" stroke="#f59e0b" stroke-opacity="0.2"/>
+<rect x="288" y="306" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="306" width="54" height="28" rx="4" fill="#10b981" opacity="0.2"/>
+<text x="315" y="324" font-family="monospace" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle">POST</text>
+<text x="354" y="324" font-family="monospace" font-size="12" fill="#ffffff">/api/tokens</text>
+<rect x="288" y="342" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="342" width="54" height="28" rx="4" fill="#00d4ff" opacity="0.2"/>
+<text x="315" y="360" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff" text-anchor="middle">GET</text>
+<text x="354" y="360" font-family="monospace" font-size="12" fill="#ffffff">/api/tokens</text>
+<rect x="288" y="378" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="378" width="54" height="28" rx="4" fill="#10b981" opacity="0.2"/>
+<text x="315" y="396" font-family="monospace" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle">POST</text>
+<text x="354" y="396" font-family="monospace" font-size="12" fill="#ffffff">/api/agents</text>
+<rect x="288" y="414" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="414" width="54" height="28" rx="4" fill="#00d4ff" opacity="0.2"/>
+<text x="315" y="432" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff" text-anchor="middle">GET</text>
+<text x="354" y="432" font-family="monospace" font-size="12" fill="#ffffff">/api/agents/{id}</text>
+<rect x="288" y="450" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="450" width="54" height="28" rx="4" fill="#10b981" opacity="0.2"/>
+<text x="315" y="468" font-family="monospace" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle">POST</text>
+<text x="354" y="468" font-family="monospace" font-size="12" fill="#ffffff">/api/agents/{id}/execute</text>
+<rect x="288" y="486" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="486" width="54" height="28" rx="4" fill="#00d4ff" opacity="0.2"/>
+<text x="315" y="504" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff" text-anchor="middle">GET</text>
+<text x="354" y="504" font-family="monospace" font-size="12" fill="#ffffff">/api/quantum/predict</text>
+<rect x="288" y="522" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="522" width="54" height="28" rx="4" fill="#10b981" opacity="0.2"/>
+<text x="315" y="540" font-family="monospace" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle">POST</text>
+<text x="354" y="540" font-family="monospace" font-size="12" fill="#ffffff">/api/auth/verify</text>
+<rect x="288" y="558" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="558" width="54" height="28" rx="4" fill="#00d4ff" opacity="0.2"/>
+<text x="315" y="576" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff" text-anchor="middle">GET</text>
+<text x="354" y="576" font-family="monospace" font-size="12" fill="#ffffff">/api/health</text>
+<rect x="288" y="594" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="594" width="54" height="28" rx="4" fill="#00d4ff" opacity="0.2"/>
+<text x="315" y="612" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff" text-anchor="middle">GET</text>
+<text x="354" y="612" font-family="monospace" font-size="12" fill="#ffffff">/api/social/feed</text>
+<rect x="288" y="630" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="630" width="54" height="28" rx="4" fill="#10b981" opacity="0.2"/>
+<text x="315" y="648" font-family="monospace" font-size="11" font-weight="bold" fill="#10b981" text-anchor="middle">POST</text>
+<text x="354" y="648" font-family="monospace" font-size="12" fill="#ffffff">/api/dex/scan</text>
+<rect x="288" y="666" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="666" width="54" height="28" rx="4" fill="#00d4ff" opacity="0.2"/>
+<text x="315" y="684" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff" text-anchor="middle">GET</text>
+<text x="354" y="684" font-family="monospace" font-size="12" fill="#ffffff">/api/timeline</text>
+<rect x="288" y="702" width="492" height="28" rx="4" fill="#0a0a0f"/>
+<rect x="288" y="702" width="54" height="28" rx="4" fill="#f472b6" opacity="0.2"/>
+<text x="315" y="720" font-family="monospace" font-size="11" font-weight="bold" fill="#f472b6" text-anchor="middle">DELETE</text>
+<text x="354" y="720" font-family="monospace" font-size="12" fill="#ffffff">/api/tokens/{id}</text>
+<rect x="820" y="266" width="568" height="256" rx="10" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="836" y="294" font-family="monospace" font-size="14" font-weight="bold" fill="#a855f7">Sandbox</text>
+<line x1="820" y1="306" x2="1388" y2="306" stroke="#a855f7" stroke-opacity="0.2"/>
+<rect x="838" y="306" width="530" height="158" rx="6" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.5" stroke-opacity="0.3"/>
+<text x="854" y="330" font-family="monospace" font-size="11" fill="#10b981">$ curl -X POST /api/tokens \</text>
+<text x="854" y="356" font-family="monospace" font-size="11" fill="#ffffff">  -H "Authorization: Bearer key" \</text>
+<text x="854" y="382" font-family="monospace" font-size="11" fill="#ffffff">  -d '{"name":"MyToken","symbol":"MTK"}'</text>
+<text x="854" y="408" font-family="monospace" font-size="11" fill="#ffffff"></text>
+<text x="854" y="434" font-family="monospace" font-size="11" fill="#f59e0b">{"id":"tok_001","status":"deployed","txHash":"0xabcd..."}</text>
+<rect x="820" y="538" width="568" height="274" rx="10" fill="#0a0e1a" stroke="#f472b6" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="836" y="566" font-family="monospace" font-size="14" font-weight="bold" fill="#f472b6">Request Logs</text>
+<line x1="820" y1="578" x2="1388" y2="578" stroke="#f472b6" stroke-opacity="0.2"/>
+<text x="838" y="580" font-family="monospace" font-size="10" fill="#6b7280">12:47:55</text>
+<text x="908" y="580" font-family="monospace" font-size="11" fill="#10b981">POST</text>
+<text x="964" y="580" font-family="monospace" font-size="12" fill="#ffffff">/api/tokens</text>
+<text x="1228" y="580" font-family="monospace" font-size="11" fill="#10b981">201</text>
+<text x="1278" y="580" font-family="monospace" font-size="10" fill="#6b7280">142ms</text>
+<text x="838" y="616" font-family="monospace" font-size="10" fill="#6b7280">12:47:48</text>
+<text x="908" y="616" font-family="monospace" font-size="11" fill="#00d4ff">GET</text>
+<text x="964" y="616" font-family="monospace" font-size="12" fill="#ffffff">/api/health</text>
+<text x="1228" y="616" font-family="monospace" font-size="11" fill="#10b981">200</text>
+<text x="1278" y="616" font-family="monospace" font-size="10" fill="#6b7280">8ms</text>
+<text x="838" y="652" font-family="monospace" font-size="10" fill="#6b7280">12:47:42</text>
+<text x="908" y="652" font-family="monospace" font-size="11" fill="#00d4ff">GET</text>
+<text x="964" y="652" font-family="monospace" font-size="12" fill="#ffffff">/api/agents</text>
+<text x="1228" y="652" font-family="monospace" font-size="11" fill="#10b981">200</text>
+<text x="1278" y="652" font-family="monospace" font-size="10" fill="#6b7280">56ms</text>
+<text x="838" y="688" font-family="monospace" font-size="10" fill="#6b7280">12:47:35</text>
+<text x="908" y="688" font-family="monospace" font-size="11" fill="#10b981">POST</text>
+<text x="964" y="688" font-family="monospace" font-size="12" fill="#ffffff">/api/quantum/predict</text>
+<text x="1228" y="688" font-family="monospace" font-size="11" fill="#10b981">200</text>
+<text x="1278" y="688" font-family="monospace" font-size="10" fill="#6b7280">234ms</text>
+<text x="838" y="724" font-family="monospace" font-size="10" fill="#6b7280">12:47:28</text>
+<text x="908" y="724" font-family="monospace" font-size="11" fill="#00d4ff">GET</text>
+<text x="964" y="724" font-family="monospace" font-size="12" fill="#ffffff">/api/timeline</text>
+<text x="1228" y="724" font-family="monospace" font-size="11" fill="#10b981">200</text>
+<text x="1278" y="724" font-family="monospace" font-size="10" fill="#6b7280">44ms</text>
+<text x="838" y="760" font-family="monospace" font-size="10" fill="#6b7280">12:47:20</text>
+<text x="908" y="760" font-family="monospace" font-size="11" fill="#10b981">POST</text>
+<text x="964" y="760" font-family="monospace" font-size="12" fill="#ffffff">/api/dex/scan</text>
+<text x="1228" y="760" font-family="monospace" font-size="11" fill="#10b981">200</text>
+<text x="1278" y="760" font-family="monospace" font-size="10" fill="#6b7280">188ms</text>
+</svg>

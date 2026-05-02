@@ -11,6 +11,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'lira.ai',
       },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gateway.ipfs.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ipfs.io',
+      },
     ],
     unoptimized: process.env.NODE_ENV === 'development',
   },

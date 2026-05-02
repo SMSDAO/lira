@@ -86,10 +86,12 @@ The Lira Protocol features a cutting-edge **Aura FX Neo Digital UI** — a high-
 
 | User Dashboard | Admin Dashboard | Developer Dashboard |
 | :---: | :---: | :---: |
-| [![User Dashboard](https://via.placeholder.com/480x300/0a0a0f/00f5ff?text=User+Dashboard)](docs/screenshots/user-dashboard.png) | [![Admin Dashboard](https://via.placeholder.com/480x300/0a0a0f/a855f7?text=Admin+Dashboard)](docs/screenshots/admin-dashboard.png) | [![Developer Dashboard](https://via.placeholder.com/480x300/0a0a0f/f59e0b?text=Developer+Dashboard)](docs/screenshots/developer-dashboard.png) |
-| *Social Timeline & Smart Wallet* | *Billing, Fees & Contract Control* | *Token Launcher & Agent Executor* |
+| [![User Dashboard](docs/screenshots/user-dashboard.svg)](docs/screenshots/user-dashboard.svg) | [![Admin Dashboard](docs/screenshots/admin-dashboard.svg)](docs/screenshots/admin-dashboard.svg) | [![Developer Dashboard](docs/screenshots/developer-portal.svg)](docs/screenshots/developer-portal.svg) |
+| *Social Timeline & Smart Wallet* | *Billing, Fees & Contract Control* | *Token Launcher & API Logs* |
 
-> 📸 **To add real screenshots**: Capture your locally running app (`npm run dev`) and save the images to [`docs/screenshots/`](./docs/screenshots/). See [`docs/screenshots/README.md`](./docs/screenshots/README.md) for the expected file names and dimensions.
+| Landing Page | Token Launch | Wallet Connect | Mobile View |
+| :---: | :---: | :---: | :---: |
+| [![Landing](docs/screenshots/landing-page.svg)](docs/screenshots/landing-page.svg) | [![Token Launch](docs/screenshots/token-launch-flow.svg)](docs/screenshots/token-launch-flow.svg) | [![Wallet Modal](docs/screenshots/wallet-connect-modal.svg)](docs/screenshots/wallet-connect-modal.svg) | [![Mobile](docs/screenshots/mobile-responsive.svg)](docs/screenshots/mobile-responsive.svg) |
 
 ### Dashboard Highlights
 
@@ -103,69 +105,13 @@ Full protocol governance panel: manage billing, configure protocol fees, control
 Token Launcher with one-click ERC20 deployment, Parallel Agent Executor with Quantum Oracle (`Q#`) visualization, live API logs, and testing tools.
 
 ### 🛠️ Tech Stack
-- **Frontend**: Next.js 14, React 18, TypeScript
+- **Frontend**: Next.js 16, React 18, TypeScript
 - **Styling**: Tailwind CSS, Framer Motion
 - **Web3**: Wagmi v2, Viem, RainbowKit v2
 - **Backend**: PHP, Go, Java (multi-service)
-- **Database**: PostgreSQL
-- **Blockchain**: BASE (Coinbase L2), Solidity
+- **Database**: PostgreSQL + Prisma ORM
+- **Blockchain**: BASE (Coinbase L2), Solidity, OpenZeppelin
 - **Quantum**: Q# (Microsoft Quantum)
-
----
-• Delayed‑reveal mint windows
-• Off‑chain signature gating
-• Optional commit‑reveal minting
-
-
-2. Anti‑Sapper Protection
-
-• Rate‑limit per wallet
-• Dynamic mint throttling
-• Automated suspicious‑pattern detection
-• Optional proof‑of‑wallet‑age or stake‑based access
-
-
-3. Honeypot‑Resistance
-
-• Transparent mint rules
-• Immutable metadata commitments
-• Publicly verifiable mint receipts
-• No hidden transfer hooks or forced approvals
-
-
-4. Admin‑Side Safety
-
-• Role‑based access control
-• Multi‑sig optional
-• Safe‑mode for contract upgrades
-• Audit‑friendly logs + event streams
-
-
-🧩 Zora‑Inspired Logic
-
-• Creator share enforcement
-• Primary sale + optional secondary royalty routing
-• Edition‑style mints
-• Mint windows, supply caps, per‑wallet limits
-
-
-🧱 Optional Bubblegum Integration
-
-• Enable via config:enableCompressedMints: true
-
-• Ideal for social mints, high‑volume collectibles, and low‑cost distribution.
-
-
-✨ Blink‑Ready API (Optional)
-
-LIRA exposes clean endpoints that can later be wrapped into Solana Blinks:
-
-• POST /api/lira/mint
-• POST /api/lira/bid
-• POST /api/lira/claim
-
-
-Blinks are not required for v1 but fully supported by design.
 
 ---
 
@@ -332,17 +278,19 @@ Security is our top priority. See [docs/SECURITY_AUDIT.md](./docs/SECURITY_AUDIT
 ## 📊 Project Status
 
 ✅ **Build**: Passing  
-✅ **Tests**: 33 total (13 passing, 20 need updates)  
+✅ **Tests**: Unit + contract tests included  
 ✅ **Deployment**: Vercel ready  
 ✅ **Documentation**: Complete  
-✅ **Production**: Ready for audit  
+✅ **Screenshots**: Available in `docs/screenshots/`  
+⚠️ **Production Audit**: Recommended before mainnet deployment  
 
 ### Recent Updates
-- ✨ Role-based dashboard system
-- ✨ Developer portal with API docs
+- ✨ Role-based dashboard system (User / Admin / Developer)
+- ✨ Developer portal with API docs, sandbox, and request logs
 - ✨ Vercel deployment configuration
 - ✨ SmartWallet authentication guide
 - ✨ Comprehensive documentation rewrite
+- ✨ UI screenshots added to `docs/screenshots/`
 
 ---
 

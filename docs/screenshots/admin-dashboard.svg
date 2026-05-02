@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+<defs>
+<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="50%" style="stop-color:#a855f7"/>
+  <stop offset="100%" style="stop-color:#f472b6"/>
+</linearGradient>
+<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="100%" style="stop-color:#a855f7"/>
+</linearGradient>
+</defs>
+<rect width="1440" height="900" fill="#0a0a0f"/>
+<rect x="0" y="0" width="240" height="900" fill="#0a0e1a"/>
+<rect x="240" y="0" width="1" height="900" fill="#a855f7" opacity="0.3"/>
+<rect x="18" y="18" width="38" height="38" rx="8" fill="url(#logoGrad)"/>
+<text x="37" y="43" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">L</text>
+<text x="66" y="44" font-family="monospace" font-size="22" font-weight="bold" fill="#a855f7">LIRA</text>
+<text x="22" y="102" font-family="monospace" font-size="13">&#x1F3E0;</text>
+<text x="46" y="102" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Home</text>
+<text x="22" y="146" font-family="monospace" font-size="13">&#x1F4CA;</text>
+<text x="46" y="146" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Dashboard</text>
+<text x="22" y="190" font-family="monospace" font-size="13">&#x26A1;</text>
+<text x="46" y="190" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Launch Token</text>
+<text x="22" y="234" font-family="monospace" font-size="13">&#x1F916;</text>
+<text x="46" y="234" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Agents</text>
+<rect x="8" y="250" width="224" height="38" rx="6" fill="#a855f7" opacity="0.15" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.5"/>
+<text x="22" y="278" font-family="monospace" font-size="13">&#x2699;</text>
+<text x="46" y="278" font-family="monospace" font-size="13" font-weight="bold" fill="#a855f7">Admin</text>
+<text x="22" y="322" font-family="monospace" font-size="13">&#x1F4BB;</text>
+<text x="46" y="322" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Dev Portal</text>
+<text x="20" y="870" font-family="monospace" font-size="11" fill="#6b7280">Role: Admin</text>
+<rect x="240" y="0" width="1200" height="60" fill="#0a0e1a" opacity="0.9"/>
+<rect x="240" y="60" width="1200" height="1" fill="#a855f7" opacity="0.2"/>
+<rect x="258" y="14" width="240" height="32" rx="6" fill="#0a0a0f" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="273" y="35" font-family="monospace" font-size="12" fill="#6b7280">Search...</text>
+<rect x="1328" y="13" width="94" height="34" rx="8" fill="#a855f7" opacity="0.15" stroke="#a855f7" stroke-width="1"/>
+<text x="1375" y="35" font-family="monospace" font-size="12" font-weight="bold" fill="#a855f7" text-anchor="middle">Connect</text>
+<text x="278" y="100" font-family="monospace" font-size="24" font-weight="bold" fill="#a855f7">Admin Dashboard</text>
+<rect x="260" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="278" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#00d4ff">1,247</text>
+<text x="278" y="168" font-family="monospace" font-size="12" fill="#9ca3af">Total Users</text>
+<rect x="555" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="573" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#a855f7">12</text>
+<text x="573" y="168" font-family="monospace" font-size="12" fill="#9ca3af">Active Agents</text>
+<rect x="850" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#10b981" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="868" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#10b981">384</text>
+<text x="868" y="168" font-family="monospace" font-size="12" fill="#9ca3af">Tokens Launched</text>
+<rect x="1145" y="110" width="275" height="80" rx="10" fill="#0a0e1a" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1163" y="146" font-family="monospace" font-size="24" font-weight="bold" fill="#f59e0b">$284K</text>
+<text x="1163" y="168" font-family="monospace" font-size="12" fill="#9ca3af">Revenue</text>
+<rect x="260" y="208" width="94" height="28" rx="4" fill="#a855f7" opacity="0.15" stroke="#a855f7" stroke-width="0.8"/>
+<text x="307" y="227" font-family="monospace" font-size="12" font-weight="bold" fill="#a855f7" text-anchor="middle">Overview</text>
+<text x="370" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Users</text>
+<text x="445" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Permissions</text>
+<text x="574" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Wallets</text>
+<text x="667" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Feature Flags</text>
+<text x="814" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Audit Log</text>
+<text x="925" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Alerts</text>
+<rect x="260" y="248" width="1148" height="586" rx="12" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.25"/>
+<rect x="280" y="266" width="360" height="248" rx="10" fill="#0a0e1a" stroke="#10b981" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="296" y="294" font-family="monospace" font-size="14" font-weight="bold" fill="#10b981">System Health</text>
+<line x1="280" y1="306" x2="640" y2="306" stroke="#10b981" stroke-opacity="0.2"/>
+<text x="296" y="316" font-family="monospace" font-size="12" fill="#9ca3af">Frontend (Next.js)</text>
+<circle cx="588" cy="311" r="5" fill="#10b981"/>
+<text x="600" y="316" font-family="monospace" font-size="12" fill="#10b981">Online</text>
+<text x="296" y="354" font-family="monospace" font-size="12" fill="#9ca3af">PHP API</text>
+<circle cx="588" cy="349" r="5" fill="#10b981"/>
+<text x="600" y="354" font-family="monospace" font-size="12" fill="#10b981">Online</text>
+<text x="296" y="392" font-family="monospace" font-size="12" fill="#9ca3af">Go Agent Service</text>
+<circle cx="588" cy="387" r="5" fill="#10b981"/>
+<text x="600" y="392" font-family="monospace" font-size="12" fill="#10b981">Online</text>
+<text x="296" y="430" font-family="monospace" font-size="12" fill="#9ca3af">Java Quantum Oracle</text>
+<circle cx="588" cy="425" r="5" fill="#10b981"/>
+<text x="600" y="430" font-family="monospace" font-size="12" fill="#10b981">Online</text>
+<text x="296" y="468" font-family="monospace" font-size="12" fill="#9ca3af">PostgreSQL</text>
+<circle cx="588" cy="463" r="5" fill="#10b981"/>
+<text x="600" y="468" font-family="monospace" font-size="12" fill="#10b981">Online</text>
+<rect x="660" y="266" width="720" height="248" rx="10" fill="#0a0e1a" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="676" y="294" font-family="monospace" font-size="14" font-weight="bold" fill="#f59e0b">Billing and Fees</text>
+<line x1="660" y1="306" x2="1380" y2="306" stroke="#f59e0b" stroke-opacity="0.2"/>
+<text x="678" y="316" font-family="monospace" font-size="12" fill="#9ca3af">Protocol Fee</text>
+<text x="1054" y="316" font-family="monospace" font-size="14" font-weight="bold" fill="#f59e0b" text-anchor="end">1.00%</text>
+<text x="678" y="364" font-family="monospace" font-size="12" fill="#9ca3af">Creator Fee</text>
+<text x="1054" y="364" font-family="monospace" font-size="14" font-weight="bold" fill="#f59e0b" text-anchor="end">2.00%</text>
+<text x="678" y="412" font-family="monospace" font-size="12" fill="#9ca3af">Launch Fee</text>
+<text x="1054" y="412" font-family="monospace" font-size="14" font-weight="bold" fill="#f59e0b" text-anchor="end">0.01 ETH</text>
+<rect x="678" y="410" width="130" height="34" rx="6" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="0.8"/>
+<text x="743" y="432" font-family="monospace" font-size="12" font-weight="bold" fill="#f59e0b" text-anchor="middle">Update Fees</text>
+<rect x="280" y="530" width="360" height="290" rx="10" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="296" y="558" font-family="monospace" font-size="14" font-weight="bold" fill="#a855f7">Contract Controller</text>
+<line x1="280" y1="570" x2="640" y2="570" stroke="#a855f7" stroke-opacity="0.2"/>
+<text x="298" y="580" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">LIRA Token</text>
+<text x="298" y="598" font-family="monospace" font-size="11" fill="#9ca3af">0xaBcD...1234</text>
+<text x="298" y="628" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">Token Registry</text>
+<text x="298" y="646" font-family="monospace" font-size="11" fill="#9ca3af">0x1234...5678</text>
+<text x="298" y="676" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">Social Graph</text>
+<text x="298" y="694" font-family="monospace" font-size="11" fill="#9ca3af">0x5678...9ABC</text>
+<text x="298" y="724" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">Token Factory</text>
+<text x="298" y="742" font-family="monospace" font-size="11" fill="#9ca3af">0x9ABC...DEF0</text>
+<rect x="660" y="530" width="720" height="290" rx="10" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="676" y="558" font-family="monospace" font-size="14" font-weight="bold" fill="#00d4ff">Recent Users</text>
+<line x1="660" y1="570" x2="1380" y2="570" stroke="#00d4ff" stroke-opacity="0.2"/>
+<text x="678" y="572" font-family="monospace" font-size="11" fill="#6b7280">WALLET</text>
+<text x="938" y="572" font-family="monospace" font-size="11" fill="#6b7280">ROLE</text>
+<text x="1080" y="572" font-family="monospace" font-size="11" fill="#6b7280">JOINED</text>
+<text x="1220" y="572" font-family="monospace" font-size="11" fill="#6b7280">STATUS</text>
+<text x="678" y="596" font-family="monospace" font-size="12" fill="#ffffff">0xABCD...0001</text>
+<rect x="936" y="582" width="56" height="22" rx="11" fill="#f472b6" opacity="0.2" stroke="#f472b6" stroke-width="0.8"/>
+<text x="964" y="597" font-family="monospace" font-size="10" font-weight="bold" fill="#f472b6" text-anchor="middle">Admin</text>
+<text x="1080" y="596" font-family="monospace" font-size="12" fill="#9ca3af">2026-01-15</text>
+<rect x="1218" y="582" width="64" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="1250" y="597" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Active</text>
+<text x="678" y="636" font-family="monospace" font-size="12" fill="#ffffff">0x1234...0002</text>
+<rect x="936" y="622" width="40" height="22" rx="11" fill="#a855f7" opacity="0.2" stroke="#a855f7" stroke-width="0.8"/>
+<text x="956" y="637" font-family="monospace" font-size="10" font-weight="bold" fill="#a855f7" text-anchor="middle">Dev</text>
+<text x="1080" y="636" font-family="monospace" font-size="12" fill="#9ca3af">2026-01-18</text>
+<rect x="1218" y="622" width="64" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="1250" y="637" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Active</text>
+<text x="678" y="676" font-family="monospace" font-size="12" fill="#ffffff">0x5678...0003</text>
+<rect x="936" y="662" width="48" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="960" y="677" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">User</text>
+<text x="1080" y="676" font-family="monospace" font-size="12" fill="#9ca3af">2026-01-20</text>
+<rect x="1218" y="662" width="64" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="1250" y="677" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Active</text>
+<text x="678" y="716" font-family="monospace" font-size="12" fill="#ffffff">0x9ABC...0004</text>
+<rect x="936" y="702" width="48" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="960" y="717" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">User</text>
+<text x="1080" y="716" font-family="monospace" font-size="12" fill="#9ca3af">2026-01-22</text>
+<rect x="1218" y="702" width="64" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="1250" y="717" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Active</text>
+<text x="678" y="756" font-family="monospace" font-size="12" fill="#ffffff">0xDEF0...0005</text>
+<rect x="936" y="742" width="48" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="960" y="757" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">User</text>
+<text x="1080" y="756" font-family="monospace" font-size="12" fill="#9ca3af">2026-01-25</text>
+<rect x="1218" y="742" width="64" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="1250" y="757" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Active</text>
+</svg>
