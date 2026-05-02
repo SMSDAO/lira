@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+<defs>
+<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="50%" style="stop-color:#a855f7"/>
+  <stop offset="100%" style="stop-color:#f472b6"/>
+</linearGradient>
+<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="100%" style="stop-color:#a855f7"/>
+</linearGradient>
+</defs>
+<rect width="1440" height="900" fill="#0a0a0f"/>
+<rect x="0" y="0" width="240" height="900" fill="#0a0e1a"/>
+<rect x="240" y="0" width="1" height="900" fill="#00d4ff" opacity="0.3"/>
+<rect x="18" y="18" width="38" height="38" rx="8" fill="url(#logoGrad)"/>
+<text x="37" y="43" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">L</text>
+<text x="66" y="44" font-family="monospace" font-size="22" font-weight="bold" fill="#00d4ff">LIRA</text>
+<text x="22" y="102" font-family="monospace" font-size="13">&#x1F3E0;</text>
+<text x="46" y="102" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Home</text>
+<text x="22" y="146" font-family="monospace" font-size="13">&#x1F4CA;</text>
+<text x="46" y="146" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Dashboard</text>
+<rect x="8" y="162" width="224" height="38" rx="6" fill="#00d4ff" opacity="0.15" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.5"/>
+<text x="22" y="190" font-family="monospace" font-size="13">&#x26A1;</text>
+<text x="46" y="190" font-family="monospace" font-size="13" font-weight="bold" fill="#00d4ff">Launch Token</text>
+<text x="22" y="234" font-family="monospace" font-size="13">&#x1F916;</text>
+<text x="46" y="234" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Agents</text>
+<text x="22" y="278" font-family="monospace" font-size="13">&#x270F;</text>
+<text x="46" y="278" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">DSL Editor</text>
+<text x="22" y="322" font-family="monospace" font-size="13">&#x1F4CB;</text>
+<text x="46" y="322" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Registry</text>
+<rect x="240" y="0" width="1200" height="60" fill="#0a0e1a" opacity="0.9"/>
+<rect x="240" y="60" width="1200" height="1" fill="#00d4ff" opacity="0.2"/>
+<rect x="258" y="14" width="240" height="32" rx="6" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="273" y="35" font-family="monospace" font-size="12" fill="#6b7280">Search...</text>
+<rect x="1328" y="13" width="94" height="34" rx="8" fill="#00d4ff" opacity="0.15" stroke="#00d4ff" stroke-width="1"/>
+<text x="1375" y="35" font-family="monospace" font-size="12" font-weight="bold" fill="#00d4ff" text-anchor="middle">Connect</text>
+<text x="278" y="100" font-family="monospace" font-size="24" font-weight="bold" fill="#00d4ff">Launch Your Token</text>
+<text x="278" y="120" font-family="monospace" font-size="14" fill="#9ca3af">Deploy your token with automatic liquidity on BASE</text>
+<rect x="380" y="138" width="640" height="640" rx="12" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="402" y="194" font-family="monospace" font-size="13" font-weight="bold" fill="#9ca3af">Token Name</text>
+<rect x="402" y="204" width="592" height="48" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="418" y="234" font-family="monospace" font-size="13" fill="#6b7280">e.g. My Awesome Token</text>
+<text x="402" y="280" font-family="monospace" font-size="13" font-weight="bold" fill="#9ca3af">Symbol</text>
+<rect x="402" y="290" width="592" height="48" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="418" y="320" font-family="monospace" font-size="13" fill="#6b7280">e.g. MAT</text>
+<text x="402" y="366" font-family="monospace" font-size="13" font-weight="bold" fill="#9ca3af">Total Supply</text>
+<rect x="402" y="376" width="592" height="48" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="418" y="406" font-family="monospace" font-size="13" fill="#6b7280">e.g. 1,000,000</text>
+<text x="402" y="448" font-family="monospace" font-size="13" font-weight="bold" fill="#9ca3af">Description</text>
+<rect x="402" y="458" width="592" height="96" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="418" y="482" font-family="monospace" font-size="13" fill="#6b7280">Describe your token...</text>
+<text x="402" y="578" font-family="monospace" font-size="13" font-weight="bold" fill="#9ca3af">Network</text>
+<rect x="402" y="588" width="592" height="48" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="418" y="618" font-family="monospace" font-size="13" fill="#ffffff">BASE Mainnet (Chain ID: 8453)</text>
+<rect x="402" y="656" width="592" height="52" rx="10" fill="#00d4ff"/>
+<text x="698" y="688" font-family="monospace" font-size="15" font-weight="bold" fill="#0a0a0f" text-anchor="middle">Launch Token on BASE</text>
+<rect x="1044" y="138" width="356" height="320" rx="10" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="1060" y="166" font-family="monospace" font-size="14" font-weight="bold" fill="#00d4ff">Launch Summary</text>
+<line x1="1044" y1="178" x2="1400" y2="178" stroke="#00d4ff" stroke-opacity="0.2"/>
+<text x="1062" y="192" font-family="monospace" font-size="12" fill="#9ca3af">Deploy Fee</text>
+<text x="1062" y="214" font-family="monospace" font-size="20" font-weight="bold" fill="#00d4ff">0.01 ETH</text>
+<text x="1062" y="248" font-family="monospace" font-size="12" fill="#9ca3af">Features Included</text>
+<text x="1062" y="272" font-family="monospace" font-size="12" fill="#10b981">v ERC-20 Contract</text>
+<text x="1062" y="296" font-family="monospace" font-size="12" fill="#10b981">v Auto Liquidity Pool</text>
+<text x="1062" y="320" font-family="monospace" font-size="12" fill="#10b981">v Registry Entry</text>
+<text x="1062" y="344" font-family="monospace" font-size="12" fill="#10b981">v Social Profile</text>
+<rect x="1044" y="474" width="356" height="304" rx="10" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="1060" y="502" font-family="monospace" font-size="14" font-weight="bold" fill="#a855f7">Recent Launches</text>
+<line x1="1044" y1="514" x2="1400" y2="514" stroke="#a855f7" stroke-opacity="0.2"/>
+<circle cx="1072" cy="526" r="16" fill="#0a0a0f" stroke="#a855f7" stroke-width="1"/>
+<text x="1072" y="531" font-family="monospace" font-size="9" fill="#a855f7" text-anchor="middle">MOO</text>
+<text x="1100" y="522" font-family="monospace" font-size="13" font-weight="bold" fill="#ffffff">MOON Token</text>
+<text x="1100" y="538" font-family="monospace" font-size="11" fill="#9ca3af">MOON · 2m ago</text>
+<circle cx="1072" cy="580" r="16" fill="#0a0a0f" stroke="#a855f7" stroke-width="1"/>
+<text x="1072" y="585" font-family="monospace" font-size="9" fill="#a855f7" text-anchor="middle">DXA</text>
+<text x="1100" y="576" font-family="monospace" font-size="13" font-weight="bold" fill="#ffffff">DEX Alpha</text>
+<text x="1100" y="592" font-family="monospace" font-size="11" fill="#9ca3af">DXAL · 14m ago</text>
+<circle cx="1072" cy="634" r="16" fill="#0a0a0f" stroke="#a855f7" stroke-width="1"/>
+<text x="1072" y="639" font-family="monospace" font-size="9" fill="#a855f7" text-anchor="middle">QAI</text>
+<text x="1100" y="630" font-family="monospace" font-size="13" font-weight="bold" fill="#ffffff">Quantum AI</text>
+<text x="1100" y="646" font-family="monospace" font-size="11" fill="#9ca3af">QAI · 1h ago</text>
+<circle cx="1072" cy="688" r="16" fill="#0a0a0f" stroke="#a855f7" stroke-width="1"/>
+<text x="1072" y="693" font-family="monospace" font-size="9" fill="#a855f7" text-anchor="middle">LSC</text>
+<text x="1100" y="684" font-family="monospace" font-size="13" font-weight="bold" fill="#ffffff">Lira Social</text>
+<text x="1100" y="700" font-family="monospace" font-size="11" fill="#9ca3af">LSC · 3h ago</text>
+</svg>

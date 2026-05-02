@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+<defs>
+<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="50%" style="stop-color:#a855f7"/>
+  <stop offset="100%" style="stop-color:#f472b6"/>
+</linearGradient>
+<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="100%" style="stop-color:#a855f7"/>
+</linearGradient>
+</defs>
+<rect width="1440" height="900" fill="#0a0a0f"/>
+<rect x="0" y="0" width="240" height="900" fill="#0a0e1a"/>
+<rect x="240" y="0" width="1" height="900" fill="#a855f7" opacity="0.3"/>
+<rect x="18" y="18" width="38" height="38" rx="8" fill="url(#logoGrad)"/>
+<text x="37" y="43" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">L</text>
+<text x="66" y="44" font-family="monospace" font-size="22" font-weight="bold" fill="#a855f7">LIRA</text>
+<text x="22" y="102" font-family="monospace" font-size="13">&#x1F3E0;</text>
+<text x="46" y="102" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Home</text>
+<text x="22" y="146" font-family="monospace" font-size="13">&#x1F4CA;</text>
+<text x="46" y="146" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Dashboard</text>
+<text x="22" y="190" font-family="monospace" font-size="13">&#x26A1;</text>
+<text x="46" y="190" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Launch Token</text>
+<rect x="8" y="206" width="224" height="38" rx="6" fill="#a855f7" opacity="0.15" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.5"/>
+<text x="22" y="234" font-family="monospace" font-size="13">&#x1F916;</text>
+<text x="46" y="234" font-family="monospace" font-size="13" font-weight="bold" fill="#a855f7">Agents</text>
+<text x="22" y="278" font-family="monospace" font-size="13">&#x270F;</text>
+<text x="46" y="278" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">DSL Editor</text>
+<text x="22" y="322" font-family="monospace" font-size="13">&#x1F4CB;</text>
+<text x="46" y="322" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Registry</text>
+<rect x="240" y="0" width="1200" height="60" fill="#0a0e1a" opacity="0.9"/>
+<rect x="240" y="60" width="1200" height="1" fill="#a855f7" opacity="0.2"/>
+<rect x="258" y="14" width="240" height="32" rx="6" fill="#0a0a0f" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="273" y="35" font-family="monospace" font-size="12" fill="#6b7280">Search...</text>
+<rect x="1328" y="13" width="94" height="34" rx="8" fill="#a855f7" opacity="0.15" stroke="#a855f7" stroke-width="1"/>
+<text x="1375" y="35" font-family="monospace" font-size="12" font-weight="bold" fill="#a855f7" text-anchor="middle">Connect</text>
+<text x="278" y="100" font-family="monospace" font-size="24" font-weight="bold" fill="#a855f7">AI Agents</text>
+<text x="278" y="120" font-family="monospace" font-size="14" fill="#9ca3af">Deploy and manage AI agents with quantum oracle intelligence</text>
+<rect x="260" y="138" width="400" height="168" rx="12" fill="#0a0e1a" stroke="#10b981" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="280" y="173" font-family="monospace" font-size="15" font-weight="bold" fill="#10b981">DexScannerAgent</text>
+<text x="280" y="195" font-family="monospace" font-size="12" fill="#9ca3af">DEX Liquidity Scanner</text>
+<rect x="280" y="208" width="72" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="316" y="223" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Running</text>
+<text x="420" y="224" font-family="monospace" font-size="14" font-weight="bold" fill="#10b981">99.2% uptime</text>
+<rect x="280" y="262" width="108" height="28" rx="6" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="334" y="280" font-family="monospace" font-size="11" fill="#10b981" text-anchor="middle">Execute</text>
+<rect x="400" y="262" width="108" height="28" rx="6" fill="#4b5563" opacity="0.4"/>
+<text x="454" y="280" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Pause</text>
+<rect x="700" y="138" width="400" height="168" rx="12" fill="#0a0e1a" stroke="#10b981" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="720" y="173" font-family="monospace" font-size="15" font-weight="bold" fill="#10b981">WalletAgent</text>
+<text x="720" y="195" font-family="monospace" font-size="12" fill="#9ca3af">Wallet Event Monitor</text>
+<rect x="720" y="208" width="72" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="756" y="223" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Running</text>
+<text x="860" y="224" font-family="monospace" font-size="14" font-weight="bold" fill="#10b981">99.8% uptime</text>
+<rect x="720" y="262" width="108" height="28" rx="6" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="774" y="280" font-family="monospace" font-size="11" fill="#10b981" text-anchor="middle">Execute</text>
+<rect x="840" y="262" width="108" height="28" rx="6" fill="#4b5563" opacity="0.4"/>
+<text x="894" y="280" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Pause</text>
+<rect x="1140" y="138" width="400" height="168" rx="12" fill="#0a0e1a" stroke="#f59e0b" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="1160" y="173" font-family="monospace" font-size="15" font-weight="bold" fill="#f59e0b">SocialAgent</text>
+<text x="1160" y="195" font-family="monospace" font-size="12" fill="#9ca3af">Farcaster + Zora</text>
+<rect x="1160" y="208" width="48" height="22" rx="11" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="0.8"/>
+<text x="1184" y="223" font-family="monospace" font-size="10" font-weight="bold" fill="#f59e0b" text-anchor="middle">Idle</text>
+<text x="1300" y="224" font-family="monospace" font-size="14" font-weight="bold" fill="#f59e0b">98.1% uptime</text>
+<rect x="1160" y="262" width="108" height="28" rx="6" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="0.8"/>
+<text x="1214" y="280" font-family="monospace" font-size="11" fill="#f59e0b" text-anchor="middle">Execute</text>
+<rect x="1280" y="262" width="108" height="28" rx="6" fill="#4b5563" opacity="0.4"/>
+<text x="1334" y="280" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Pause</text>
+<rect x="260" y="322" width="880" height="340" rx="10" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="276" y="350" font-family="monospace" font-size="14" font-weight="bold" fill="#00d4ff">Quantum Oracle - Q# Prediction Engine</text>
+<line x1="260" y1="362" x2="1140" y2="362" stroke="#00d4ff" stroke-opacity="0.2"/>
+<text x="280" y="374" font-family="monospace" font-size="12" fill="#9ca3af">Market Sentiment: </text>
+<text x="426" y="374" font-family="monospace" font-size="14" font-weight="bold" fill="#10b981">BULLISH (87.3% confidence)</text>
+<rect x="282" y="526" width="44" height="72" rx="4" fill="#00d4ff" opacity="0.51"/>
+<rect x="344" y="490" width="44" height="108" rx="4" fill="#00d4ff" opacity="0.59"/>
+<rect x="406" y="454" width="44" height="144" rx="4" fill="#00d4ff" opacity="0.67"/>
+<rect x="468" y="473" width="44" height="125" rx="4" fill="#00d4ff" opacity="0.63"/>
+<rect x="530" y="436" width="44" height="162" rx="4" fill="#00d4ff" opacity="0.71"/>
+<rect x="592" y="418" width="44" height="180" rx="4" fill="#00d4ff" opacity="0.75"/>
+<rect x="654" y="445" width="44" height="153" rx="4" fill="#00d4ff" opacity="0.69"/>
+<rect x="716" y="433" width="44" height="165" rx="4" fill="#00d4ff" opacity="0.72"/>
+<rect x="778" y="458" width="44" height="140" rx="4" fill="#00d4ff" opacity="0.66"/>
+<rect x="840" y="440" width="44" height="158" rx="4" fill="#00d4ff" opacity="0.70"/>
+<rect x="902" y="427" width="44" height="171" rx="4" fill="#00d4ff" opacity="0.73"/>
+<rect x="964" y="451" width="44" height="147" rx="4" fill="#00d4ff" opacity="0.68"/>
+<text x="280" y="618" font-family="monospace" font-size="10" fill="#6b7280">Price correlation across 12 quantum dimensions</text>
+<rect x="1160" y="322" width="260" height="340" rx="10" fill="#0a0e1a" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="1176" y="350" font-family="monospace" font-size="14" font-weight="bold" fill="#a855f7">Agent Log</text>
+<line x1="1160" y1="362" x2="1420" y2="362" stroke="#a855f7" stroke-opacity="0.2"/>
+<text x="1176" y="362" font-family="monospace" font-size="10" fill="#00d4ff">[12:47] DexScanner: 14 pools indexed</text>
+<text x="1176" y="406" font-family="monospace" font-size="10" fill="#9ca3af">[12:46] Quantum: prediction OK</text>
+<text x="1176" y="450" font-family="monospace" font-size="10" fill="#00d4ff">[12:45] WalletAgent: 3 events</text>
+<text x="1176" y="494" font-family="monospace" font-size="10" fill="#9ca3af">[12:44] Social: 2 posts published</text>
+<text x="1176" y="538" font-family="monospace" font-size="10" fill="#00d4ff">[12:43] Analytics: snapshot OK</text>
+<text x="1176" y="582" font-family="monospace" font-size="10" fill="#9ca3af">[12:42] DexScanner: 9 pools</text>
+<rect x="260" y="678" width="200" height="44" rx="8" fill="#a855f7"/>
+<text x="360" y="706" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">+ New Agent</text>
+</svg>

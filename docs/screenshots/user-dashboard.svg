@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+<defs>
+<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="50%" style="stop-color:#a855f7"/>
+  <stop offset="100%" style="stop-color:#f472b6"/>
+</linearGradient>
+<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="100%" style="stop-color:#a855f7"/>
+</linearGradient>
+</defs>
+<rect width="1440" height="900" fill="#0a0a0f"/>
+<rect x="0" y="0" width="240" height="900" fill="#0a0e1a"/>
+<rect x="240" y="0" width="1" height="900" fill="#00d4ff" opacity="0.3"/>
+<rect x="18" y="18" width="38" height="38" rx="8" fill="url(#logoGrad)"/>
+<text x="37" y="43" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">L</text>
+<text x="66" y="44" font-family="monospace" font-size="22" font-weight="bold" fill="#00d4ff">LIRA</text>
+<text x="22" y="102" font-family="monospace" font-size="13">&#x1F3E0;</text>
+<text x="46" y="102" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Home</text>
+<rect x="8" y="118" width="224" height="38" rx="6" fill="#00d4ff" opacity="0.15" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.5"/>
+<text x="22" y="146" font-family="monospace" font-size="13">&#x1F4CA;</text>
+<text x="46" y="146" font-family="monospace" font-size="13" font-weight="bold" fill="#00d4ff">Dashboard</text>
+<text x="22" y="190" font-family="monospace" font-size="13">&#x26A1;</text>
+<text x="46" y="190" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Launch Token</text>
+<text x="22" y="234" font-family="monospace" font-size="13">&#x1F916;</text>
+<text x="46" y="234" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Agents</text>
+<text x="22" y="278" font-family="monospace" font-size="13">&#x270F;</text>
+<text x="46" y="278" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">DSL Editor</text>
+<text x="22" y="322" font-family="monospace" font-size="13">&#x1F4CB;</text>
+<text x="46" y="322" font-family="monospace" font-size="13" font-weight="normal" fill="#9ca3af">Registry</text>
+<rect x="240" y="0" width="1200" height="60" fill="#0a0e1a" opacity="0.9"/>
+<rect x="240" y="60" width="1200" height="1" fill="#00d4ff" opacity="0.2"/>
+<rect x="258" y="14" width="240" height="32" rx="6" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<text x="273" y="35" font-family="monospace" font-size="12" fill="#6b7280">Search...</text>
+<rect x="1328" y="13" width="94" height="34" rx="8" fill="#00d4ff" opacity="0.15" stroke="#00d4ff" stroke-width="1"/>
+<text x="1375" y="35" font-family="monospace" font-size="12" font-weight="bold" fill="#00d4ff" text-anchor="middle">Connect</text>
+<text x="278" y="100" font-family="monospace" font-size="24" font-weight="bold" fill="#00d4ff">User Dashboard</text>
+<text x="20" y="870" font-family="monospace" font-size="11" fill="#6b7280">Role: </text>
+<text x="52" y="870" font-family="monospace" font-size="11" font-weight="bold" fill="#00d4ff">User</text>
+<rect x="260" y="208" width="85" height="28" rx="4" fill="#00d4ff" opacity="0.15" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="302" y="227" font-family="monospace" font-size="12" font-weight="bold" fill="#00d4ff" text-anchor="middle">Profile</text>
+<text x="361" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Wallets</text>
+<text x="454" y="227" font-family="monospace" font-size="12" fill="#9ca3af">API Keys</text>
+<text x="556" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Security</text>
+<text x="658" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Activity</text>
+<text x="760" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Notifications</text>
+<text x="907" y="227" font-family="monospace" font-size="12" fill="#9ca3af">Settings</text>
+<rect x="260" y="148" width="1148" height="686" rx="12" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.25"/>
+<text x="280" y="183" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff">Profile</text>
+<circle cx="322" cy="238" r="28" fill="url(#logoGrad)"/>
+<text x="322" y="246" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">0x</text>
+<text x="362" y="232" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff">0xaBcD...f012</text>
+<text x="362" y="252" font-family="monospace" font-size="12" fill="#9ca3af">Lira User</text>
+<rect x="280" y="276" width="106" height="68" rx="8" fill="#0a0a0f"/>
+<text x="333" y="314" font-family="monospace" font-size="22" font-weight="bold" fill="#00d4ff" text-anchor="middle">0</text>
+<text x="333" y="334" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Tokens</text>
+<rect x="400" y="276" width="106" height="68" rx="8" fill="#0a0a0f"/>
+<text x="453" y="314" font-family="monospace" font-size="22" font-weight="bold" fill="#00d4ff" text-anchor="middle">0</text>
+<text x="453" y="334" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">NFTs</text>
+<rect x="520" y="276" width="106" height="68" rx="8" fill="#0a0a0f"/>
+<text x="573" y="314" font-family="monospace" font-size="22" font-weight="bold" fill="#00d4ff" text-anchor="middle">0</text>
+<text x="573" y="334" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Reputation</text>
+<rect x="280" y="366" width="460" height="58" rx="8" fill="#0a0a0f"/>
+<text x="300" y="392" font-family="monospace" font-size="12" fill="#ffffff">0xaBcD1234...f012</text>
+<text x="300" y="410" font-family="monospace" font-size="11" fill="#9ca3af">Primary wallet • Base Mainnet</text>
+<rect x="692" y="378" width="64" height="22" rx="11" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="0.8"/>
+<text x="724" y="393" font-family="monospace" font-size="10" font-weight="bold" fill="#10b981" text-anchor="middle">Active</text>
+<rect x="800" y="162" width="588" height="640" rx="10" fill="#0a0e1a" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.3"/>
+<text x="816" y="190" font-family="monospace" font-size="14" font-weight="bold" fill="#00d4ff">Social Timeline</text>
+<line x1="800" y1="202" x2="1388" y2="202" stroke="#00d4ff" stroke-opacity="0.2"/>
+<circle cx="826" cy="240" r="20" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<rect x="858" y="220" width="508" height="82" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.5" stroke-opacity="0.2"/>
+<text x="874" y="240" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">user1000.eth</text>
+<text x="874" y="260" font-family="monospace" font-size="11" fill="#9ca3af">Launched token #1 on Base mainnet</text>
+<text x="874" y="278" font-family="monospace" font-size="10" fill="#6b7280">2m ago</text>
+<rect x="874" y="282" width="72" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="910" y="297" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">Like 12</text>
+<circle cx="826" cy="350" r="20" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<rect x="858" y="330" width="508" height="82" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.5" stroke-opacity="0.2"/>
+<text x="874" y="350" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">user1001.eth</text>
+<text x="874" y="370" font-family="monospace" font-size="11" fill="#9ca3af">Launched token #2 on Base mainnet</text>
+<text x="874" y="388" font-family="monospace" font-size="10" fill="#6b7280">3m ago</text>
+<rect x="874" y="392" width="72" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="910" y="407" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">Like 15</text>
+<circle cx="826" cy="460" r="20" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<rect x="858" y="440" width="508" height="82" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.5" stroke-opacity="0.2"/>
+<text x="874" y="460" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">user1002.eth</text>
+<text x="874" y="480" font-family="monospace" font-size="11" fill="#9ca3af">Launched token #3 on Base mainnet</text>
+<text x="874" y="498" font-family="monospace" font-size="10" fill="#6b7280">4m ago</text>
+<rect x="874" y="502" width="72" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="910" y="517" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">Like 18</text>
+<circle cx="826" cy="570" r="20" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<rect x="858" y="550" width="508" height="82" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.5" stroke-opacity="0.2"/>
+<text x="874" y="570" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">user1003.eth</text>
+<text x="874" y="590" font-family="monospace" font-size="11" fill="#9ca3af">Launched token #4 on Base mainnet</text>
+<text x="874" y="608" font-family="monospace" font-size="10" fill="#6b7280">5m ago</text>
+<rect x="874" y="612" width="72" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="910" y="627" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">Like 21</text>
+<circle cx="826" cy="680" r="20" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.8" stroke-opacity="0.4"/>
+<rect x="858" y="660" width="508" height="82" rx="8" fill="#0a0a0f" stroke="#00d4ff" stroke-width="0.5" stroke-opacity="0.2"/>
+<text x="874" y="680" font-family="monospace" font-size="12" font-weight="bold" fill="#ffffff">user1004.eth</text>
+<text x="874" y="700" font-family="monospace" font-size="11" fill="#9ca3af">Launched token #5 on Base mainnet</text>
+<text x="874" y="718" font-family="monospace" font-size="10" fill="#6b7280">6m ago</text>
+<rect x="874" y="722" width="72" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="910" y="737" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">Like 24</text>
+</svg>

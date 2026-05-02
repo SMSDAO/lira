@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+<defs>
+<linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="50%" style="stop-color:#a855f7"/>
+  <stop offset="100%" style="stop-color:#f472b6"/>
+</linearGradient>
+<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" style="stop-color:#00d4ff"/>
+  <stop offset="100%" style="stop-color:#a855f7"/>
+</linearGradient>
+</defs>
+<rect width="1440" height="900" fill="#0a0a0f"/>
+<rect width="1440" height="60" fill="#0a0e1a" opacity="0.4"/>
+<text x="40" y="40" font-family="monospace" font-size="24" font-weight="bold" fill="#00d4ff" opacity="0.4">LIRA</text>
+<rect width="1440" height="900" fill="rgba(0,0,0,0.55)"/>
+<rect x="480" y="120" width="480" height="628" rx="24" fill="#1a1a2e" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.5"/>
+<text x="720" y="178" font-family="monospace" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="middle">Connect a Wallet</text>
+<text x="720" y="204" font-family="monospace" font-size="13" fill="#9ca3af" text-anchor="middle">Choose your preferred wallet to connect</text>
+<line x1="480" y1="220" x2="960" y2="220" stroke="#00d4ff" stroke-opacity="0.2"/>
+<rect x="500" y="236" width="440" height="58" rx="12" fill="#00d4ff" opacity="0.12" stroke="#00d4ff" stroke-width="1.2"/>
+<text x="526" y="270" font-family="monospace" font-size="22">&#x1F535;</text>
+<text x="562" y="262" font-family="monospace" font-size="14" font-weight="bold" fill="#00d4ff">Coinbase Smart Wallet</text>
+<text x="562" y="280" font-family="monospace" font-size="11" fill="#9ca3af">Gasless · Social Login · Recommended</text>
+<rect x="880" y="252" width="72" height="22" rx="11" fill="#00d4ff" opacity="0.2" stroke="#00d4ff" stroke-width="0.8"/>
+<text x="916" y="267" font-family="monospace" font-size="10" font-weight="bold" fill="#00d4ff" text-anchor="middle">PRIMARY</text>
+<rect x="500" y="308" width="440" height="58" rx="12" fill="#0a0a0f" stroke="#4b5563" stroke-width="0.8"/>
+<text x="526" y="342" font-family="monospace" font-size="22">&#x1F98A;</text>
+<text x="562" y="334" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff">MetaMask</text>
+<text x="562" y="352" font-family="monospace" font-size="11" fill="#9ca3af">Browser Extension</text>
+<rect x="500" y="380" width="440" height="58" rx="12" fill="#0a0a0f" stroke="#4b5563" stroke-width="0.8"/>
+<text x="526" y="414" font-family="monospace" font-size="22">&#x1F308;</text>
+<text x="562" y="406" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff">Rainbow</text>
+<text x="562" y="424" font-family="monospace" font-size="11" fill="#9ca3af">Mobile Friendly</text>
+<rect x="500" y="452" width="440" height="58" rx="12" fill="#0a0a0f" stroke="#4b5563" stroke-width="0.8"/>
+<text x="526" y="486" font-family="monospace" font-size="22">&#x1F517;</text>
+<text x="562" y="478" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff">WalletConnect</text>
+<text x="562" y="496" font-family="monospace" font-size="11" fill="#9ca3af">200+ Wallets Supported</text>
+<rect x="500" y="524" width="440" height="58" rx="12" fill="#0a0a0f" stroke="#4b5563" stroke-width="0.8"/>
+<text x="526" y="558" font-family="monospace" font-size="22">&#x1F4A0;</text>
+<text x="562" y="550" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff">Coinbase Wallet</text>
+<text x="562" y="568" font-family="monospace" font-size="11" fill="#9ca3af">Coinbase App</text>
+<text x="720" y="634" font-family="monospace" font-size="11" fill="#6b7280" text-anchor="middle">By connecting you agree to the Terms of Service</text>
+<circle cx="942" cy="152" r="14" fill="#0a0a0f" stroke="#4b5563"/>
+<text x="942" y="157" font-family="monospace" font-size="15" fill="#9ca3af" text-anchor="middle">x</text>
+</svg>
