@@ -9,7 +9,7 @@ interface NeonInputProps extends InputHTMLAttributes<HTMLInputElement> {
 const NeonInput = forwardRef<HTMLInputElement, NeonInputProps>(
   ({ label, error, wrapperClassName = '', className = '', id, ...props }, ref) => {
     const generatedId = useId();
-    const inputId = id ?? (label ? generatedId : undefined);
+    const inputId = id ?? generatedId;
 
     return (
       <div className={`flex flex-col gap-1.5 ${wrapperClassName}`}>
