@@ -1,5 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import PixelsLayout from '@ui/PixelsLayout';
@@ -15,6 +17,8 @@ const recentPrompts = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const [quickPrompt, setQuickPrompt] = useState('');
   return (
     <>
       <Head>
@@ -68,24 +72,40 @@ export default function Home() {
             <h2 className="text-sm font-semibold text-white/70 uppercase tracking-widest">
               Quick Optimize
             </h2>
-            <textarea
-              rows={3}
-              placeholder="Enter a prompt to optimize…"
-              className={[
-                'w-full rounded-xl px-4 py-3 resize-none',
-                'bg-white/[0.05] backdrop-blur-[20px]',
-                'border border-white/[0.08]',
-                'text-white placeholder-white/30 text-sm',
-                'focus:outline-none focus:border-[#7C3AED]/60 focus:shadow-[0_0_20px_rgba(124,58,237,0.5)]',
-                'transition-all duration-300',
-              ].join(' ')}
-            />
-            <Link
-              href="/optimizer"
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="quick-optimize-prompt"
+                className="text-sm font-medium text-white/70"
+              >
+                Your Prompt
+              </label>
+              <textarea
+                id="quick-optimize-prompt"
+                rows={3}
+                placeholder="Enter a prompt to optimize…"
+                value={quickPrompt}
+                onChange={(e) => setQuickPrompt(e.target.value)}
+                className={[
+                  'w-full rounded-xl px-4 py-3 resize-none',
+                  'bg-white/[0.05] backdrop-blur-[20px]',
+                  'border border-white/[0.08]',
+                  'text-white placeholder-white/30 text-sm',
+                  'focus:outline-none focus:border-[#7C3AED]/60 focus:shadow-[0_0_20px_rgba(124,58,237,0.5)]',
+                  'transition-all duration-300',
+                ].join(' ')}
+              />
+            </div>
+            <button
+              onClick={() => {
+                const query = quickPrompt.trim()
+                  ? `?prompt=${encodeURIComponent(quickPrompt.trim())}`
+                  : '';
+                router.push(`/optimizer${query}`);
+              }}
               className="block w-full text-center px-6 py-3 text-base rounded-xl font-semibold bg-gradient-to-r from-[#7C3AED] to-[#2563EB] text-white shadow-[0_10px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_0_20px_rgba(124,58,237,0.5)] transition-all duration-300"
             >
               ✨ Go to Optimizer
-            </Link>
+            </button>
           </GlassCard>
         </motion.div>
 

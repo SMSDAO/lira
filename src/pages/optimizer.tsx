@@ -1,5 +1,6 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { motion } from 'framer-motion';
 import PixelsLayout from '@ui/PixelsLayout';
@@ -9,10 +10,19 @@ import GradientText from '@ui/GradientText';
 import { pixelsTabs } from '@/config/pixelsTabs';
 
 export default function OptimizerPage() {
+  const router = useRouter();
   const [prompt, setPrompt] = useState('');
   const [output, setOutput] = useState('');
   const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Pre-fill prompt from ?prompt= query param (passed from home quick-optimize)
+  useEffect(() => {
+    const q = router.query.prompt;
+    if (typeof q === 'string' && q) {
+      setPrompt(q);
+    }
+  }, [router.query.prompt]);
 
   async function handleOptimize() {
     if (!prompt.trim()) return;

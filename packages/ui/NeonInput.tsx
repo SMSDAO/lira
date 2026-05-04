@@ -10,6 +10,7 @@ const NeonInput = forwardRef<HTMLInputElement, NeonInputProps>(
   ({ label, error, wrapperClassName = '', className = '', id, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
+    const errorId = `${inputId}-error`;
 
     return (
       <div className={`flex flex-col gap-1.5 ${wrapperClassName}`}>
@@ -21,6 +22,8 @@ const NeonInput = forwardRef<HTMLInputElement, NeonInputProps>(
         <input
           ref={ref}
           id={inputId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
           className={[
             'w-full rounded-xl px-4 py-3',
             'bg-white/[0.05] backdrop-blur-[20px]',
@@ -36,7 +39,7 @@ const NeonInput = forwardRef<HTMLInputElement, NeonInputProps>(
             .join(' ')}
           {...props}
         />
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p id={errorId} className="text-xs text-red-400" role="alert">{error}</p>}
       </div>
     );
   }

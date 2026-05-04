@@ -64,6 +64,7 @@ export default function Sidebar({ tabs, logo, topBarContent }: SidebarProps) {
             <Link
               key={tab.href}
               href={tab.href}
+              aria-label={collapsed ? tab.label : undefined}
               className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group"
               style={
                 isActive

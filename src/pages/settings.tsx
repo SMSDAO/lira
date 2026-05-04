@@ -14,9 +14,10 @@ const STORAGE_KEYS = {
   density: 'lira:settings:density',
 } as const;
 
-function readStorage<T extends string>(key: string, fallback: T): T {
+function readStorage<T extends string>(key: string, fallback: T, valid: readonly T[]): T {
   if (typeof window === 'undefined') return fallback;
-  return (localStorage.getItem(key) as T) ?? fallback;
+  const stored = localStorage.getItem(key) as T | null;
+  return stored !== null && (valid as readonly string[]).includes(stored) ? stored : fallback;
 }
 
 export default function SettingsPage() {
@@ -27,8 +28,8 @@ export default function SettingsPage() {
 
   // Hydrate from localStorage after mount (theme + density only)
   useEffect(() => {
-    setTheme(readStorage<'dark' | 'light'>(STORAGE_KEYS.theme, 'dark'));
-    setDensity(readStorage<'comfortable' | 'compact'>(STORAGE_KEYS.density, 'comfortable'));
+    setTheme(readStorage<'dark' | 'light'>(STORAGE_KEYS.theme, 'dark', ['dark', 'light']));
+    setDensity(readStorage<'comfortable' | 'compact'>(STORAGE_KEYS.density, 'comfortable', ['comfortable', 'compact']));
     // API key is intentionally not persisted to storage for security
   }, []);
 
@@ -134,6 +135,7 @@ export default function SettingsPage() {
             </span>
           </div>
           <NeonInput
+            label="API Key"
             type="password"
             placeholder="sk-…"
             value={apiKey}

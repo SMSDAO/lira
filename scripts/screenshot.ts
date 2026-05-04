@@ -6,11 +6,6 @@
  *   1. Start the app: npm start (or npm run dev)
  *   2. Run: npm run screenshot
  *
- * This script is also called as a postbuild step, but screenshots are only
- * captured when a server is already running on SCREENSHOT_BASE_URL
- * (default: http://localhost:3000). Failures are non-fatal so they don't
- * block deployment when a display/browser is unavailable.
- *
  * Requires: npx playwright install chromium (one-time setup)
  */
 
@@ -87,6 +82,5 @@ async function run() {
 
 run().catch((err) => {
   console.warn('[screenshot] Unexpected error:', err.message);
-  // Non-fatal: exit 0 so postbuild doesn't block the build
-  process.exit(0);
+  process.exit(1);
 });

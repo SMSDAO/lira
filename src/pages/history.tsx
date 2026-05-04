@@ -61,6 +61,7 @@ export default function HistoryPage() {
         {/* Search + filter */}
         <div className="flex flex-col sm:flex-row gap-3">
           <NeonInput
+            label="Search prompts"
             placeholder="Search prompts…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

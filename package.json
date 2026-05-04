@@ -8,7 +8,7 @@
     "build": "npm run env:validate && next build",
     "screenshot": "ts-node scripts/screenshot.ts",
     "start": "next start",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src packages/ui --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
