@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode, useState } from 'react';
 import type { TabItem } from './TabBar';
+import GradientText from './GradientText';
 
 interface SidebarProps {
   tabs: TabItem[];
@@ -30,7 +31,7 @@ export default function Sidebar({ tabs, logo, topBarContent }: SidebarProps) {
         style={{ borderColor: 'rgba(255,255,255,0.08)' }}
       >
         {!collapsed && (
-          <div className="flex-1 overflow-hidden">{logo ?? <span className="text-lg font-bold" style={{ background: 'linear-gradient(135deg, #7C3AED, #2563EB)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>LIRA</span>}</div>
+          <div className="flex-1 overflow-hidden">{logo ?? <span className="text-lg font-bold"><GradientText>LIRA</GradientText></span>}</div>
         )}
         <button
           onClick={() => setCollapsed((c) => !c)}
