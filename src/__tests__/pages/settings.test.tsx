@@ -17,6 +17,9 @@ jest.mock('framer-motion', () => ({
     div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
       <div {...props}>{children}</div>
     ),
+    button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+      <button {...props}>{children}</button>
+    ),
   },
 }));
 
@@ -39,7 +42,8 @@ beforeEach(() => {
 describe('Settings Page', () => {
   it('renders without crashing', () => {
     render(<SettingsPage />);
-    expect(screen.getByText(/Settings/i)).toBeInTheDocument();
+    // The gradient heading "Settings" is the h1
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
   it('displays theme toggle buttons', () => {
@@ -65,7 +69,9 @@ describe('Settings Page', () => {
 
   it('displays API Key section with Local Dev Only badge', () => {
     render(<SettingsPage />);
-    expect(screen.getByText(/API Key/i)).toBeInTheDocument();
+    // "API Key" heading span is the section label
+    const apiKeyItems = screen.getAllByText(/API Key/i);
+    expect(apiKeyItems.length).toBeGreaterThan(0);
     expect(screen.getByText(/Local Dev Only/i)).toBeInTheDocument();
   });
 

@@ -56,8 +56,11 @@ describe('Home Page', () => {
   it('displays platform feature grid', () => {
     render(<Home />);
     expect(screen.getByText(/Platform/i)).toBeInTheDocument();
-    expect(screen.getByText(/Token Launch/i)).toBeInTheDocument();
-    expect(screen.getByText(/AI Agents/i)).toBeInTheDocument();
+    // "Token Launch" appears in both the description paragraph and the grid label
+    const tokenLaunchItems = screen.getAllByText(/Token Launch/i);
+    expect(tokenLaunchItems.length).toBeGreaterThan(0);
+    const aiAgentsItems = screen.getAllByText(/AI Agents/i);
+    expect(aiAgentsItems.length).toBeGreaterThan(0);
   });
 
   it('renders Connect Wallet button', () => {
