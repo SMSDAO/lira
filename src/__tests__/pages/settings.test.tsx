@@ -89,21 +89,23 @@ describe('Settings Page', () => {
     expect(compactBtn).toBeInTheDocument();
   });
 
-  it('saves settings to localStorage when Save is clicked', () => {
+  it('saves theme and density to localStorage when Save is clicked', () => {
     render(<SettingsPage />);
 
     // Change to light theme
     fireEvent.click(screen.getByRole('button', { name: /☀️ Light/i }));
 
-    // Enter API key
+    // Enter API key (not persisted)
     const apiInput = screen.getByPlaceholderText(/sk-/i);
     fireEvent.change(apiInput, { target: { value: 'sk-test-key' } });
 
     // Save
     fireEvent.click(screen.getByText(/💾 Save Settings/i));
 
+    // Theme and density are persisted
     expect(localStorageMock.getItem('lira:settings:theme')).toBe('light');
-    expect(localStorageMock.getItem('lira:settings:apiKey')).toBe('sk-test-key');
+    // API key is NOT written to storage for security
+    expect(localStorageMock.getItem('lira:settings:apiKey')).toBeNull();
   });
 
   it('shows saved confirmation after clicking save', () => {
@@ -117,10 +119,10 @@ describe('Settings Page', () => {
     jest.useRealTimers();
   });
 
-  it('shows note about browser local storage', () => {
+  it('shows note that API key is not stored', () => {
     render(<SettingsPage />);
     expect(
-      screen.getByText(/saved in your browser/i)
+      screen.getByText(/kept in session state only/i)
     ).toBeInTheDocument();
   });
 });

@@ -24,18 +24,18 @@ jest.mock('@rainbow-me/rainbowkit', () => ({
   ConnectButton: () => <button>Connect Wallet</button>,
 }));
 
+// Configurable wagmi mock
+const mockUseAccount = jest.fn();
+jest.mock('wagmi', () => ({
+  useAccount: () => mockUseAccount(),
+}));
+
 describe('Wallet Page — disconnected', () => {
   beforeEach(() => {
-    jest.mock('wagmi', () => ({
-      useAccount: () => ({ address: undefined, isConnected: false }),
-    }));
+    mockUseAccount.mockReturnValue({ address: undefined, isConnected: false });
   });
 
   it('renders without crashing', () => {
-    jest.doMock('wagmi', () => ({
-      useAccount: () => ({ address: undefined, isConnected: false }),
-    }));
-    const { default: WalletPageFresh } = jest.requireActual('@/pages/wallet');
     render(<WalletPage />);
     expect(screen.getByText(/Wallet/i)).toBeInTheDocument();
   });
@@ -54,32 +54,61 @@ describe('Wallet Page — disconnected', () => {
     render(<WalletPage />);
     expect(screen.getByText(/NFT Status/i)).toBeInTheDocument();
   });
-});
 
-describe('Wallet Page — connected', () => {
-  beforeAll(() => {
-    jest.mock('wagmi', () => ({
-      useAccount: () => ({
-        address: '0xAbCd1234567890123456789012345678901234Ab',
-        isConnected: true,
-      }),
-    }));
-  });
-
-  it('shows Free tier badge when disconnected (default mock)', () => {
-    // Default wagmi mock in this suite is disconnected
+  it('shows Free tier when disconnected', () => {
     render(<WalletPage />);
-    // The Free tier badge or Connect Wallet prompt should be visible
-    expect(
-      screen.getByText(/Connect wallet to unlock Pro features/i) ||
-        screen.getByText(/🔒 Free/i)
-    ).toBeTruthy();
+    expect(screen.getByText(/🔒 Free/i)).toBeInTheDocument();
   });
 
-  it('shows NFT connect prompt when disconnected', () => {
+  it('shows prompt to connect wallet for NFTs', () => {
     render(<WalletPage />);
     expect(
       screen.getByText(/Connect wallet to view your NFTs/i)
     ).toBeInTheDocument();
+  });
+
+  it('shows prompt to connect wallet for Pro features', () => {
+    render(<WalletPage />);
+    expect(
+      screen.getByText(/Connect wallet to unlock Pro features/i)
+    ).toBeInTheDocument();
+  });
+});
+
+describe('Wallet Page — connected', () => {
+  const mockAddress = '0xAbCd1234567890123456789012345678901234Ab';
+
+  beforeEach(() => {
+    mockUseAccount.mockReturnValue({
+      address: mockAddress,
+      isConnected: true,
+    });
+  });
+
+  it('shows Connected Wallet label', () => {
+    render(<WalletPage />);
+    expect(screen.getByText(/Connected Wallet/i)).toBeInTheDocument();
+  });
+
+  it('shows truncated wallet address', () => {
+    render(<WalletPage />);
+    // Truncated: first 6 chars + last 4 chars
+    expect(screen.getByText(/0xAbCd.*34Ab/)).toBeInTheDocument();
+  });
+
+  it('shows Pro tier when connected', () => {
+    render(<WalletPage />);
+    expect(screen.getByText(/⚡ Pro/i)).toBeInTheDocument();
+  });
+
+  it('shows NFT grid when connected', () => {
+    render(<WalletPage />);
+    expect(screen.getByText(/Lira Genesis #001/i)).toBeInTheDocument();
+    expect(screen.getByText(/DAO Pass #42/i)).toBeInTheDocument();
+  });
+
+  it('shows Online indicator', () => {
+    render(<WalletPage />);
+    expect(screen.getByText(/● Online/i)).toBeInTheDocument();
   });
 });
