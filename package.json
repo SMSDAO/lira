@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run env:validate && next build",
-    "postbuild": "ts-node scripts/screenshot.ts",
     "screenshot": "ts-node scripts/screenshot.ts",
     "start": "next start",
     "lint": "eslint src --ext .ts,.tsx",
