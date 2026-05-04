@@ -65,10 +65,11 @@ export default function OptimizerPage() {
 
         {/* Input panel */}
         <GlassCard className="p-6 space-y-4">
-          <label className="block text-sm font-medium text-white/70">
+          <label htmlFor="optimizer-prompt" className="block text-sm font-medium text-white/70">
             Your Prompt
           </label>
           <textarea
+            id="optimizer-prompt"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={6}

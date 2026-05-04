@@ -48,11 +48,8 @@ describe('Optimizer Page', () => {
 
   it('shows a prompt label above the textarea', () => {
     render(<OptimizerPage />);
-    // The label text "Your Prompt" appears only as a <label> element
-    const label = screen.getAllByText(/Your Prompt/i).find(
-      (el) => el.tagName.toLowerCase() === 'label' || el.className.includes('text-sm')
-    );
-    expect(label).toBeDefined();
+    // The textarea has an associated label "Your Prompt"
+    expect(screen.getByRole('textbox', { name: /Your Prompt/i })).toBeInTheDocument();
   });
 
   it('does not show output panel on initial render', () => {
