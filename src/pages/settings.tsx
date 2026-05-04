@@ -16,8 +16,8 @@ const STORAGE_KEYS = {
 
 function readStorage<T extends string>(key: string, fallback: T, valid: readonly T[]): T {
   if (typeof window === 'undefined') return fallback;
-  const stored = localStorage.getItem(key) as T | null;
-  return stored !== null && (valid as readonly string[]).includes(stored) ? stored : fallback;
+  const stored = localStorage.getItem(key);
+  return stored !== null && valid.includes(stored as T) ? (stored as T) : fallback;
 }
 
 export default function SettingsPage() {
