@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { motion } from 'framer-motion';
 import PixelsLayout from '@ui/PixelsLayout';
@@ -9,13 +9,34 @@ import GradientText from '@ui/GradientText';
 import NeonInput from '@ui/NeonInput';
 import { pixelsTabs } from '@/config/pixelsTabs';
 
+const STORAGE_KEYS = {
+  theme: 'lira:settings:theme',
+  density: 'lira:settings:density',
+  apiKey: 'lira:settings:apiKey',
+} as const;
+
+function readStorage<T extends string>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  return (localStorage.getItem(key) as T) ?? fallback;
+}
+
 export default function SettingsPage() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
   const [apiKey, setApiKey] = useState('');
   const [saved, setSaved] = useState(false);
 
+  // Hydrate from localStorage after mount
+  useEffect(() => {
+    setTheme(readStorage<'dark' | 'light'>(STORAGE_KEYS.theme, 'dark'));
+    setDensity(readStorage<'comfortable' | 'compact'>(STORAGE_KEYS.density, 'comfortable'));
+    setApiKey(readStorage(STORAGE_KEYS.apiKey, ''));
+  }, []);
+
   function handleSave() {
+    localStorage.setItem(STORAGE_KEYS.theme, theme);
+    localStorage.setItem(STORAGE_KEYS.density, density);
+    localStorage.setItem(STORAGE_KEYS.apiKey, apiKey);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -120,7 +141,7 @@ export default function SettingsPage() {
             onChange={(e) => setApiKey(e.target.value)}
           />
           <p className="text-xs text-white/30">
-            Your API key is stored locally and never sent to our servers.
+            Your API key is saved in your browser&apos;s local storage and is never sent to our servers.
           </p>
         </GlassCard>
 

@@ -6,7 +6,6 @@ import PixelsLayout from '@ui/PixelsLayout';
 import GlassCard from '@ui/GlassCard';
 import GlowButton from '@ui/GlowButton';
 import GradientText from '@ui/GradientText';
-import NeonInput from '@ui/NeonInput';
 import { pixelsTabs } from '@/config/pixelsTabs';
 
 export default function OptimizerPage() {

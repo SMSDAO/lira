@@ -1,0 +1,126 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import SettingsPage from '@/pages/settings';
+
+// Mock Next.js router
+jest.mock('next/router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    pathname: '/settings',
+    query: {},
+    asPath: '/settings',
+  }),
+}));
+
+// Mock framer-motion
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+      <div {...props}>{children}</div>
+    ),
+  },
+}));
+
+// Provide localStorage mock for jsdom
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+beforeEach(() => {
+  localStorageMock.clear();
+});
+
+describe('Settings Page', () => {
+  it('renders without crashing', () => {
+    render(<SettingsPage />);
+    expect(screen.getByText(/Settings/i)).toBeInTheDocument();
+  });
+
+  it('displays theme toggle buttons', () => {
+    render(<SettingsPage />);
+    expect(screen.getByRole('button', { name: /🌙 Dark/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /☀️ Light/i })).toBeInTheDocument();
+  });
+
+  it('displays layout density buttons', () => {
+    render(<SettingsPage />);
+    expect(
+      screen.getByRole('button', { name: /📐 Comfortable/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /📏 Compact/i })
+    ).toBeInTheDocument();
+  });
+
+  it('displays API key input', () => {
+    render(<SettingsPage />);
+    expect(screen.getByPlaceholderText(/sk-/i)).toBeInTheDocument();
+  });
+
+  it('displays API Key section with Local Dev Only badge', () => {
+    render(<SettingsPage />);
+    expect(screen.getByText(/API Key/i)).toBeInTheDocument();
+    expect(screen.getByText(/Local Dev Only/i)).toBeInTheDocument();
+  });
+
+  it('displays Save Settings button', () => {
+    render(<SettingsPage />);
+    expect(screen.getByText(/💾 Save Settings/i)).toBeInTheDocument();
+  });
+
+  it('allows switching theme to Light', () => {
+    render(<SettingsPage />);
+    const lightBtn = screen.getByRole('button', { name: /☀️ Light/i });
+    fireEvent.click(lightBtn);
+    // After clicking, the button remains visible (no crash)
+    expect(lightBtn).toBeInTheDocument();
+  });
+
+  it('allows switching density to Compact', () => {
+    render(<SettingsPage />);
+    const compactBtn = screen.getByRole('button', { name: /📏 Compact/i });
+    fireEvent.click(compactBtn);
+    expect(compactBtn).toBeInTheDocument();
+  });
+
+  it('saves settings to localStorage when Save is clicked', () => {
+    render(<SettingsPage />);
+
+    // Change to light theme
+    fireEvent.click(screen.getByRole('button', { name: /☀️ Light/i }));
+
+    // Enter API key
+    const apiInput = screen.getByPlaceholderText(/sk-/i);
+    fireEvent.change(apiInput, { target: { value: 'sk-test-key' } });
+
+    // Save
+    fireEvent.click(screen.getByText(/💾 Save Settings/i));
+
+    expect(localStorageMock.getItem('lira:settings:theme')).toBe('light');
+    expect(localStorageMock.getItem('lira:settings:apiKey')).toBe('sk-test-key');
+  });
+
+  it('shows saved confirmation after clicking save', () => {
+    jest.useFakeTimers();
+    render(<SettingsPage />);
+
+    fireEvent.click(screen.getByText(/💾 Save Settings/i));
+
+    expect(screen.getByText(/✅ Saved!/i)).toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  it('shows note about browser local storage', () => {
+    render(<SettingsPage />);
+    expect(
+      screen.getByText(/saved in your browser/i)
+    ).toBeInTheDocument();
+  });
+});

@@ -2,11 +2,16 @@
  * Playwright screenshot generator for Lira Protocol.
  * Captures key app screens and saves them to /public/screenshots/.
  *
- * Usage: ts-node scripts/screenshot.ts
- * Requires: npx playwright install chromium (one-time setup)
+ * Usage:
+ *   1. Start the app: npm start (or npm run dev)
+ *   2. Run: npm run screenshot
  *
- * This script is run as a postbuild step. Failures are non-fatal so
- * they don't block deployment when a display/browser is unavailable.
+ * This script is also called as a postbuild step, but screenshots are only
+ * captured when a server is already running on SCREENSHOT_BASE_URL
+ * (default: http://localhost:3000). Failures are non-fatal so they don't
+ * block deployment when a display/browser is unavailable.
+ *
+ * Requires: npx playwright install chromium (one-time setup)
  */
 
 import * as path from 'path';

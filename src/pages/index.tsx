@@ -4,7 +4,6 @@ import type { ReactElement, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import PixelsLayout from '@ui/PixelsLayout';
 import GlassCard from '@ui/GlassCard';
-import GlowButton from '@ui/GlowButton';
 import GradientText from '@ui/GradientText';
 import { pixelsTabs } from '@/config/pixelsTabs';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
@@ -81,10 +80,11 @@ export default function Home() {
                 'transition-all duration-300',
               ].join(' ')}
             />
-            <Link href="/optimizer">
-              <GlowButton size="md" className="w-full">
-                ✨ Go to Optimizer
-              </GlowButton>
+            <Link
+              href="/optimizer"
+              className="block w-full text-center px-6 py-3 text-base rounded-xl font-semibold bg-gradient-to-r from-[#7C3AED] to-[#2563EB] text-white shadow-[0_10px_30px_rgba(0,0,0,0.4)] hover:shadow-[0_0_20px_rgba(124,58,237,0.5)] transition-all duration-300"
+            >
+              ✨ Go to Optimizer
             </Link>
           </GlassCard>
         </motion.div>

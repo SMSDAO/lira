@@ -4,6 +4,8 @@ const config = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@ui/(.*)$': '<rootDir>/packages/ui/$1',
+    '^@lira/types$': '<rootDir>/packages/types/index.ts',
     '^@components/(.*)$': '<rootDir>/src/components/$1',
     '^@styles/(.*)$': '<rootDir>/src/styles/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',

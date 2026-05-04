@@ -3,7 +3,6 @@ import type { ReactElement } from 'react';
 import { motion } from 'framer-motion';
 import PixelsLayout from '@ui/PixelsLayout';
 import GlassCard from '@ui/GlassCard';
-import GlowButton from '@ui/GlowButton';
 import GradientText from '@ui/GradientText';
 import { pixelsTabs } from '@/config/pixelsTabs';
 import { ConnectButton } from '@rainbow-me/rainbowkit';

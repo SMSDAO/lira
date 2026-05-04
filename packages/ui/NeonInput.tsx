@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef, useId } from 'react';
 
 interface NeonInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,14 +7,20 @@ interface NeonInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const NeonInput = forwardRef<HTMLInputElement, NeonInputProps>(
-  ({ label, error, wrapperClassName = '', className = '', ...props }, ref) => {
+  ({ label, error, wrapperClassName = '', className = '', id, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id ?? (label ? generatedId : undefined);
+
     return (
       <div className={`flex flex-col gap-1.5 ${wrapperClassName}`}>
         {label && (
-          <label className="text-sm font-medium text-white/70">{label}</label>
+          <label htmlFor={inputId} className="text-sm font-medium text-white/70">
+            {label}
+          </label>
         )}
         <input
           ref={ref}
+          id={inputId}
           className={[
             'w-full rounded-xl px-4 py-3',
             'bg-white/[0.05] backdrop-blur-[20px]',
