@@ -31,7 +31,8 @@ async function run() {
   // Ensure output directory exists
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  let chromium: typeof import('playwright').chromium;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let chromium: any;
   try {
     // Dynamic import so missing playwright doesn't crash at module load
     const playwright = await import('playwright');
