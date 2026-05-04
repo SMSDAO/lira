@@ -41,6 +41,9 @@
       ],
       "@lira/types": [
         "./packages/types/index.ts"
+      ],
+      "@ui/*": [
+        "./packages/ui/*"
       ]
     },
     "plugins": [

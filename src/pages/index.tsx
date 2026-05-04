@@ -1,141 +1,178 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import type { ReactElement, ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import PixelsLayout from '@ui/PixelsLayout';
+import GlassCard from '@ui/GlassCard';
+import GlowButton from '@ui/GlowButton';
+import GradientText from '@ui/GradientText';
+import { pixelsTabs } from '@/config/pixelsTabs';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+
+const recentPrompts = [
+  { text: 'Generate a smart contract for ERC-20 token with minting controls', score: 94, tag: 'Smart Contract' },
+  { text: 'Analyze DEX liquidity pool opportunities on BASE', score: 91, tag: 'DEX' },
+  { text: 'Create an AI agent for automated portfolio rebalancing', score: 88, tag: 'AI Agent' },
+];
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>Lira Protocol - Quantum-Powered Token Launch Platform</title>
+        <title>Lira Protocol — Quantum-Powered Token Launch Platform</title>
         <meta name="description" content="Launch tokens with quantum oracle intelligence" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="min-h-screen bg-neo-darker">
-        {/* Header */}
-        <header className="border-b border-neo-blue/30 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-neo-blue">LIRA</h1>
-              </div>
-              <nav className="hidden md:flex space-x-8">
-                <Link href="/dashboard" className="text-gray-300 hover:text-neo-blue transition">
-                  Dashboard
-                </Link>
-                <Link href="/launch" className="text-gray-300 hover:text-neo-blue transition">
-                  Launch Token
-                </Link>
-                <Link href="/agents" className="text-gray-300 hover:text-neo-blue transition">
-                  Agents
-                </Link>
-                <Link href="/admin" className="text-gray-300 hover:text-neo-blue transition">
-                  Admin
-                </Link>
-              </nav>
-              <ConnectButton />
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+        {/* Welcome header */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-2"
+        >
+          <p className="text-white/40 text-sm font-medium tracking-widest uppercase">
+            Welcome back
+          </p>
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            <GradientText>LIRA Protocol</GradientText>
+          </h1>
+          <p className="text-white/50 text-base max-w-md">
+            Quantum-powered token launches, AI agents, and DAO management on BASE.
+          </p>
+        </motion.div>
+
+        {/* Wallet connect */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <GlassCard className="p-5 flex items-center justify-between gap-4 flex-wrap">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-white/70">Wallet</p>
+              <p className="text-xs text-white/40">Connect to unlock all features</p>
             </div>
-          </div>
-        </header>
+            <ConnectButton />
+          </GlassCard>
+        </motion.div>
 
-        {/* Hero Section */}
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-neo-purple/20 via-neo-dark to-neo-blue/20" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center"
-            >
-              <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-neo-blue via-neo-purple to-neo-pink">
-                Quantum-Powered<br />Token Launches
-              </h2>
-              <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto">
-                Launch tokens with AI agents, quantum oracle intelligence, and parallel execution on BASE and Monad
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/launch"
-                  className="px-8 py-4 bg-neo-blue text-neo-darker font-bold rounded-lg hover:shadow-aura-lg transition transform hover:scale-105"
-                >
-                  Launch Your Token
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="px-8 py-4 bg-transparent border-2 border-neo-blue text-neo-blue font-bold rounded-lg hover:bg-neo-blue/10 transition"
-                >
-                  Explore Dashboard
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        {/* Quick optimize input */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+        >
+          <GlassCard className="p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-white/70 uppercase tracking-widest">
+              Quick Optimize
+            </h2>
+            <textarea
+              rows={3}
+              placeholder="Enter a prompt to optimize…"
+              className={[
+                'w-full rounded-xl px-4 py-3 resize-none',
+                'bg-white/[0.05] backdrop-blur-[20px]',
+                'border border-white/[0.08]',
+                'text-white placeholder-white/30 text-sm',
+                'focus:outline-none focus:border-[#7C3AED]/60 focus:shadow-[0_0_20px_rgba(124,58,237,0.5)]',
+                'transition-all duration-300',
+              ].join(' ')}
+            />
+            <Link href="/optimizer">
+              <GlowButton size="md" className="w-full">
+                ✨ Go to Optimizer
+              </GlowButton>
+            </Link>
+          </GlassCard>
+        </motion.div>
 
-        {/* Features */}
-        <section className="py-20 bg-neo-dark">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h3 className="text-3xl font-bold text-center mb-12 text-neo-blue">
-              Features
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: 'Auto Token Launch',
-                  description: 'Launch tokens instantly with automatic liquidity and smart contract deployment',
-                  icon: '🚀',
-                },
-                {
-                  title: 'Quantum Oracle',
-                  description: 'Q# powered quantum brain oracle for advanced market intelligence',
-                  icon: '⚛️',
-                },
-                {
-                  title: 'Parallel Agents',
-                  description: 'Deploy and execute multiple AI agents simultaneously for model building',
-                  icon: '🤖',
-                },
-                {
-                  title: 'Smart Wallets',
-                  description: 'Integrated wallet with social features and timeline like Zora',
-                  icon: '💰',
-                },
-                {
-                  title: 'Admin Control',
-                  description: 'Full admin dashboard for fees, settings, billing, and user management',
-                  icon: '⚙️',
-                },
-                {
-                  title: 'Multi-Chain',
-                  description: 'Production ready on BASE and Monad mainnets with full audit',
-                  icon: '🔗',
-                },
-              ].map((feature, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="p-6 bg-neo-darker border border-neo-blue/30 rounded-lg hover:shadow-aura transition"
-                >
-                  <div className="text-4xl mb-4">{feature.icon}</div>
-                  <h4 className="text-xl font-bold mb-2 text-neo-blue">{feature.title}</h4>
-                  <p className="text-gray-400">{feature.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Recent prompts */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="space-y-3"
+        >
+          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-widest">
+            Recent Prompts
+          </h2>
+          {recentPrompts.map((item, idx) => (
+            <GlassCard key={idx} className="p-4 flex items-center gap-4" hover>
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{
+                  background: 'linear-gradient(135deg, #7C3AED, #2563EB)',
+                  boxShadow: '0 0 8px rgba(124,58,237,0.6)',
+                }}
+              />
+              <p className="flex-1 text-sm text-white/70 truncate">{item.text}</p>
+              <span
+                className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, #7C3AED, #2563EB)',
+                  boxShadow: '0 0 8px rgba(124,58,237,0.4)',
+                }}
+              >
+                {item.score}
+              </span>
+            </GlassCard>
+          ))}
+          <Link
+            href="/history"
+            className="block text-center text-xs text-white/30 hover:text-white/60 transition-colors pt-2"
+          >
+            View all history →
+          </Link>
+        </motion.div>
 
-        {/* Footer */}
-        <footer className="border-t border-neo-blue/30 py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
-            <p>&copy; 2026 Lira Protocol. All rights reserved.</p>
+        {/* Feature cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+          className="space-y-3"
+        >
+          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-widest">
+            Platform
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { icon: '🚀', label: 'Token Launch', href: '/launch' },
+              { icon: '🤖', label: 'AI Agents', href: '/agents' },
+              { icon: '📊', label: 'Dashboard', href: '/dashboard' },
+              { icon: '⚛️', label: 'Quantum Oracle', href: '/dev' },
+              { icon: '🔗', label: 'Registry', href: '/registry' },
+              { icon: '🌐', label: 'Social', href: '/social' },
+            ].map((item) => (
+              <Link key={item.href} href={item.href}>
+                <GlassCard className="p-4 flex flex-col items-center gap-2 text-center h-full" hover>
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-xs font-medium text-white/60">{item.label}</span>
+                </GlassCard>
+              </Link>
+            ))}
           </div>
-        </footer>
-      </main>
+        </motion.div>
+      </div>
     </>
   );
 }
+
+Home.getLayout = function getLayout(page: ReactElement): ReactNode {
+  return (
+    <PixelsLayout
+      tabs={pixelsTabs}
+      topBarContent={
+        <div className="flex items-center justify-between gap-2">
+          <ConnectButton showBalance={false} />
+        </div>
+      }
+    >
+      {page}
+    </PixelsLayout>
+  );
+};
+

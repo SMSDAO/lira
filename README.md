@@ -80,6 +80,22 @@ Open [http://localhost:3000](http://localhost:3000) and connect your wallet!
 
 ---
 
+## UI Preview
+
+The Lira Protocol features a **Pixels-style modern app UI** — dark base (#0B0F1A), purple→blue gradient accents, glassmorphism panels, and neon glow effects.
+
+<img src="public/screenshots/home.png" alt="Home screen" width="600"/>
+
+<img src="public/screenshots/optimizer.png" alt="Optimizer screen" width="600"/>
+
+<img src="public/screenshots/history.png" alt="History screen" width="600"/>
+
+<img src="public/screenshots/wallet.png" alt="Wallet screen" width="600"/>
+
+> Screenshots are auto-generated after each build via `scripts/screenshot.ts` (requires `npx playwright install chromium`).
+
+---
+
 ## 🖥️ User Interface
 
 The Lira Protocol features a cutting-edge **Aura FX Neo Digital UI** — a high-contrast dark theme with neon glow effects, fluid animations powered by Framer Motion, and a modern neo-digital aesthetic inspired by Zora. Each role-based dashboard provides a purpose-built workspace for its audience.

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  /* Legacy Aura FX tokens */
   --neo-dark: #0a0e1a;
   --neo-darker: #050810;
   --neo-blue: #00d4ff;
@@ -10,6 +11,14 @@
   --neo-pink: #ff006e;
   --neo-green: #06ffa5;
   --aura-glow: #00f0ff;
+
+  /* Pixels-style design tokens */
+  --px-bg-primary: #0B0F1A;
+  --px-bg-secondary: #121826;
+  --px-purple: #7C3AED;
+  --px-blue: #2563EB;
+  --px-glow-purple: rgba(124, 58, 237, 0.6);
+  --px-glow-blue: rgba(37, 99, 235, 0.6);
 }
 
 * {

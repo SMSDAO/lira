@@ -1,0 +1,12 @@
+{
+  "name": "@lira/ui",
+  "version": "1.0.0",
+  "description": "Pixels-style shared UI components for Lira Protocol",
+  "private": true,
+  "main": "./index.ts",
+  "peerDependencies": {
+    "framer-motion": ">=10",
+    "next": ">=14",
+    "react": ">=18"
+  }
+}
