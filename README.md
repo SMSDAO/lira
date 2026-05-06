@@ -80,9 +80,23 @@ Open [http://localhost:3000](http://localhost:3000) and connect your wallet!
 
 ---
 
+## UI Preview
+
+The Lira Protocol features a **Pixels-style modern app UI** — dark base (#0B0F1A), purple→blue gradient accents, glassmorphism panels, and neon glow effects.
+
+> **Generating screenshots:** Start the app (`npm run dev` or `npm start`) and then run `npm run screenshot` to capture all screens to `public/screenshots/`.
+
+Screenshots are saved to `public/screenshots/` after running the screenshot script:
+- `home.png` — Home screen with quick-optimize and platform grid
+- `optimizer.png` — Prompt optimizer with glass textarea and output panel
+- `history.png` — History timeline with search and tag filter
+- `wallet.png` — Wallet connect, tier badge, and NFT status
+
+---
+
 ## 🖥️ User Interface
 
-The Lira Protocol features a cutting-edge **Aura FX Neo Digital UI** — a high-contrast dark theme with neon glow effects, fluid animations powered by Framer Motion, and a modern neo-digital aesthetic inspired by Zora. Each role-based dashboard provides a purpose-built workspace for its audience.
+The Lira Protocol features a **Pixels-style modern app UI** — dark base (#0B0F1A / #121826), purple→blue gradient accents, glassmorphism cards with `backdrop-filter: blur(20px)`, soft shadows, and neon glow effects powered by Framer Motion. Each role-based dashboard provides a purpose-built workspace for its audience.
 
 ---
 

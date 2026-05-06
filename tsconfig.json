@@ -41,6 +41,9 @@
       ],
       "@lira/types": [
         "./packages/types/index.ts"
+      ],
+      "@ui/*": [
+        "./packages/ui/*"
       ]
     },
     "plugins": [
@@ -60,6 +63,7 @@
     "node_modules",
     "prisma",
     "src/__tests__",
-    "packages/mobile"
+    "packages/mobile",
+    "scripts"
   ]
 }
