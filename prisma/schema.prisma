@@ -1,6 +1,3 @@
-// This is your Prisma schema file
-// Learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,10 +6,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// ====================
-// Users & Profiles
-// ====================
 
 model User {
   id            Int       @id @default(autoincrement())
@@ -25,17 +18,18 @@ model User {
   isVerified    Boolean   @default(false) @map("is_verified")
   lastLogin     DateTime? @map("last_login")
 
-  // Relations
-  profile         Profile?
-  followersEdges  SocialEdge[] @relation("Follower")
-  followingEdges  SocialEdge[] @relation("Following")
-  posts           Post[]
-  notifications   Notification[]
-  tokenRoles      UserTokenRole[]
+  profile        Profile?
+  followersEdges SocialEdge[] @relation("Follower")
+  followingEdges SocialEdge[] @relation("Following")
+  posts          Post[]
+  notifications Notification[]
+  tokenRoles     UserTokenRole[]
 
   @@index([walletAddress])
+  @@index([walletAddress, role])
   @@index([handle])
   @@index([role])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -59,12 +53,9 @@ model Profile {
 
   @@index([userId])
   @@index([primaryTokenAddress])
+  @@index([primaryTokenAddress, userId])
   @@map("profiles")
 }
-
-// ====================
-// Social Graph
-// ====================
 
 model SocialEdge {
   id          Int      @id @default(autoincrement())
@@ -79,12 +70,9 @@ model SocialEdge {
   @@unique([followerId, followingId, edgeType])
   @@index([followerId, edgeType])
   @@index([followingId, edgeType])
+  @@index([createdAt])
   @@map("social_edges")
 }
-
-// ====================
-// Tokens
-// ====================
 
 model Token {
   id              Int       @id @default(autoincrement())
@@ -103,15 +91,15 @@ model Token {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  // Relations
-  events     TokenEvent[]
-  stats      TokenStat[]
-  userRoles  UserTokenRole[]
+  events    TokenEvent[]
+  stats     TokenStat[]
+  userRoles UserTokenRole[]
 
   @@index([contractAddress])
   @@index([creatorAddress])
   @@index([ownerAddress])
   @@index([tokenType])
+  @@index([isActive, createdAt])
   @@map("tokens")
 }
 
@@ -132,6 +120,7 @@ model TokenEvent {
   token Token @relation(fields: [tokenAddress], references: [contractAddress])
 
   @@index([tokenAddress])
+  @@index([tokenAddress, blockNumber])
   @@index([eventType])
   @@index([fromAddress])
   @@index([toAddress])
@@ -175,12 +164,9 @@ model UserTokenRole {
   @@index([userId])
   @@index([tokenAddress])
   @@index([role])
+  @@index([userId, tokenAddress])
   @@map("user_token_roles")
 }
-
-// ====================
-// Social Features
-// ====================
 
 model Post {
   id          Int      @id @default(autoincrement())
@@ -198,51 +184,45 @@ model Post {
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([authorId])
+  @@index([authorId, createdAt])
   @@index([createdAt])
   @@map("posts")
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  type        String   @db.VarChar(50)
-  title       String   @db.VarChar(255)
-  message     String   @db.Text
-  link        String?  @db.VarChar(500)
-  isRead      Boolean  @default(false) @map("is_read")
-  metadata    Json     @default("{}")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  type      String   @db.VarChar(50)
+  title     String   @db.VarChar(255)
+  message   String   @db.Text
+  link      String?  @db.VarChar(500)
+  isRead    Boolean  @default(false) @map("is_read")
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, isRead, createdAt])
   @@index([isRead])
   @@index([createdAt])
   @@map("notifications")
 }
 
-// ====================
-// Observability
-// ====================
-
 model AuditVaultEntry {
-  id          Int      @id @default(autoincrement())
-  /// Hex-encoded SHA-256 hash of the canonical event JSON (64 characters)
-  hash        String   @unique @db.VarChar(64)
-  action      String   @db.VarChar(100)
-  userId      String   @map("user_id") @db.VarChar(255)
-  recordedAt  DateTime @map("recorded_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         Int      @id @default(autoincrement())
+  hash       String   @unique @db.VarChar(64)
+  action     String   @db.VarChar(100)
+  userId     String   @map("user_id") @db.VarChar(255)
+  recordedAt DateTime @map("recorded_at")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([action])
   @@index([recordedAt])
+  @@index([action, recordedAt])
   @@map("audit_vault_entries")
 }
-
-// ====================
-// Admin & Configuration
-// ====================
 
 model SystemSetting {
   id          Int      @id @default(autoincrement())
