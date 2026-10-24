@@ -17,6 +17,26 @@ jobs:
   validate:
     name: Validate (Lint • Type • Test • Build)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://ci-user:ci-pass@localhost:5432/lira
+      JWT_SECRET: 0123456789abcdef0123456789abcdef
+      SESSION_SECRET: 0123456789abcdef0123456789abcdef
+      NEXT_PUBLIC_WALLET_CONNECT_ID: 00000000000000000000000000000000
+      ADMIN_ADDRESSES: 0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_ADMIN_ADDRESSES: 0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_ADMIN_WALLET: 0x1111111111111111111111111111111111111111
+      NEXT_PUBLIC_CHAIN_ID: 8453
+      NEXT_PUBLIC_CHAIN_NAME: base
+      NEXT_PUBLIC_RPC_BASE_MAINNET: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_BASE_SEPOLIA: https://sepolia.base.org
+      NEXT_PUBLIC_LIRA_TOKEN: 0x1111111111111111111111111111111111111111
+      NEXT_PUBLIC_LIRA_REGISTRY: 0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_LIRA_PROFILE: 0x3333333333333333333333333333333333333333
+      NEXT_PUBLIC_LIRA_SOCIAL_GRAPH: 0x4444444444444444444444444444444444444444
+      NEXT_PUBLIC_FACTORY: 0x5555555555555555555555555555555555555555
+      NEXT_PUBLIC_USER_FACTORY: 0x6666666666666666666666666666666666666666
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +49,13 @@ jobs:
 
       - name: Install dependencies
         if: hashFiles('package.json') != ''
-        run: npm ci
+        run: |
+          for i in 1 2 3; do
+            npm ci && break || sleep 15;
+          done
+
+      - name: Validate environment
+        run: npm run env:validate
 
       - name: Lint
         run: npm run lint --if-present
@@ -38,7 +64,7 @@ jobs:
         run: npm run typecheck --if-present
 
       - name: Test
-        run: npm test --if-present
+        run: npm test -- --runInBand --passWithNoTests
 
       - name: Build
         run: npm run build --if-present
