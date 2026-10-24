@@ -9,6 +9,7 @@ import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import { AppShell } from '@/components/enterprise/AppShell';
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -18,9 +19,17 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
+const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? '';
+
+if (!walletConnectProjectId || /replace_with|your_project_id|change_me|placeholder/i.test(walletConnectProjectId)) {
+  throw new Error(
+    'LIRA requires NEXT_PUBLIC_WALLET_CONNECT_ID to be set to a real WalletConnect project ID before the app can run.'
+  );
+}
+
 const config = getDefaultConfig({
   appName: 'Lira Protocol',
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID || 'YOUR_PROJECT_ID',
+  projectId: walletConnectProjectId,
   chains: [base, baseSepolia],
   transports: {
     [base.id]: http(),
@@ -32,12 +41,13 @@ const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
+  const content = getLayout(<Component {...pageProps} />);
 
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-          {getLayout(<Component {...pageProps} />)}
+          <AppShell>{content}</AppShell>
           <Toaster
             position="top-right"
             toastOptions={{
