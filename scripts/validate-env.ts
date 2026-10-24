@@ -1,11 +1,15 @@
 #!/usr/bin/env ts-node
 
 /**
- * Validate environment variables before build
- * Usage: npm run env:validate
- * 
- * In production (NODE_ENV=production), all required variables are enforced.
- * In development/CI, only warnings are shown for missing variables.
+ * Validate required environment variables before build and deployment.
+ *
+ * Production requirements:
+ * - DATABASE_URL must be set
+ * - JWT_SECRET and SESSION_SECRET must be set and not placeholder-like
+ * - NEXT_PUBLIC_WALLET_CONNECT_ID must be set and valid
+ * - ADMIN_ADDRESSES must be set with at least one wallet address
+ *
+ * UI-only testing is still allowed with NOT_DEPLOYED contract addresses.
  */
 
 interface ValidationRule {
@@ -16,19 +20,40 @@ interface ValidationRule {
   description: string;
 }
 
+const PRODUCTION_REQUIRED_KEYS = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'SESSION_SECRET',
+  'NEXT_PUBLIC_WALLET_CONNECT_ID',
+  'ADMIN_ADDRESSES',
+] as const;
+
+const PLACEHOLDER_PATTERNS = [
+  /^@.+$/i,
+  /^replace_with_/i,
+  /^change_me_/i,
+  /^your_/i,
+  /^example$/i,
+  /^placeholder$/i,
+  /^test$/i,
+  /^todo$/i,
+  /^tbd$/i,
+  /^YOUR_PROJECT_ID$/i,
+  /^NOT_DEPLOYED$/i,
+];
+
 const VALIDATION_RULES: ValidationRule[] = [
-  // Network Configuration (optional with defaults)
   {
     key: 'NEXT_PUBLIC_CHAIN_ID',
-    required: false, // Has default in next.config.js
+    required: false,
     type: 'number',
-    description: 'Blockchain network chain ID (defaults to 84532)',
+    description: 'Blockchain network chain ID (defaults to 8453)',
   },
   {
     key: 'NEXT_PUBLIC_CHAIN_NAME',
-    required: false, // Has default
+    required: false,
     type: 'string',
-    description: 'Blockchain network name (defaults to Base Sepolia)',
+    description: 'Blockchain network name (defaults to base)',
   },
   {
     key: 'NEXT_PUBLIC_RPC_BASE_SEPOLIA',
@@ -42,10 +67,8 @@ const VALIDATION_RULES: ValidationRule[] = [
     required: false,
     type: 'string',
     pattern: /^https?:\/\/.+/,
-    description: 'Base Mainnet RPC URL',
+    description: 'Base mainnet RPC URL',
   },
-  
-  // Contract Addresses (optional for development)
   {
     key: 'NEXT_PUBLIC_LIRA_TOKEN',
     required: false,
@@ -82,22 +105,36 @@ const VALIDATION_RULES: ValidationRule[] = [
     type: 'address',
     description: 'User token factory contract address',
   },
-  
-  // WalletConnect (optional with default)
   {
     key: 'NEXT_PUBLIC_WALLET_CONNECT_ID',
-    required: false, // Has default 'YOUR_PROJECT_ID' in _app.tsx
+    required: true,
     type: 'string',
-    description: 'WalletConnect project ID (uses default if not set)',
+    description: 'WalletConnect project ID used by RainbowKit',
   },
-  
-  // Database (required for production)
   {
     key: 'DATABASE_URL',
-    required: process.env.NODE_ENV === 'production',
+    required: true,
     type: 'string',
-    pattern: /^postgresql:\/\/.+/,
-    description: 'PostgreSQL database URL',
+    pattern: /^postgres(?:ql)?:\/\/.+/i,
+    description: 'PostgreSQL connection string',
+  },
+  {
+    key: 'JWT_SECRET',
+    required: true,
+    type: 'string',
+    description: 'JWT signing secret',
+  },
+  {
+    key: 'SESSION_SECRET',
+    required: true,
+    type: 'string',
+    description: 'Session signing secret',
+  },
+  {
+    key: 'ADMIN_ADDRESSES',
+    required: true,
+    type: 'string',
+    description: 'Comma-separated admin wallet addresses',
   },
 ];
 
@@ -108,8 +145,14 @@ interface ValidationResult {
   info: string[];
 }
 
+function isPlaceholderValue(value: string): boolean {
+  if (!value) return true;
+  const trimmed = value.trim();
+  if (trimmed === 'NOT_DEPLOYED') return true;
+  return PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(trimmed));
+}
+
 function validateAddress(value: string): boolean {
-  // Check if it's a valid Ethereum address or "NOT_DEPLOYED"
   if (value === 'NOT_DEPLOYED') return true;
   return /^0x[a-fA-F0-9]{40}$/.test(value);
 }
@@ -118,42 +161,44 @@ function validateEnvironmentVariable(rule: ValidationRule): ValidationResult['er
   const value = process.env[rule.key];
   const errors: string[] = [];
 
-  // Check if required and missing
-  if (rule.required && !value) {
+  if (!value && rule.required) {
     return [`Missing required variable: ${rule.key} - ${rule.description}`];
   }
 
-  // Skip validation if not set and not required
-  if (!value && !rule.required) {
+  if (!value) {
     return null;
   }
 
-  // Type validation
+  if (rule.key !== 'NEXT_PUBLIC_LIRA_TOKEN' && rule.key !== 'NEXT_PUBLIC_LIRA_REGISTRY' && rule.key !== 'NEXT_PUBLIC_LIRA_PROFILE' && rule.key !== 'NEXT_PUBLIC_LIRA_SOCIAL_GRAPH' && rule.key !== 'NEXT_PUBLIC_FACTORY' && rule.key !== 'NEXT_PUBLIC_USER_FACTORY' && rule.key !== 'NEXT_PUBLIC_ADMIN_WALLET') {
+    if (isPlaceholderValue(value)) {
+      errors.push(`${rule.key} contains a placeholder value: ${value}`);
+    }
+  }
+
   if (rule.type && value) {
     switch (rule.type) {
       case 'number':
-        if (isNaN(Number(value))) {
+        if (Number.isNaN(Number(value))) {
           errors.push(`${rule.key} must be a number, got: ${value}`);
         }
         break;
-      
       case 'boolean':
         if (value !== 'true' && value !== 'false') {
           errors.push(`${rule.key} must be 'true' or 'false', got: ${value}`);
         }
         break;
-      
       case 'address':
         if (!validateAddress(value)) {
           errors.push(`${rule.key} must be a valid Ethereum address or NOT_DEPLOYED, got: ${value}`);
         }
         break;
+      default:
+        break;
     }
   }
 
-  // Pattern validation
   if (rule.pattern && value && !rule.pattern.test(value)) {
-    errors.push(`${rule.key} does not match required pattern`);
+    errors.push(`${rule.key} does not match the required pattern`);
   }
 
   return errors.length > 0 ? errors : null;
@@ -167,34 +212,31 @@ function validate(): ValidationResult {
     info: [],
   };
 
-  console.log('🔍 Validating environment variables...\n');
-
-  // Check Node environment
   const nodeEnv = process.env.NODE_ENV || 'development';
   result.info.push(`Environment: ${nodeEnv}`);
 
-  // Validate each rule
   for (const rule of VALIDATION_RULES) {
     const errors = validateEnvironmentVariable(rule);
-    
     if (errors) {
       result.errors.push(...errors);
       result.valid = false;
     } else if (process.env[rule.key]) {
       result.info.push(`✓ ${rule.key}`);
-    } else if (!rule.required) {
-      result.warnings.push(`Optional: ${rule.key} not set - ${rule.description}`);
     }
   }
 
-  // Special warnings
-  if (process.env.NEXT_PUBLIC_LIRA_TOKEN === 'NOT_DEPLOYED') {
-    result.warnings.push('Contracts not deployed - application may have limited functionality');
+  if (nodeEnv === 'production') {
+    for (const key of PRODUCTION_REQUIRED_KEYS) {
+      const value = process.env[key];
+      if (!value || isPlaceholderValue(value)) {
+        result.errors.push(`Production requires a real value for ${key}`);
+        result.valid = false;
+      }
+    }
   }
 
-  if (process.env.JWT_SECRET === 'change_this_in_production' && nodeEnv === 'production') {
-    result.errors.push('JWT_SECRET must be changed in production!');
-    result.valid = false;
+  if (process.env.NEXT_PUBLIC_LIRA_TOKEN === 'NOT_DEPLOYED' || process.env.NEXT_PUBLIC_FACTORY === 'NOT_DEPLOYED') {
+    result.warnings.push('Contract addresses are still placeholders. UI-only testing is allowed, but real deployment requires real addresses.');
   }
 
   return result;
@@ -202,45 +244,35 @@ function validate(): ValidationResult {
 
 function main() {
   const result = validate();
-  const nodeEnv = process.env.NODE_ENV || 'development';
-  const isProduction = nodeEnv === 'production';
-  const isCI = process.env.CI === 'true';
+  const isProduction = (process.env.NODE_ENV || 'development') === 'production';
 
-  // Print info
   if (result.info.length > 0) {
     console.log('ℹ️  Configuration:');
-    result.info.forEach(info => console.log(`   ${info}`));
+    result.info.forEach((info) => console.log(`   ${info}`));
     console.log('');
   }
 
-  // Print warnings
   if (result.warnings.length > 0) {
     console.log('⚠️  Warnings:');
-    result.warnings.forEach(warning => console.log(`   ${warning}`));
+    result.warnings.forEach((warning) => console.log(`   ${warning}`));
     console.log('');
   }
 
-  // Print errors
   if (result.errors.length > 0) {
     console.log('❌ Errors:');
-    result.errors.forEach(error => console.log(`   ${error}`));
+    result.errors.forEach((error) => console.log(`   ${error}`));
     console.log('');
-    
-    // In production, fail on errors
+
     if (isProduction) {
-      console.log('Environment validation failed in production!');
+      console.log('Production environment validation failed. Fix the required variables before continuing.');
       process.exit(1);
     }
-    
-    // In CI/development, only warn
-    console.log('⚠️  Validation errors detected, but continuing in non-production environment.');
-    console.log('   These will cause build failure in production.');
+
+    console.log('Validation errors detected in a non-production environment. The app will continue, but deployment will fail until fixed.');
     console.log('');
   }
 
-  console.log('✅ Environment validation passed!\n');
-  process.exit(0);
+  console.log('✅ Environment validation passed.');
 }
 
-// Run validation
 main();
