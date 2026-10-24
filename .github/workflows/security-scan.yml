@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 4 * * *' # daily at 04:00 UTC
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,27 @@ jobs:
   dependency-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://ci-user:ci-pass@localhost:5432/lira
+      JWT_SECRET: 0123456789abcdef0123456789abcdef
+      SESSION_SECRET: 0123456789abcdef0123456789abcdef
+      NEXT_PUBLIC_WALLET_CONNECT_ID: 00000000000000000000000000000000
+      ADMIN_ADDRESSES: 0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_ADMIN_ADDRESSES: 0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_ADMIN_WALLET: 0x1111111111111111111111111111111111111111
+      NEXT_PUBLIC_CHAIN_ID: 8453
+      NEXT_PUBLIC_CHAIN_NAME: base
+      NEXT_PUBLIC_RPC_BASE_MAINNET: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_BASE_SEPOLIA: https://sepolia.base.org
+      NEXT_PUBLIC_LIRA_TOKEN: 0x1111111111111111111111111111111111111111
+      NEXT_PUBLIC_LIRA_REGISTRY: 0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_LIRA_PROFILE: 0x3333333333333333333333333333333333333333
+      NEXT_PUBLIC_LIRA_SOCIAL_GRAPH: 0x4444444444444444444444444444444444444444
+      NEXT_PUBLIC_FACTORY: 0x5555555555555555555555555555555555555555
+      NEXT_PUBLIC_USER_FACTORY: 0x6666666666666666666666666666666666666666
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,15 +47,41 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          for i in 1 2 3; do
+            npm ci && break || sleep 15;
+          done
+
+      - name: Validate environment
+        run: npm run env:validate
 
       - name: npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true
 
   contract-scan:
     name: Smart Contract Scan (Slither)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://ci-user:ci-pass@localhost:5432/lira
+      JWT_SECRET: 0123456789abcdef0123456789abcdef
+      SESSION_SECRET: 0123456789abcdef0123456789abcdef
+      NEXT_PUBLIC_WALLET_CONNECT_ID: 00000000000000000000000000000000
+      ADMIN_ADDRESSES: 0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_ADMIN_ADDRESSES: 0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_ADMIN_WALLET: 0x1111111111111111111111111111111111111111
+      NEXT_PUBLIC_CHAIN_ID: 8453
+      NEXT_PUBLIC_CHAIN_NAME: base
+      NEXT_PUBLIC_RPC_BASE_MAINNET: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_BASE_SEPOLIA: https://sepolia.base.org
+      NEXT_PUBLIC_LIRA_TOKEN: 0x1111111111111111111111111111111111111111
+      NEXT_PUBLIC_LIRA_REGISTRY: 0x2222222222222222222222222222222222222222
+      NEXT_PUBLIC_LIRA_PROFILE: 0x3333333333333333333333333333333333333333
+      NEXT_PUBLIC_LIRA_SOCIAL_GRAPH: 0x4444444444444444444444444444444444444444
+      NEXT_PUBLIC_FACTORY: 0x5555555555555555555555555555555555555555
+      NEXT_PUBLIC_USER_FACTORY: 0x6666666666666666666666666666666666666666
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,14 +100,19 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          for i in 1 2 3; do
+            npm ci && break || sleep 15;
+          done
+
+      - name: Validate environment
+        run: npm run env:validate
 
       - name: Compile contracts
         run: npm run contracts:compile --if-present
 
       - name: Run Slither
         run: slither . --config-file .slither.config.json --sarif slither-results.sarif
-        continue-on-error: true
 
       - name: Upload SARIF
         if: always()
@@ -72,6 +124,7 @@ jobs:
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     strategy:
       matrix:
         language: [javascript-typescript]
@@ -90,7 +143,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          for i in 1 2 3; do
+            npm ci && break || sleep 15;
+          done
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
