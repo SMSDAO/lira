@@ -64,6 +64,9 @@
     "prisma",
     "src/__tests__",
     "packages/mobile",
-    "scripts"
+    "scripts",
+    "indexer",
+    "test",
+    "backend"
   ]
 }

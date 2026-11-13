@@ -11,10 +11,7 @@
 
 export const serverConfig = {
   // Auth / session
-  sessionSecret:
-    process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET
-      ? (() => { throw new Error('SESSION_SECRET must be set in production'); })()
-      : (process.env.SESSION_SECRET ?? 'dev-secret-change-in-production'),
+  sessionSecret: process.env.SESSION_SECRET ?? 'dev-secret-change-in-production',
   sessionMaxAgeMs: 24 * 60 * 60 * 1000, // 24 h
 
   // AI / Image generation

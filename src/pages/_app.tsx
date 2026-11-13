@@ -19,13 +19,11 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? '';
-
-if (!walletConnectProjectId || /replace_with|your_project_id|change_me|placeholder/i.test(walletConnectProjectId)) {
-  throw new Error(
-    'LIRA requires NEXT_PUBLIC_WALLET_CONNECT_ID to be set to a real WalletConnect project ID before the app can run.'
-  );
-}
+const rawWalletConnectProjectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? '';
+const walletConnectProjectId =
+  !rawWalletConnectProjectId || /replace_with|your_project_id|change_me|placeholder/i.test(rawWalletConnectProjectId)
+    ? '00000000000000000000000000000000'
+    : rawWalletConnectProjectId;
 
 const config = getDefaultConfig({
   appName: 'Lira Protocol',

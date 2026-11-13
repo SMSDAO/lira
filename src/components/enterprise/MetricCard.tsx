@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 export function MetricCard({
   label,
   value,
